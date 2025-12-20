@@ -1,0 +1,1084 @@
+<!DOCTYPE html>  
+<html lang="ar" dir="rtl">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+    <title>ملاحظاتي الذكية - Cloud Pro</title>  
+    
+    <!-- مكتبة جوجل -->
+    <script src="https://accounts.google.com/gsi/client" onload="initGoogleLib()" async defer></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@700&display=swap" rel="stylesheet">  
+    <style>  
+        :root {  
+            --bg-color: #f8fafc;  
+            --primary-color: #2563eb;  
+            --folder-color: #f59e0b; 
+            --file-color: #ef4444; /* لون جديد للملفات */
+            --primary-gradient: linear-gradient(135deg, #2563eb, #1d4ed8);
+            --secondary-color: #7c3aed;   
+            --success-color: #059669;  
+            --danger-color: #dc2626;   
+            --card-color: #ffffff;  
+            --text-color: #1e293b;  
+            --text-secondary: #64748b;  
+            --light-bg: #f1f5f9;  
+            --border-color: #e2e8f0;   
+            --selection-color: #16a34a;  
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);  
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);  
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);  
+            --radius: 18px;
+            
+            --google-blue: #1a73e8;
+            --google-hover: #1765cc;
+        }  
+
+        * {  
+            -webkit-tap-highlight-color: transparent;   
+            box-sizing: border-box;  
+            outline: none;  
+        }  
+
+        body {  
+            font-family: 'Tajawal', sans-serif;  
+            background-color: var(--bg-color);  
+            background-image: radial-gradient(#e0e7ff 1px, transparent 1px);  
+            background-size: 20px 20px;  
+            margin: 0;  
+            padding: 20px;  
+            color: var(--text-color);  
+            padding-bottom: 120px;   
+            -webkit-user-select: none; user-select: none;           
+        }  
+          
+        input, textarea {  
+            -webkit-user-select: text !important; user-select: text !important;  
+        }  
+
+        /* --- Header Styling --- */  
+        .header-content {  
+            position: relative;  
+            text-align: center;  
+            margin-bottom: 20px;  
+            padding-top: 40px;  
+        }  
+
+        h1 {  
+            color: var(--primary-color);  
+            font-weight: 800;  
+            margin: 0 0 5px 0;  
+            font-size: 2.2rem;  
+            letter-spacing: -0.5px;  
+        }  
+        
+        #navBar {
+            display: none; 
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 15px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+        .back-btn {
+            background: var(--light-bg);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .current-path {
+            margin-right: 10px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .author-name {  
+            font-family: 'Amiri', serif;   
+            font-weight: 700;  
+            font-size: 1.3rem; 
+            color: var(--text-secondary);   
+            margin-top: 0;  
+        }  
+
+        button, .note-card, .sub-note-item, .settings-item, .drag-option-card {  
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);  
+        }  
+        button:active, .note-card:active, .drag-option-card:active { transform: scale(0.95); }  
+
+        .settings-btn {  
+            position: absolute; top: 10px; left: 10px; font-size: 1.8rem; 
+            color: var(--text-color); padding: 10px; background: transparent; 
+            width: 45px; height: 45px; display: flex; align-items: center;  
+            justify-content: center; cursor: pointer; z-index: 2000; border-radius: 50%;
+        }  
+        .settings-btn:hover { background-color: rgba(0,0,0,0.05); }
+
+        /* حالة السحابة */
+        .cloud-status {
+            position: absolute; top: 15px; left: 60px; font-size: 0.8rem;
+            color: var(--text-secondary); display: flex; align-items: center; gap: 5px;
+        }
+
+        #mainSelectBtn {
+            position: absolute; top: 15px; right: 10px; 
+            background-color: transparent; color: var(--primary-color);
+            border: none; font-family: 'Tajawal', sans-serif;
+            font-weight: 800; font-size: 1.1rem; cursor: pointer;
+            padding: 8px 12px; border-radius: 8px; z-index: 2000;
+        }
+        #mainSelectBtn:hover { background-color: rgba(37, 99, 235, 0.1); }
+
+        /* --- Search --- */
+        .search-container { margin-bottom: 25px; position: relative; }  
+        #searchInput {  
+            width: 100%; padding: 16px 20px; padding-left: 45px; 
+            border: 2px solid transparent; background-color: white; border-radius: var(--radius);  
+            font-family: 'Tajawal', sans-serif; font-size: 1.1rem;  
+            text-align: right; box-shadow: var(--shadow-md); transition: all 0.3s ease;  
+        }  
+        #subSearchInput {  
+            width: 100%; padding: 16px 20px; border: 2px solid transparent;  
+            background-color: white; border-radius: var(--radius);  
+            font-family: 'Tajawal', sans-serif; font-size: 1.1rem;  
+            text-align: right; box-shadow: var(--shadow-md); transition: all 0.3s ease;  
+        }
+        #searchInput:focus, #subSearchInput:focus {  
+            border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15); transform: translateY(-2px);  
+        }  
+        .clear-search-btn {
+            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+            width: 30px; height: 30px; background-color: #e2e8f0; color: #64748b;
+            border-radius: 50%; display: none; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1rem; cursor: pointer; z-index: 10;
+        }
+
+        .main-selection-toolbar, .detail-toolbar {  
+            display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;  
+        }
+        .detail-toolbar { justify-content: space-between; margin-bottom: 0; padding-bottom: 15px; }  
+
+        .toolbar-btn {  
+            background: var(--primary-gradient); color: white; border: none;  
+            padding: 8px 16px; border-radius: 12px; cursor: pointer;  
+            font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.9rem;  
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); min-width: 60px;
+        }  
+        .toolbar-btn.cancel { background: white; color: var(--text-color); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }  
+        .toolbar-btn.confirm { background: var(--danger-color); box-shadow: 0 2px 5px rgba(220, 38, 38, 0.3); }  
+
+        /* --- Cards Grid --- */  
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding-bottom: 20px; align-items: start; }  
+        .note-card {  
+            background-color: var(--card-color); border-radius: 20px; padding: 15px 10px; height: 160px;      
+            display: flex; flex-direction: column; justify-content: space-between; align-items: center;  
+            box-shadow: var(--shadow-md); cursor: pointer; border-bottom: 6px solid var(--primary-color); position: relative;  
+            text-align: center; touch-action: pan-y;
+        }  
+        .note-card.is-folder { background-color: #fffbeb; border-bottom-color: var(--folder-color) !important; border-radius: 20px 20px 0 0; }
+        .note-card.is-folder::after { content: ''; position: absolute; top: -10px; right: 0; width: 40%; height: 10px; background-color: #fcd34d; border-radius: 10px 10px 0 0; opacity: 0.5; }
+        
+        /* FILE CARD STYLE */
+        .note-card.is-file { background-color: #fff1f2; border-bottom-color: var(--file-color) !important; }
+        
+        .note-card.drag-target { border: 3px dashed var(--primary-color) !important; background-color: #e0e7ff !important; transform: scale(1.05); }
+        .note-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }  
+        .note-card.dragging { opacity: 0.5; border: 2px dashed var(--text-secondary); transform: scale(0.95); }
+        .note-card.selected { border: 3px solid var(--selection-color); background-color: #f0fdf4; transform: scale(0.98); }  
+        .card-icon-big { font-size: 2.2rem; margin-bottom: 5px; margin-top: 5px; }
+        .card-title {  
+            font-size: 0.95rem; font-weight: 700; margin-bottom: 5px; line-height: 1.4; color: var(--text-color);  
+            width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-height: 2.8em;
+        }  
+        .card-count { background: var(--light-bg); padding: 2px 10px; border-radius: 20px; font-size: 0.75rem !important; color: var(--text-secondary) !important; font-weight: 600; margin-top: auto; margin-bottom: 5px; }  
+        .card-selection-icon {  
+            position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; line-height: 20px; text-align: center; border-radius: 50%;  
+            border: 2px solid var(--selection-color); background: white; display: none; font-weight: bold; font-size: 14px; box-shadow: var(--shadow-sm); z-index: 5;
+        }  
+        .note-card.selected .card-selection-icon { background-color: var(--selection-color); color: white; display: block; }  
+        .sort-handle { position: absolute; bottom: 5px; right: 5px; color: #cbd5e1; font-size: 1.2rem; padding: 5px; cursor: grab; z-index: 10; }
+
+        /* --- FAB --- */  
+        .fab {  
+            position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px; border-radius: 20px; background: linear-gradient(135deg, var(--secondary-color), #9333ea);   
+            color: white; font-size: 2.5rem; line-height: 60px; text-align: center; border: none; box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);   
+            cursor: pointer; z-index: 1000; transition: transform 0.2s;  
+        }  
+        .fab:active { transform: scale(0.9); }  
+
+        /* --- Context Menus --- */  
+        #contextMenu, #subNoteContextMenu {  
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(255, 255, 255, 0.98); border: 1px solid var(--border-color);  
+            border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); padding: 10px; z-index: 5000; display: none; flex-direction: column; min-width: 220px; overflow: hidden; animation: menuPopup 0.15s ease-out forwards;  
+        }  
+        #createTypeMenu {
+            position: fixed; bottom: 100px; left: 30px; top: auto; right: auto; background-color: rgba(255, 255, 255, 0.98); border: 1px solid var(--border-color);
+            border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 5px; z-index: 5000; display: none; flex-direction: column; min-width: 160px; transform-origin: bottom left; animation: fabPopup 0.15s ease-out forwards;
+        }
+        @keyframes menuPopup { from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }  
+        @keyframes fabPopup { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        .context-item {  
+            background: none; border: none; text-align: right; padding: 15px 18px; cursor: pointer; width: 100%; font-family: 'Tajawal', sans-serif; font-size: 1.1rem; color: var(--text-color); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 10px;  
+        }  
+        .context-item:hover { background-color: var(--light-bg); color: var(--primary-color); }  
+        .context-item.delete { color: var(--danger-color); border-top: 1px solid #f1f5f9; margin-top: 5px; }  
+        .context-item.copy-option { border-top: 1px solid #f1f5f9; margin-top: 5px; color: var(--success-color); }
+
+        /* --- Modals --- */
+        .modal {  
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(5px); 
+        }  
+        .modal-content {  
+            background-color: white; width: 100%; height: 100%; padding: 25px; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);  
+        }  
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }  
+        .small-modal-content { 
+            height: auto !important; width: 90% !important; max-width: 320px !important; 
+            text-align: center; padding: 25px; border-radius: 24px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }  
+        .modal-message { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; line-height: 1.6; color: var(--text-color); }  
+        
+        .modal-input-area {  
+            width: 100%; flex-grow: 1; padding: 15px; border: 2px solid var(--primary-color); border-radius: 12px; font-family: 'Tajawal', sans-serif; font-size: 1.3rem; text-align: right; margin-bottom: 20px;  
+            background-color: #fdfdfd; color: var(--text-color); resize: none; overflow-y: auto; white-space: pre-wrap; line-height: 1.6;
+        }
+        .modal-input-single { width: 100%; padding: 15px; border: 2px solid var(--border-color); border-radius: 12px; font-family: 'Tajawal', sans-serif; font-size: 1.1rem; text-align: right; margin-bottom: 20px; background-color: #f8fafc; }
+        .modal-input-single:focus { border-color: var(--primary-color); background-color: white; }
+        
+        .modal-actions { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }  
+        .modal-btn { 
+            border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; 
+            font-weight: 700; font-family: 'Tajawal', sans-serif; font-size: 1rem; flex: 1; 
+            transition: transform 0.1s;
+        }  
+        .modal-btn:active { transform: scale(0.97); }
+
+        .modal-btn.confirm-primary { background: var(--primary-gradient); color: white; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }  
+        .modal-btn.confirm { background-color: var(--danger-color); color: white; }  
+        .modal-btn.cancel { background-color: var(--light-bg); color: var(--text-secondary); }  
+        .modal-btn.paste-action { background-color: var(--success-color); color: white; }
+        .modal-btn.confirm-copy { background-color: var(--secondary-color); color: white; }
+
+        /* --- وضع التعديل النظيف --- */
+        .modal.clean-mode .modal-content { background-color: #ffffff; padding: 0; border-radius: 0; height: 100%; width: 100%; max-width: 100%; box-shadow: none; overflow: hidden; display: flex; flex-direction: column; }
+        .modal.clean-mode .modal-input-area { border: none; background: transparent; font-size: 1rem; font-weight: 500; line-height: 2; flex-grow: 1; height: 100%; width: 100%; box-shadow: none; padding: 20px; padding-top: 60px; margin: 0; border-radius: 0; overflow-y: auto; }
+        
+        /* --- Floating Toolbar --- */
+        .floating-toolbar { position: absolute; top: 15px; left: 15px; display: flex; gap: 8px; z-index: 20; }
+        .tool-btn { width: 40px; height: 40px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); font-size: 1.2rem; border: none; color: var(--text-color); }
+        .text-search-toolbar { position: absolute; top: 10px; left: 10px; right: 10px; background: white; border-radius: 12px; padding: 8px; box-shadow: var(--shadow-md); display: none; align-items: center; gap: 8px; z-index: 25; border: 1px solid var(--border-color); }
+        .text-search-input { flex: 1; border: none; background: #f8fafc; padding: 8px 12px; border-radius: 8px; font-family: 'Tajawal'; text-align: right; outline: none; }
+        .text-search-nav { background: #e0e7ff; border: none; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--primary-color); }
+        .text-search-close { background: #fee2e2; color: #dc2626; border: none; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; }
+
+        /* --- Settings Modal --- */
+        #settingsModal .modal-content { padding: 20px; max-width: 320px !important; width: 90%; height: auto !important; border-radius: 24px; margin: auto; }
+        .settings-title-header { text-align: center; font-size: 1.2rem; font-weight: 800; color: #1e293b; margin-bottom: 20px; margin-top: 0; }
+        .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background-color: transparent; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-weight: 600; color: var(--text-color); border-radius: 12px; font-size: 0.95rem; margin-bottom: 5px; }
+        .settings-item:hover { background-color: var(--light-bg); }
+        .settings-item.delete-all { color: var(--danger-color); }
+        .settings-icon { font-size: 1.1rem; margin-left: 10px; width: 25px; text-align: center; }
+
+        .sub-notes-list { flex-grow: 1; overflow-y: auto; list-style: none; padding: 5px; margin: 0; padding-bottom: 10px; }  
+        .sub-note-item { display: flex; align-items: flex-start; justify-content: space-between; background-color: white; padding: 15px; margin-bottom: 12px; border-radius: 12px; box-shadow: var(--shadow-sm); border-right: 4px solid var(--secondary-color); cursor: pointer; position: relative; }  
+        .sub-note-item.selected { border-color: var(--selection-color); background-color: #f0fdf4; }  
+        .sub-note-content { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; white-space: pre-wrap; flex: 1; font-size: 1rem; line-height: 1.5; }
+        .input-area { display: flex; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color); }  
+        #newSubNoteInput { flex-grow: 1; height: 50px; padding: 12px; border: 2px solid var(--border-color); border-radius: 14px; font-family: 'Tajawal', sans-serif; font-size: 1rem; text-align: right; }  
+        .add-btn { background: var(--primary-gradient); color: white; border: none; border-radius: 14px; width: 50px; height: 50px; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }  
+
+        /* --- Drag Option Cards Styling --- */
+        .drag-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+        .drag-option-card { background-color: white; border-radius: 16px; padding: 20px 10px; text-align: center; border: 2px solid var(--border-color); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); }
+        .drag-option-card.move-option { border-color: var(--primary-color); background-color: #eff6ff; }
+        .drag-option-card.swap-option { border-color: var(--folder-color); background-color: #fffbeb; }
+        .option-icon { font-size: 2rem; margin-bottom: 8px; }
+        .option-text { font-weight: 800; font-size: 1rem; color: var(--text-color); margin-bottom: 4px; }
+        .option-desc { font-size: 0.8rem; color: var(--text-secondary); }
+        .note-card.dragging-mobile { position: fixed; z-index: 9999; opacity: 0.9; background-color: #e0e7ff; border: 3px solid var(--primary-color); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); pointer-events: none; width: 150px; height: 150px; transform-origin: center center; }
+        .note-card.drag-target-hover { transform: scale(1.05); border: 3px dashed var(--success-color) !important; background-color: #dcfce7 !important; }
+
+        /* --- GOOGLE STYLES --- */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #f0f2f5;
+            z-index: 6000; display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: white; padding: 40px; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center;
+            width: 100%; max-width: 400px; font-family: 'Segoe UI', sans-serif;
+        }
+        .google-logo { width: 75px; margin-bottom: 10px; }
+        .google-btn {
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--google-blue); color: white; border: none;
+            padding: 2px; border-radius: 4px; font-size: 14px;
+            font-weight: 500; cursor: pointer; width: 100%;
+            transition: background-color 0.3s; text-decoration: none;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .google-btn:hover { background-color: var(--google-hover); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .google-icon-wrapper {
+            background: white; padding: 8px; border-radius: 2px; margin: 1px;
+            display: flex; align-items: center; justify-content: center; height: 38px; width: 38px;
+        }
+        .google-icon { width: 18px; height: 18px; }
+        .btn-text { flex: 1; text-align: center; }
+        .user-profile-img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
+        .sync-loader {
+            display: none; width: 16px; height: 16px; border: 2px solid #ddd;
+            border-top: 2px solid var(--primary-color); border-radius: 50%;
+            animation: spin 0.8s linear infinite; margin-left: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>  
+</head>  
+<body>  
+
+<!-- Google Login Overlay -->
+<div id="loginOverlay">
+    <div class="login-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" class="google-logo">
+        <h2 style="font-size:24px; font-weight:400; margin:0 0 8px 0; color:#202124;">تسجيل الدخول مطلوب</h2>
+        <p style="color:#5f6368; margin-bottom:30px;">التخزين السحابي فقط (Google Drive)</p>
+
+        <a href="#" class="google-btn" onclick="event.preventDefault(); startGoogleLogin()">
+            <div class="google-icon-wrapper">
+                <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G logo"/>
+            </div>
+            <span class="btn-text">تسجيل الدخول للمزامنة</span>
+        </a>
+
+        <div style="margin-top:20px; font-size:12px; color:#666;">
+            لا يتم حفظ أي بيانات على هذا الجهاز. <br> كل شيء يحفظ مباشرة في Google Drive.
+        </div>
+        <div id="loginStatus" style="margin-top:20px; font-size:13px; color:var(--primary-color); display:none;">جاري الاتصال...</div>
+    </div>
+</div>
+
+<div class="header-content">  
+    <span class="settings-btn" onclick="handleSettingsOpen()">⋮</span>
+    <div class="cloud-status">
+        <div id="syncLoader" class="sync-loader"></div>
+        <span id="syncText"></span>
+    </div>
+
+    <div id="mainSelectionToolbar" class="main-selection-toolbar">  
+        <button id="mainSelectBtn" onclick="toggleMainSelectionMode(true)">تحديد</button>  
+        <span id="mainSelectionControls" style="display: none; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; width: 100%;">  
+            <span id="mainSelectionCount" style="font-weight: 800; color: var(--primary-color); margin-left: 10px;">0</span>  
+            <button class="toolbar-btn" onclick="selectAllMainNotes()">الكل</button>  
+            <button class="toolbar-btn" id="lockMultipleBtn" style="display:none;" onclick="toggleMultipleLock(true)">🔒 قفل</button>
+            <button class="toolbar-btn" id="unlockMultipleBtn" style="display:none;" onclick="toggleMultipleLock(false)">🔓 إلغاء قفل</button>
+            <button class="toolbar-btn confirm" onclick="deleteSelectedMainNotesWrapper()">حذف</button>  
+            <button class="toolbar-btn cancel" onclick="toggleMainSelectionMode(false)">إلغاء</button>  
+        </span>  
+    </div> 
+    <h1>ملاحظاتي الذكية</h1>  
+    <p class="author-name">Cloud Edition</p>  
+</div>  
+
+<div id="navBar">
+    <button class="back-btn" onclick="window.history.back()">➜ رجوع</button>
+    <span id="currentPathTitle" class="current-path" style="margin-right: auto;"></span>
+</div>
+
+<!-- تم إضافة autocomplete="off" لإصلاح مشكلة الروابط -->
+<div class="search-container">  
+    <span id="clearSearchBtn" class="clear-search-btn" onclick="clearSearch()">×</span>
+    <input type="text" id="searchInput" placeholder="🔍  ابحث في العناوين..." oninput="searchNotes()" autocomplete="off">  
+</div>  
+
+<div id="contextMenu">  
+    <button class="context-item" id="lockUnlockBtn" onclick="handleMenuAction('toggleLock')">🔒 قفل/فتح</button>  
+    <button class="context-item" onclick="handleMenuAction('edit')">✏️ تعديل الاسم</button>  
+    
+    <!-- Dynamic Buttons: Copy (Default) / Move to Main (If inside folder) -->
+    <button id="ctxCopyBtn" class="context-item" onclick="handleMenuAction('copyText')">📄 نسخ (المحتوى)</button>
+    <button id="ctxMoveBtn" class="context-item" onclick="handleMenuAction('moveToRoot')" style="display:none;">🏠 إضافة للواجهة الرئيسية</button>
+
+    <button class="context-item delete" onclick="handleMenuAction('delete')">🗑️ حذف</button>
+</div>  
+
+<div id="subNoteContextMenu">  
+    <button class="context-item" onclick="handleSubNoteAction('edit')">✏️ تعديل</button>  
+    <button class="context-item" onclick="handleSubNoteAction('copy')">📄 نسخ</button>  
+    <button class="context-item delete" onclick="handleSubNoteAction('delete')">🗑️ حذف</button>  
+</div>
+
+<div id="createTypeMenu">
+    <button class="context-item" onclick="createItemWrapper('folder')">📁 مجلد جديد</button>
+    <button class="context-item" onclick="createItemWrapper('note')">📝 ملاحظة جديدة</button>
+    <button class="context-item" onclick="triggerFileUpload()">📎 إضافة ملف</button>
+</div>
+
+<!-- Hidden File Input for the system picker -->
+<input type="file" id="fileUploadInput" multiple style="display:none;" onchange="handleFileUpload(event)">
+
+<div id="notesGrid" class="grid-container"></div>  
+
+<button class="fab" onclick="showCreateMenu()">+</button>  
+
+<div id="detailsModal" class="modal">  
+    <div class="modal-content">  
+        <div class="detail-toolbar">  
+            <button class="back-btn" onclick="window.history.back()">➜ رجوع</button>
+            <button class="toolbar-btn" id="selectBtn" onclick="toggleSelectionMode(true)">تحديد</button>  
+            <button class="toolbar-btn" id="selectAllBtn" style="display:none;" onclick="selectAllSubNotes()">الكل</button>  
+            <button class="toolbar-btn cancel" id="cancelSelectionBtn" style="display:none;" onclick="toggleSelectionMode(false)">إلغاء</button> 
+            <button class="toolbar-btn confirm" id="deleteSubBtn" style="display:none;" onclick="deleteSelectedSubNotesWrapper()">حذف</button> 
+        </div>  
+        <div style="text-align: right; margin-bottom: 10px;">  
+            <span class="modal-title" id="modalTitle" style="display:block; font-size: 1.5rem; font-weight: 800; color: var(--primary-color);">عنوان الملاحظة</span>  
+        </div>  
+        <input type="text" id="subSearchInput" placeholder="بحث داخل القائمة..." oninput="renderSubNotes()" style="margin-bottom:10px; padding:10px;" autocomplete="off">
+        <ul id="subNotesList" class="sub-notes-list"></ul>  
+        <div class="input-area">  
+            <textarea id="newSubNoteInput" placeholder="أضف نصاً..."></textarea>   
+            <button class="add-btn" onclick="addSubNote()">+</button> 
+        </div>  
+    </div>  
+</div>  
+
+<div id="inputModal" class="modal">  
+    <div class="modal-content">  
+        <div id="floatingToolbar" class="floating-toolbar" style="display:none;">
+            <button id="cleanModeSearchBtn" class="tool-btn" onclick="toggleSearch()">🔍</button>
+            <button id="btnRedo" class="tool-btn disabled" onclick="redo()">↪️</button>
+            <button id="btnUndo" class="tool-btn disabled" onclick="undo()">↩️</button>
+        </div>
+        <div id="searchToolbar" class="text-search-toolbar">
+            <button class="text-search-close" onclick="toggleSearch()">×</button>
+            <button class="text-search-nav" onclick="findInText('prev')">🔼</button>
+            <button class="text-search-nav" onclick="findInText('next')">🔽</button>
+            <input type="text" id="inTextSearchInput" class="text-search-input" placeholder="بحث في النص..." onkeyup="if(event.key==='Enter') findInText('next')">
+        </div>
+        <p id="inputMessage" class="modal-message"></p>  
+        <input type="text" id="modalInputSingle" class="modal-input-single" style="display:none;" autocomplete="off">
+        <textarea id="modalInputArea" class="modal-input-area" style="display:none;" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+        <div class="modal-actions">  
+            <button id="inputCopyBtn" class="modal-btn confirm-copy" onclick="copyModalContent()">نسخ</button>
+            <button id="inputPasteBtn" class="modal-btn paste-action" style="display:none;" onclick="pasteModalContent()">لصق</button>
+            <button id="inputBtn" class="modal-btn confirm-primary">حفظ</button>  
+            <button class="modal-btn cancel" onclick="window.history.back()">إلغاء</button>  
+        </div>  
+    </div>  
+</div>  
+  
+<div id="settingsModal" class="modal" onclick="if(event.target.id === 'settingsModal') hideSettingsModal()">  
+    <div class="modal-content">  
+        <h2 class="settings-title-header">إعدادات التطبيق</h2>  
+        
+        <div id="googleDriveSection">
+            <div style="text-align:center; font-size:0.9rem; color:#64748b; margin-bottom:5px;">التخزين السحابي (نشط دائماً)</div>
+            
+            <div id="googleLoginBtnArea">
+                <div class="settings-item" onclick="openLoginOverlay()" style="color:var(--google-blue);">
+                    <span class="settings-title">تسجيل الدخول (Google)</span> <span class="settings-icon">☁️</span>
+                </div>
+            </div>
+
+            <div id="googleSyncActions" style="display:none;">
+                <div class="settings-item" onclick="forceSyncFromCloud()"> 
+                    <span class="settings-title">إعادة تحميل من السحابة</span> <span class="settings-icon">🔄</span> 
+                </div>
+            </div>
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
+        </div>
+
+        <!-- أزرار التصدير والاستيراد الجديدة -->
+        <div class="settings-item" onclick="exportDataAuto()"> <span class="settings-title">تصدير ملف (JSON)</span> <span class="settings-icon">📥</span> </div>  
+        <div class="settings-item" onclick="document.getElementById('importFile').click()"> <span class="settings-title">استيراد ملف (JSON)</span> <span class="settings-icon">📂</span> </div>  
+        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importDataWrapper(event)">  
+        
+        <div class="settings-item" onclick="exportDataManual()"> <span class="settings-title">نسخ يدوي (Text)</span> <span class="settings-icon">📝</span> </div>
+        <div class="settings-item" onclick="importDataPaste()"> <span class="settings-title">استيراد يدوي (Paste)</span> <span class="settings-icon">📋</span> </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">  
+
+        <div id="setPassBtn" class="settings-item" onclick="setAppPassword()">  
+            <span class="settings-title">تعيين كلمة مرور للتطبيق</span> <span class="settings-icon">🔒</span>  
+        </div> 
+        <div id="removePassBtn" class="settings-item delete-all" onclick="removeAppPassword()" style="display:none; color: var(--danger-color);">  
+            <span class="settings-title">حذف كلمة المرور</span> <span class="settings-icon">🔓</span>  
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">  
+        
+        <div id="googleLogoutContainer" style="display:none; margin-top:5px; border-top:1px solid #eee;">
+             <div class="settings-item" onclick="handleGoogleLogout()"> 
+                <span class="settings-title" style="color:#64748b;">تسجيل خروج Google (مسح البيانات)</span> 
+                <span class="settings-icon" id="googleLogoutIcon">🚪</span> 
+            </div>
+        </div>
+
+        <button class="modal-btn cancel" style="margin-top:10px; width:100%;" onclick="hideSettingsModal()">إغلاق</button>
+    </div>  
+</div>  
+
+<div id="saveConfirmModal" class="modal">  
+    <div class="modal-content small-modal-content">  
+        <p class="modal-message">هل تريد حفظ التعديلات؟</p>  
+        <div class="modal-actions">  
+            <button class="modal-btn confirm-primary" onclick="resolveSaveConfirm(true)">نعم، احفظ</button>  
+            <button class="modal-btn cancel" onclick="resolveSaveConfirm(false)">لا، تجاهل</button>  
+        </div>  
+    </div>  
+</div>
+
+<div id="confirmModal" class="modal">  
+    <div class="modal-content small-modal-content">  
+        <p id="confirmMessage" class="modal-message"></p>  
+        <div class="modal-actions">  
+            <button class="modal-btn cancel" onclick="hideConfirmModal(false)">إلغاء</button>  
+            <button class="modal-btn confirm-primary" onclick="hideConfirmModal(true)">تأكيد</button>  
+        </div>  
+    </div>  
+</div>
+
+<div id="passwordModal" class="modal">  
+    <div class="modal-content small-modal-content">  
+        <p class="modal-message">أدخل كلمة المرور</p>  
+        <input type="password" id="modalPasswordInput" class="modal-input-single" placeholder="••••">
+        <div class="modal-actions">  
+            <button class="modal-btn cancel" onclick="hidePasswordModal(null)">إلغاء</button>  
+            <button id="passwordBtn" class="modal-btn confirm-primary">تأكيد</button>  
+        </div>  
+    </div>  
+</div>
+
+<div id="notificationModal" class="modal" onclick="closeNotification()">  
+    <div class="modal-content small-modal-content">  
+        <span id="notifIcon" class="notification-icon">ℹ️</span>
+        <p id="notificationMessage" class="modal-message"></p>  
+        <button class="modal-btn confirm-primary" onclick="closeNotification()">حسناً</button>  
+    </div>  
+</div>
+
+<div id="dragActionModal" class="modal">  
+    <div class="modal-content small-modal-content" style="padding: 20px;">  
+        <h3 style="margin-top:0; color:var(--text-color);">خيار النقل</h3>
+        <div class="drag-options-grid">
+            <div class="drag-option-card move-option" onclick="resolveDragAction('move')">
+                <div class="option-icon">📂</div> <div class="option-text">نقل للداخل</div> <div class="option-desc">ضع الملاحظة داخل المجلد</div>
+            </div>
+            <div class="drag-option-card swap-option" onclick="resolveDragAction('swap')">
+                <div class="option-icon">⇄</div> <div class="option-text">تبديل الأماكن</div> <div class="option-desc">تغيير الترتيب فقط</div>
+            </div>
+        </div>
+        <button class="modal-btn cancel" style="margin-top:15px; width:100%" onclick="resolveDragAction(null)">إلغاء</button>  
+    </div>  
+</div>
+
+<script>  
+    // --- Data Management (RAM ONLY) ---
+    const APP_PASS_KEY = 'smartNotes_appPass';
+    let allData = [];   
+    let currentFolderId = null; 
+    let activeInputModalMode = null; 
+    let searchMatches = []; let currentSearchIndex = -1;
+    let historyStack = []; let historyIndex = -1; let originalContent = ""; 
+
+    // --- GOOGLE API CONFIG ---
+    const GOOGLE_CLIENT_ID = '979816526016-ukb9vqtb6u2hlutombpf8rumbjr3o2ua.apps.googleusercontent.com';
+    const SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.profile';
+    const FILENAME = 'smart_notes_cloud_v1.json'; 
+    let tokenClient;
+    let gAccessToken = localStorage.getItem('gAccessToken'); 
+    let saveTimeout = null; 
+
+    // --- History & Back Button Control ---
+    window.addEventListener('popstate', function(event) {
+        if (document.getElementById('inputModal').style.display === 'flex') { 
+            if (activeInputModalMode === 'edit_clean') { checkSaveChanges(); } else { hideInputModal(false); }
+        } 
+        else if (document.getElementById('detailsModal').style.display === 'flex') { closeModalInternal(); } 
+        else if (document.getElementById('searchInput').value !== '') { clearSearch(); }
+        else if (currentFolderId !== null) { currentFolderId = null; renderMainGrid(); }
+        else if (document.getElementById('loginOverlay').style.display === 'flex') { /* Prevent back from login overlay easily */ }
+    });
+
+    function pushState() { window.history.pushState({ open: true }, ""); }
+    function findNoteById(list, id) { id = parseInt(id); for (let item of list) { if (parseInt(item.id) === id) return item; if (item.type === 'folder' && item.items) { const found = findNoteById(item.items, id); if (found) return found; } } return null; }
+    function getCurrentList() { if (currentFolderId === null) return allData; const folder = findNoteById(allData, currentFolderId); return folder ? folder.items : []; }
+    
+    // --- NO LOCAL STORAGE FOR NOTES ---
+    function saveData() { 
+        if(saveTimeout) clearTimeout(saveTimeout);
+        document.getElementById('syncText').innerText = "جاري الحفظ...";
+        setSyncLoader(true);
+        saveTimeout = setTimeout(() => {
+            forceUploadToDrive(true); // True = Silent Mode
+        }, 1000);
+    } 
+    
+    function loadData() { 
+        allData = []; 
+        if(gAccessToken) {
+            forceSyncFromCloud(true); 
+        } else {
+            document.getElementById('loginOverlay').style.display = 'flex';
+        }
+    }
+
+    let activeCardId = null; let currentNoteId = null; let activeSubNoteIndex = null; let isMainSelectionMode = false; let selectedMainIds = new Set(); let isSelectionMode = false; let selectedSubIndices = new Set();
+    document.addEventListener('DOMContentLoaded', () => { 
+        // تفريغ حقل البحث عند التحميل لإصلاح مشكلة النص التلقائي
+        document.getElementById('searchInput').value = '';
+        
+        loadData(); 
+        renderMainGrid(); 
+        document.getElementById('searchInput').addEventListener('focus', function() { pushState(); }); 
+        document.getElementById('modalInputArea').addEventListener('input', function(e) { saveHistory(this.value); }); 
+    });
+
+    function initHistory(val) { historyStack = [val]; historyIndex = 0; updateUndoRedoButtons(); }
+    function saveHistory(val) { if (historyIndex < historyStack.length - 1) { historyStack = historyStack.slice(0, historyIndex + 1); } historyStack.push(val); historyIndex++; updateUndoRedoButtons(); }
+    function undo() { if (historyIndex > 0) { historyIndex--; const val = historyStack[historyIndex]; document.getElementById('modalInputArea').value = val; updateUndoRedoButtons(); } }
+    function redo() { if (historyIndex < historyStack.length - 1) { historyIndex++; const val = historyStack[historyIndex]; document.getElementById('modalInputArea').value = val; updateUndoRedoButtons(); } }
+    function updateUndoRedoButtons() { const btnUndo = document.getElementById('btnUndo'); const btnRedo = document.getElementById('btnRedo'); if (historyIndex > 0) btnUndo.classList.remove('disabled'); else btnUndo.classList.add('disabled'); if (historyIndex < historyStack.length - 1) btnRedo.classList.remove('disabled'); else btnRedo.classList.add('disabled'); }
+    function checkSaveChanges() { const currentVal = document.getElementById('modalInputArea').value; if (currentVal !== originalContent) { document.getElementById('saveConfirmModal').style.display = 'flex'; } else { hideInputModal(false); } }
+    function resolveSaveConfirm(shouldSave) { document.getElementById('saveConfirmModal').style.display = 'none'; if (shouldSave) { const currentVal = document.getElementById('modalInputArea').value; hideInputModal(true, undefined, currentVal); } else { hideInputModal(false); } }
+
+    function renderMainGrid(filter = '') {
+        const grid = document.getElementById('notesGrid'); grid.innerHTML = ''; const navBar = document.getElementById('navBar');
+        if (currentFolderId === null) { navBar.style.display = 'none'; } else { navBar.style.display = 'flex'; const folder = findNoteById(allData, currentFolderId); document.getElementById('currentPathTitle').innerText = folder ? `📁 ${folder.title}` : ''; }
+        const list = getCurrentList(); const filteredList = list.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()));
+        
+        if (!gAccessToken) {
+            grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#dc2626; margin-top:20px;">يجب تسجيل الدخول لعرض الملاحظات.</p>';
+            return;
+        }
+
+        if (filteredList.length === 0) { grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#94a3b8; margin-top:20px;">لا توجد عناصر.</p>'; }
+        filteredList.forEach(item => {
+            const card = document.createElement('div'); card.className = `note-card ${item.type === 'folder' ? 'is-folder' : ''}`;
+            if(item.type === 'file') card.classList.add('is-file'); // Add file class
+            
+            card.setAttribute('data-id', item.id); card.setAttribute('data-type', item.type); card.setAttribute('draggable', 'true'); 
+            let icon = item.type === 'folder' ? '📁' : '📄'; 
+            if(item.type === 'file') icon = '📎'; // File icon
+            if (item.isLocked) icon = '🔒';
+            
+            let countLabel = "";
+            if(item.type === 'folder') {
+                const count = item.items.length; 
+                countLabel = `<div class="card-count">${count} عنصر</div>`;
+            } else if(item.type === 'file') {
+                countLabel = `<div class="card-count" style="direction:ltr">${formatFileSize(item.content.length * 0.75)}</div>`;
+            } else {
+                const count = item.items.length; 
+                countLabel = `<div class="card-count">${count} ملاحظة</div>`;
+            }
+
+            if (selectedMainIds.has(item.id)) card.classList.add('selected');
+            card.innerHTML = ` <span class="card-selection-icon">${selectedMainIds.has(item.id) ? '✓' : ''}</span> <div class="card-icon-big">${icon}</div> <div class="card-title">${item.title}</div> ${countLabel} ${!isMainSelectionMode ? '<span class="sort-handle">⇅</span>' : ''} `;
+            
+            // Logic for Click vs Long Press
+            let isLongPress = false;
+            card.onclick = (e) => { 
+                if (isLongPress) return; // Ignore click if long press triggered
+                handleCardClick(e, item); 
+            }; 
+            
+            // Context Menu Logic (Right Click + Long Press)
+            card.oncontextmenu = (e) => { e.preventDefault(); isLongPress = true; showContextMenu(item.id); };
+            let pressTimer; 
+            card.addEventListener('touchstart', (e) => { 
+                if (e.target.classList.contains('sort-handle')) return; 
+                isLongPress = false; // Reset
+                pressTimer = setTimeout(() => { 
+                    if (!isMainSelectionMode) {
+                        isLongPress = true;
+                        if(navigator.vibrate) navigator.vibrate(50);
+                        showContextMenu(item.id); 
+                    }
+                }, 600); // 600ms for long press
+            });
+            card.addEventListener('touchend', () => clearTimeout(pressTimer)); 
+            card.addEventListener('touchmove', () => clearTimeout(pressTimer));
+            
+            addDragEvents(card, item); grid.appendChild(card);
+        });
+        updateMainToolbar(); const clearBtn = document.getElementById('clearSearchBtn'); if (filter.length > 0) { clearBtn.style.display = 'flex'; } else { clearBtn.style.display = 'none'; }
+    }
+    
+    function formatFileSize(bytes) {
+        if(bytes === 0) return '0 B';
+        const k = 1024; const sizes = ['B', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function searchNotes() { renderMainGrid(document.getElementById('searchInput').value); }
+    function clearSearch() { document.getElementById('searchInput').value = ''; renderMainGrid(); }
+    
+    let mobileDragEl = null; let mobileDragClone = null; let mobileDragStartX = 0; let mobileDragStartY = 0; let lastTargetEl = null; let dragSrcId = null; let dragSrcEl = null; 
+    function addDragEvents(card, item) { card.addEventListener('dragstart', handleDragStart); card.addEventListener('dragenter', handleDragEnter); card.addEventListener('dragover', handleDragOver); card.addEventListener('dragleave', handleDragLeave); card.addEventListener('drop', handleDrop); card.addEventListener('dragend', handleDragEnd); const handle = card.querySelector('.sort-handle'); if(handle) { handle.addEventListener('touchstart', (e) => handleTouchStart(e, card), {passive: false}); handle.addEventListener('touchmove', (e) => handleTouchMove(e), {passive: false}); handle.addEventListener('touchend', (e) => handleTouchEnd(e), {passive: false}); } }
+    function showDragActionModal() { document.getElementById('dragActionModal').style.display = 'flex'; return new Promise(resolve => { window.resolveDragAction = (action) => { document.getElementById('dragActionModal').style.display = 'none'; resolve(action); }; }); }
+    function handleDragStart(e) { dragSrcEl = this; dragSrcId = parseInt(this.getAttribute('data-id')); this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragSrcId); }
+    function handleDragOver(e) { if (e.preventDefault) e.preventDefault(); return false; }
+    function handleDragEnter(e) { if (this === dragSrcEl) return; this.classList.add('drag-target'); }
+    function handleDragLeave(e) { this.classList.remove('drag-target'); }
+    async function handleDrop(e) { e.stopPropagation(); const targetId = parseInt(this.getAttribute('data-id')); const targetType = this.getAttribute('data-type'); if (dragSrcId === targetId) return false; document.querySelectorAll('.note-card').forEach(c => c.classList.remove('drag-target')); if (targetType === 'folder') { const action = await showDragActionModal(); if (action === 'move') { moveItemsToFolder(targetId); } else if (action === 'swap') { reorderItems(dragSrcId, targetId); } } else { reorderItems(dragSrcId, targetId); } return false; }
+    function handleDragEnd(e) { this.classList.remove('dragging'); document.querySelectorAll('.note-card').forEach(c => c.classList.remove('drag-target')); }
+    function handleTouchStart(e, card) { e.preventDefault(); const touch = e.touches[0]; mobileDragEl = card; dragSrcId = parseInt(card.getAttribute('data-id')); mobileDragClone = card.cloneNode(true); mobileDragClone.classList.add('dragging-mobile'); document.body.appendChild(mobileDragClone); updateClonePosition(touch.clientX, touch.clientY); card.style.opacity = '0.3'; }
+    function handleTouchMove(e) { if (!mobileDragClone) return; e.preventDefault(); const touch = e.touches[0]; updateClonePosition(touch.clientX, touch.clientY); mobileDragClone.style.display = 'none'; let elementBelow = document.elementFromPoint(touch.clientX, touch.clientY); mobileDragClone.style.display = 'block'; if (!elementBelow) return; let targetCard = elementBelow.closest('.note-card'); if (lastTargetEl && lastTargetEl !== targetCard) { lastTargetEl.classList.remove('drag-target-hover'); } if (targetCard && targetCard !== mobileDragEl) { targetCard.classList.add('drag-target-hover'); lastTargetEl = targetCard; } else { lastTargetEl = null; } }
+    async function handleTouchEnd(e) { if (!mobileDragClone) return; mobileDragClone.remove(); mobileDragClone = null; if (mobileDragEl) mobileDragEl.style.opacity = '1'; if (lastTargetEl) { lastTargetEl.classList.remove('drag-target-hover'); const targetId = parseInt(lastTargetEl.getAttribute('data-id')); const targetType = lastTargetEl.getAttribute('data-type'); if (targetType === 'folder') { const action = await showDragActionModal(); if (action === 'move') { moveItemsToFolder(targetId); } else if (action === 'swap') { reorderItems(dragSrcId, targetId); } } else { reorderItems(dragSrcId, targetId); } } mobileDragEl = null; lastTargetEl = null; }
+    function updateClonePosition(x, y) { mobileDragClone.style.left = (x - 75) + 'px'; mobileDragClone.style.top = (y - 75) + 'px'; }
+    function moveItemsToFolder(targetFolderId) { const list = getCurrentList(); const targetFolder = findNoteById(allData, targetFolderId); if (!targetFolder || targetFolder.type !== 'folder') return; let itemsToMove = []; if (selectedMainIds.size > 0) { itemsToMove = list.filter(n => selectedMainIds.has(n.id) && n.id !== targetFolderId); } else { itemsToMove = list.filter(n => n.id === dragSrcId && n.id !== targetFolderId); } if (itemsToMove.length === 0) return; if (currentFolderId === null) allData = allData.filter(n => !itemsToMove.includes(n)); else { const currentFolder = findNoteById(allData, currentFolderId); currentFolder.items = currentFolder.items.filter(n => !itemsToMove.includes(n)); } itemsToMove.forEach(item => targetFolder.items.unshift(item)); saveData(); toggleMainSelectionMode(false); renderMainGrid(); }
+    function reorderItems(srcId, targetId) { let list = getCurrentList(); const srcIndex = list.findIndex(n => n.id === srcId); const targetIndex = list.findIndex(n => n.id === targetId); if (srcIndex < 0 || targetIndex < 0 || srcIndex === targetIndex) return; const [movedItem] = list.splice(srcIndex, 1); list.splice(targetIndex, 0, movedItem); saveData(); renderMainGrid(); }
+    
+    function openNoteDetails(id) { currentNoteId = id; pushState(); const note = findNoteById(allData, id); if (!note) { return; } document.getElementById('modalTitle').innerText = note.title; if (note.isLocked) { checkPassword(note, () => { document.getElementById('detailsModal').style.display = 'flex'; renderSubNotes(); }); } else { document.getElementById('detailsModal').style.display = 'flex'; renderSubNotes(); } }
+    function closeModalInternal() { document.getElementById('detailsModal').style.display = 'none'; document.getElementById('subSearchInput').value = ''; toggleSelectionMode(false); }
+    function handleCardClick(e, item) { 
+        if (isMainSelectionMode) { e.stopPropagation(); toggleMainSelection(item.id); return; } 
+        if (e.target.closest('.sort-handle')) { return; } 
+        
+        if (item.type === 'folder') { 
+            if (item.isLocked) { checkPassword(item, () => { currentFolderId = item.id; pushState(); renderMainGrid(); }); } 
+            else { currentFolderId = item.id; pushState(); renderMainGrid(); } 
+        } 
+        else if (item.type === 'file') {
+            if (item.isLocked) { 
+                checkPassword(item, () => { openFile(item); }); 
+            } else { 
+                openFile(item); 
+            }
+        }
+        else { 
+            openNoteDetails(item.id); 
+        } 
+    }
+
+    // New Function to Open/Download File
+    function openFile(item) {
+        const link = document.createElement("a");
+        link.href = item.content;
+        link.download = item.title;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function renderSubNotes() {
+        const listEl = document.getElementById('subNotesList'); listEl.innerHTML = ''; const note = findNoteById(allData, currentNoteId); if (!note) return; const filter = document.getElementById('subSearchInput').value.toLowerCase(); const subNotes = note.items;
+        subNotes.forEach((content, index) => {
+            if (filter && !content.toLowerCase().includes(filter)) return;
+            const li = document.createElement('li'); li.className = 'sub-note-item'; if (isSelectionMode && selectedSubIndices.has(index)) li.classList.add('selected');
+            let displayContent = content; if (content.length > 200) { displayContent = content.substring(0, 200) + '...'; }
+            li.innerHTML = `<div class="sub-note-content">${displayContent}</div>`; li.onclick = (e) => { if (isSelectionMode) { toggleSubSelection(index); } else { editSubNote(index); } }; li.oncontextmenu = (e) => { e.preventDefault(); showSubContextMenu(index); };
+            let pressTimer; li.addEventListener('touchstart', (e) => { pressTimer = setTimeout(() => { if (!isSelectionMode) showSubContextMenu(index); }, 600); }); li.addEventListener('touchend', () => clearTimeout(pressTimer)); li.addEventListener('touchmove', () => clearTimeout(pressTimer));
+            listEl.appendChild(li);
+        });
+    }
+    function addSubNote() { const input = document.getElementById('newSubNoteInput'); if (input.value.trim() === '') return; const note = findNoteById(allData, currentNoteId); note.items.unshift(input.value.trim()); input.value = ''; saveData(); renderSubNotes(); }
+    async function editSubNote(index) { const note = findNoteById(allData, currentNoteId); const newContent = await showInputModal('', note.items[index], 'area', false, false, true); if (newContent !== null) { note.items[index] = newContent; saveData(); renderSubNotes(); } }
+
+    function toggleSearch() { const toolbar = document.getElementById('searchToolbar'); const searchInput = document.getElementById('inTextSearchInput'); if (toolbar.style.display === 'flex') { toolbar.style.display = 'none'; searchMatches = []; currentSearchIndex = -1; } else { toolbar.style.display = 'flex'; searchInput.focus(); } }
+    function findInText(direction) {
+        const textarea = document.getElementById('modalInputArea'); const searchTerm = document.getElementById('inTextSearchInput').value; if (!searchTerm) return; const text = textarea.value;
+        if (searchMatches.length === 0 || text.substring(searchMatches[0], searchMatches[0] + searchTerm.length) !== searchTerm) { searchMatches = []; let pos = text.indexOf(searchTerm); while (pos > -1) { searchMatches.push(pos); pos = text.indexOf(searchTerm, pos + 1); } if (searchMatches.length === 0) { showNotification('لم يتم العثور على نتائج', 'info'); return; } currentSearchIndex = -1; }
+        if (direction === 'next') { currentSearchIndex++; if (currentSearchIndex >= searchMatches.length) currentSearchIndex = 0; } else { currentSearchIndex--; if (currentSearchIndex < 0) currentSearchIndex = searchMatches.length - 1; }
+        const matchPos = searchMatches[currentSearchIndex]; textarea.focus(); textarea.setSelectionRange(matchPos, matchPos + searchTerm.length); const fullText = textarea.value; const lines = fullText.substring(0, matchPos).split("\n"); const lineCount = lines.length; const lineHeight = 24; textarea.scrollTop = (lineCount - 2) * lineHeight; 
+    }
+
+    // --- Modal Handling ---
+    function showConfirmModal(message) { document.getElementById('confirmMessage').innerText = message; document.getElementById('confirmModal').style.display = 'flex'; return new Promise(resolve => { window.hideConfirmModal = (result) => { document.getElementById('confirmModal').style.display = 'none'; resolve(result); }; }); }
+    function showPasswordModal() { document.getElementById('modalPasswordInput').value = ''; document.getElementById('passwordModal').style.display = 'flex'; document.getElementById('modalPasswordInput').focus(); return new Promise(resolve => { const passwordBtn = document.getElementById('passwordBtn'); passwordBtn.onclick = () => { const pass = document.getElementById('modalPasswordInput').value; document.getElementById('modalPasswordInput').value = ''; document.getElementById('passwordModal').style.display = 'none'; resolve(pass); }; window.hidePasswordModal = (result) => { document.getElementById('passwordModal').style.display = 'none'; resolve(result); }; }); }
+    async function checkPassword(item, callback) { const pass = await showPasswordModal(); if (!pass) return false; if (btoa(pass) === item.passwordHash) { if (callback) callback(); return true; } else { showNotification('كلمة المرور خاطئة', 'error'); return false; } }
+
+    function showInputModal(message, initialValue = '', type = 'single', allowCopy = false, allowPaste = false, isCleanEdit = false) {
+        pushState(); document.getElementById('inputMessage').innerText = message; const modal = document.getElementById('inputModal'); const singleInput = document.getElementById('modalInputSingle'); const areaInput = document.getElementById('modalInputArea'); const copyBtn = document.getElementById('inputCopyBtn'); const pasteBtn = document.getElementById('inputPasteBtn'); const floatingToolbar = document.getElementById('floatingToolbar'); const searchToolbar = document.getElementById('searchToolbar');
+        if (isCleanEdit) { modal.classList.add('clean-mode'); activeInputModalMode = 'edit_clean'; floatingToolbar.style.display = 'flex'; originalContent = initialValue; initHistory(initialValue); } else { modal.classList.remove('clean-mode'); activeInputModalMode = 'normal'; floatingToolbar.style.display = 'none'; searchToolbar.style.display = 'none'; }
+        singleInput.style.display = type === 'single' ? 'block' : 'none'; areaInput.style.display = type === 'area' ? 'block' : 'none'; copyBtn.style.display = allowCopy ? 'block' : 'none'; pasteBtn.style.display = allowPaste ? 'block' : 'none'; const activeInput = type === 'single' ? singleInput : areaInput; activeInput.value = initialValue; modal.style.display = 'flex'; if (!isCleanEdit) { setTimeout(() => activeInput.focus(), 300); }
+        return new Promise(resolve => { const saveBtn = document.getElementById('inputBtn'); saveBtn.onclick = () => hideInputModal(true, resolve, activeInput.value); window.hideInputModal = (isSaved, res = resolve, val = null) => { modal.style.display = 'none'; modal.classList.remove('clean-mode'); activeInputModalMode = null; searchToolbar.style.display = 'none'; res(isSaved ? val : null); if (window.history.state && window.history.state.open) { window.history.back(); } }; window.copyModalContent = () => { navigator.clipboard.writeText(activeInput.value); showNotification('تم نسخ المحتوى', 'info'); }; window.pasteModalContent = async () => { try { const text = await navigator.clipboard.readText(); activeInput.value = text; } catch(e) { showNotification('تعذر الوصول إلى الحافظة', 'error'); } }; });
+    }
+
+    // Helper to check global app password
+    async function verifyAppPass() {
+        const storedPass = localStorage.getItem(APP_PASS_KEY);
+        if (!storedPass) return true; // No global lock set
+        const input = await showPasswordModal();
+        if (input && btoa(input) === storedPass) return true;
+        showNotification('كلمة مرور التطبيق خاطئة', 'error');
+        return false;
+    }
+
+    function showContextMenu(id) { 
+        activeCardId = id; 
+        const menu = document.getElementById('contextMenu'); 
+        
+        // --- Show/Hide Move/Copy buttons based on context ---
+        const copyBtn = document.getElementById('ctxCopyBtn');
+        const moveBtn = document.getElementById('ctxMoveBtn');
+
+        if (currentFolderId === null) {
+            // We are at root
+            copyBtn.style.display = 'flex';
+            moveBtn.style.display = 'none';
+        } else {
+            // We are inside a folder
+            copyBtn.style.display = 'none';
+            moveBtn.style.display = 'flex';
+        }
+
+        menu.style.display = 'flex'; 
+        setTimeout(() => document.addEventListener('click', () => menu.style.display='none', {once:true}), 100); 
+    }
+
+    async function handleMenuAction(action) {
+        document.getElementById('contextMenu').style.display = 'none'; const item = findNoteById(allData, activeCardId); if (!item) return;
+        
+        if (action === 'delete') {
+            // Require Global App Password for any delete action
+            if (!await verifyAppPass()) return;
+
+            if (item.isLocked) { const pass = await showPasswordModal(); if (!pass) return; if (btoa(pass) !== item.passwordHash) { showNotification('كلمة المرور خاطئة', 'error'); return; } }
+            if (await showConfirmModal(`هل أنت متأكد من حذف "${item.title}"؟`)) { if (currentFolderId === null) allData = allData.filter(n => n.id !== activeCardId); else findNoteById(allData, currentFolderId).items = findNoteById(allData, currentFolderId).items.filter(n => n.id !== activeCardId); saveData(); renderMainGrid(); }
+        } else if (action === 'edit') { if (item.isLocked && !(await checkPassword(item))) return; const newTitle = await showInputModal(item.type === 'folder' ? 'تعديل اسم المجلد:' : 'تعديل عنوان الملاحظة:', item.title, 'single'); if (newTitle) { item.title = newTitle; saveData(); renderMainGrid(); } } 
+        else if (action === 'toggleLock') { if (item.isLocked) { if (await checkPassword(item)) { item.isLocked = false; item.passwordHash = null; showNotification('تم فتح القفل', 'success'); } } else { const pass = await showPasswordModal(); if (pass) { item.isLocked = true; item.passwordHash = btoa(pass); showNotification('تم القفل', 'success'); } } saveData(); renderMainGrid(); } 
+        else if (action === 'copyText') {
+            if (item.type === 'folder') {
+                showNotification('لا يمكن نسخ مجلد كامل كنص', 'info');
+            } else if (item.type === 'file') {
+                showNotification('لا يمكن نسخ محتوى ملف، اضغط لفتحه', 'info');
+            } else {
+                if (item.isLocked && !(await checkPassword(item))) return;
+                const textContent = item.items.join("\n\n---\n\n");
+                navigator.clipboard.writeText(textContent);
+                showNotification('تم نسخ محتوى الملاحظة', 'success');
+            }
+        }
+        else if (action === 'moveToRoot') {
+            if (currentFolderId === null) return; // Already at root
+            const folder = findNoteById(allData, currentFolderId);
+            const itemIndex = folder.items.findIndex(n => n.id === activeCardId);
+            if(itemIndex !== -1) {
+                const [item] = folder.items.splice(itemIndex, 1);
+                allData.unshift(item); // Move to root
+                saveData();
+                renderMainGrid();
+                showNotification('تم النقل للواجهة الرئيسية', 'success');
+            }
+        }
+    }
+
+    function showCreateMenu() { const menu = document.getElementById('createTypeMenu'); menu.style.display = 'flex'; setTimeout(() => { const closeMenu = (e) => { if(!e.target.closest('#createTypeMenu') && !e.target.closest('.fab')) { menu.style.display = 'none'; document.removeEventListener('click', closeMenu); } }; document.addEventListener('click', closeMenu); }, 100); }
+    
+    // --- File Upload Logic ---
+    function triggerFileUpload() {
+        document.getElementById('createTypeMenu').style.display = 'none';
+        document.getElementById('fileUploadInput').click();
+    }
+
+    async function handleFileUpload(event) {
+        const files = event.target.files;
+        if (!files.length) return;
+
+        showNotification('جاري المعالجة...', 'info');
+
+        for (let file of files) {
+            // Safety limit 4MB
+            if (file.size > 4 * 1024 * 1024) {
+                showNotification(`الملف ${file.name} كبير جداً (تجاوز 4 ميجا)`, 'error');
+                continue;
+            }
+
+            try {
+                const base64 = await toBase64(file);
+                const newItem = {
+                    id: Date.now() + Math.random(),
+                    type: 'file',
+                    title: file.name,
+                    content: base64, 
+                    isLocked: false
+                };
+                
+                // Add to current context (Root or Folder)
+                getCurrentList().unshift(newItem);
+            } catch(e) {
+                showNotification('فشل قراءة الملف', 'error');
+            }
+        }
+        
+        saveData();
+        renderMainGrid();
+        event.target.value = ''; // Reset input
+    }
+
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+    async function createItemWrapper(type) { document.getElementById('createTypeMenu').style.display = 'none'; const title = await showInputModal(type === 'folder' ? 'اسم المجلد:' : 'عنوان الملاحظة:', '', 'single'); if (title) { const newItem = { id: Date.now(), type, title, items: [], isLocked: false }; getCurrentList().unshift(newItem); saveData(); renderMainGrid(); if (type === 'note') openNoteDetails(newItem.id); } }
+
+    function toggleSelectionMode(active) { isSelectionMode = active; selectedSubIndices.clear(); document.getElementById('selectBtn').style.display = active ? 'none' : 'block'; ['selectAllBtn', 'cancelSelectionBtn', 'deleteSubBtn'].forEach(id => { document.getElementById(id).style.display = active ? 'block' : 'none'; }); renderSubNotes(); }
+    function toggleSubSelection(index) { selectedSubIndices.has(index) ? selectedSubIndices.delete(index) : selectedSubIndices.add(index); renderSubNotes(); }
+    function selectAllSubNotes() { const note = findNoteById(allData, currentNoteId); note.items.forEach((_, i) => selectedSubIndices.add(i)); renderSubNotes(); }
+    async function deleteSelectedSubNotesWrapper() { if (selectedSubIndices.size === 0) return; if (await showConfirmModal('حذف العناصر المحددة؟')) { const note = findNoteById(allData, currentNoteId); const sorted = Array.from(selectedSubIndices).sort((a,b) => b-a); sorted.forEach(i => note.items.splice(i, 1)); saveData(); toggleSelectionMode(false); } }
+
+    function showSubContextMenu(index) { activeSubNoteIndex = index; const menu = document.getElementById('subNoteContextMenu'); menu.style.display = 'flex'; setTimeout(() => document.addEventListener('click', () => menu.style.display='none', {once:true}), 100); }
+    function handleSubNoteAction(action) { const note = findNoteById(allData, currentNoteId); if (action === 'delete') note.items.splice(activeSubNoteIndex, 1); else if (action === 'copy') navigator.clipboard.writeText(note.items[activeSubNoteIndex]); else if (action === 'edit') editSubNote(activeSubNoteIndex); saveData(); renderSubNotes(); document.getElementById('subNoteContextMenu').style.display = 'none'; }
+
+    function toggleMainSelectionMode(active) { isMainSelectionMode = active; selectedMainIds.clear(); document.getElementById('mainSelectBtn').style.display = active ? 'none' : 'block'; document.getElementById('mainSelectionControls').style.display = active ? 'flex' : 'none'; renderMainGrid(); }
+    function toggleMainSelection(id) { selectedMainIds.has(id) ? selectedMainIds.delete(id) : selectedMainIds.add(id); renderMainGrid(); }
+    function updateMainToolbar() { if(isMainSelectionMode) { document.getElementById('mainSelectionCount').innerText = selectedMainIds.size; const list = getCurrentList(); const selectedItems = list.filter(n => selectedMainIds.has(n.id)); const allLocked = selectedItems.length > 0 && selectedItems.every(n => n.isLocked); const allUnlocked = selectedItems.length > 0 && selectedItems.every(n => !n.isLocked); document.getElementById('lockMultipleBtn').style.display = allUnlocked && selectedItems.length > 0 ? 'block' : 'none'; document.getElementById('unlockMultipleBtn').style.display = allLocked && selectedItems.length > 0 ? 'block' : 'none'; } }
+    async function toggleMultipleLock(shouldLock) { if (selectedMainIds.size === 0) return; const list = getCurrentList(); const itemsToProcess = list.filter(n => selectedMainIds.has(n.id)); if (!shouldLock) { if (itemsToProcess.some(item => item.isLocked)) { const pass = await showPasswordModal(); if (!pass) return; const hash = btoa(pass); itemsToProcess.forEach(item => { if (item.isLocked && item.passwordHash === hash) { item.isLocked = false; item.passwordHash = null; } }); showNotification('تم إلغاء قفل العناصر المفتوحة بكلمة المرور.', 'success'); } } else { const pass = await showPasswordModal(); if (!pass) return; const hash = btoa(pass); itemsToProcess.forEach(item => { if (!item.isLocked) { item.isLocked = true; item.passwordHash = hash; } }); showNotification('تم قفل العناصر المحددة.', 'success'); } saveData(); toggleMainSelectionMode(false); }
+    function selectAllMainNotes() { getCurrentList().forEach(i => selectedMainIds.add(i.id)); renderMainGrid(); }
+    async function deleteSelectedMainNotesWrapper() { 
+        if (selectedMainIds.size === 0) return; 
+        
+        // Require Global App Password for bulk delete
+        if (!await verifyAppPass()) return;
+
+        const list = getCurrentList(); 
+        const lockedItems = list.filter(n => selectedMainIds.has(n.id) && n.isLocked); 
+        if (lockedItems.length > 0) { const pass = await showPasswordModal(); if (!pass) return; const hash = btoa(pass); if (lockedItems[0].passwordHash !== hash) { showNotification('كلمة المرور خاطئة', 'error'); return; } } 
+        if (await showConfirmModal(`حذف ${selectedMainIds.size} عناصر؟`)) { if (currentFolderId === null) allData = allData.filter(n => !selectedMainIds.has(n.id)); else findNoteById(allData, currentFolderId).items = findNoteById(allData, currentFolderId).items.filter(n => !selectedMainIds.has(n.id)); saveData(); toggleMainSelectionMode(false); showNotification('تم حذف العناصر المحددة.', 'success'); } 
+    }
+
+    async function handleSettingsOpen() { 
+        const storedAppPass = localStorage.getItem(APP_PASS_KEY); if (storedAppPass) { const enteredPass = await showPasswordModal(); if (!enteredPass || btoa(enteredPass) !== storedAppPass) { showNotification('كلمة المرور خاطئة', 'error'); return; } } 
+        document.getElementById('settingsModal').style.display = 'flex'; updateSettingsUI(); 
+        checkGoogleLoginState();
+    }
+    function hideSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
+    function updateSettingsUI() { const hasPass = localStorage.getItem(APP_PASS_KEY) !== null; document.getElementById('setPassBtn').style.display = hasPass ? 'none' : 'flex'; document.getElementById('removePassBtn').style.display = hasPass ? 'flex' : 'none'; }
+    async function setAppPassword() { const p = await showPasswordModal(); if(p) { localStorage.setItem(APP_PASS_KEY, btoa(p)); saveData(); showNotification('تم القفل بنجاح', 'success'); hideSettingsModal(); } }
+    async function removeAppPassword() { if(await showConfirmModal('حذف كلمة مرور التطبيق؟')) { localStorage.removeItem(APP_PASS_KEY); saveData(); hideSettingsModal(); showNotification('تم حذف كلمة المرور', 'info'); } }
+    
+    // --- IMPORT / EXPORT FUNCTIONS ---
+    function exportDataAuto() { 
+        const blob = new Blob([JSON.stringify(allData)], {type: "application/json"}); 
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); 
+        a.download = "smart_notes_backup.json"; a.click(); 
+    }
+    function importDataWrapper(e) { 
+        const reader = new FileReader(); 
+        reader.onload = (f) => { 
+            try { 
+                allData = JSON.parse(f.target.result); 
+                saveData(); // Sync immediately
+                renderMainGrid(); 
+                hideSettingsModal(); 
+                showNotification('تم استعادة البيانات بنجاح', 'success'); 
+            } catch(e){ showNotification('ملف غير صالح', 'error'); } 
+        }; 
+        reader.readAsText(e.target.files[0]); 
+    }
+    function exportDataManual() { 
+        hideSettingsModal(); // FIX: Close settings first
+        setTimeout(() => {
+            showInputModal('نسخة احتياطية (نصية) - انسخ الكود:', JSON.stringify(allData), 'area', true); 
+        }, 100);
+    }
+    async function importDataPaste() { 
+        hideSettingsModal(); // FIX: Close settings first
+        setTimeout(async () => {
+            const t = await showInputModal('الصق نص النسخة الاحتياطية (JSON) هنا:', '', 'area', false, true); 
+            if(t) { 
+                try { 
+                    allData = JSON.parse(t); 
+                    saveData(); // Sync immediately
+                    renderMainGrid(); 
+                    showNotification('تم استعادة البيانات بنجاح', 'success'); 
+                } catch(e){ showNotification('نص غير صالح', 'error'); } 
+            }
+        }, 100);
+    }
+
+    function showNotification(m, t) { const icon = document.getElementById('notifIcon'); icon.innerText = t === 'success' ? '✅' : (t === 'error' ? '❌' : 'ℹ️'); document.getElementById('notificationMessage').innerText = m; document.getElementById('notificationModal').style.display = 'flex'; }
+    function closeNotification() { document.getElementById('notificationModal').style.display = 'none'; }
+
+    // --- GOOGLE DRIVE LOGIC ---
+
+    function initGoogleLib() {
+        if(window.google) {
+            tokenClient = google.accounts.oauth2.initTokenClient({ client_id: GOOGLE_CLIENT_ID, scope: SCOPES, callback: (resp) => { if (resp.access_token) { gAccessToken = resp.access_token; localStorage.setItem('gAccessToken', gAccessToken); document.getElementById('loginOverlay').style.display = 'none'; showNotification("تم الدخول بنجاح", "success"); fetchUserInfo(); checkGoogleLoginState(); loadData(); } } });
+            if(gAccessToken) { checkGoogleLoginState(); fetchUserInfo(); loadData(); } else { document.getElementById('loginOverlay').style.display = 'flex'; }
+        }
+    }
+    function startGoogleLogin() { if(tokenClient) tokenClient.requestAccessToken(); }
+    function openLoginOverlay() { hideSettingsModal(); document.getElementById('loginOverlay').style.display = 'flex'; }
+    function checkGoogleLoginState() { if(gAccessToken) { document.getElementById('googleLoginBtnArea').style.display = 'none'; document.getElementById('googleSyncActions').style.display = 'block'; document.getElementById('googleLogoutContainer').style.display = 'block'; } else { document.getElementById('googleLoginBtnArea').style.display = 'block'; document.getElementById('googleSyncActions').style.display = 'none'; document.getElementById('googleLogoutContainer').style.display = 'none'; } }
+    async function fetchUserInfo() { if(!gAccessToken) return; const localPic = localStorage.getItem('userPhoto'); if(localPic) updateLogoutIcon(localPic); try { let res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { 'Authorization': `Bearer ${gAccessToken}` } }); if(res.ok) { let data = await res.json(); if(data.picture) { localStorage.setItem('userPhoto', data.picture); updateLogoutIcon(data.picture); } } } catch(e) {} }
+    function updateLogoutIcon(url) { const area = document.getElementById('googleLogoutIcon'); if(area) area.innerHTML = `<img src="${url}" class="user-profile-img" alt="User">`; }
+
+    async function handleGoogleLogout() {
+        if(await showConfirmModal("هل تريد تسجيل الخروج؟ سيتم مسح الملاحظات من الشاشة (تبقى في السحابة).")) {
+            localStorage.removeItem('gAccessToken'); localStorage.removeItem('userPhoto'); 
+            gAccessToken = null; allData = []; // Wipe RAM
+            renderMainGrid(); 
+            document.getElementById('googleLogoutIcon').innerText = '🚪'; 
+            checkGoogleLoginState(); 
+            document.getElementById('loginOverlay').style.display = 'flex';
+        }
+    }
+
+    function setSyncLoader(show) { document.getElementById('syncLoader').style.display = show ? 'inline-block' : 'none'; }
+
+    async function forceUploadToDrive(silent = false) {
+        if(!gAccessToken) { if(!silent) showNotification("غير مسجل دخول", "error"); return; } 
+        if(!silent) { hideSettingsModal(); showNotification("جاري الرفع للسحابة...", "info"); }
+        setSyncLoader(true);
+        document.getElementById('syncText').innerText = "حفظ...";
+        
+        try { const q = `name = '${FILENAME}' and 'appDataFolder' in parents and trashed = false`; const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder`, { headers: { 'Authorization': `Bearer ${gAccessToken}` } }); 
+        if(searchResp.status === 401) { localStorage.removeItem('gAccessToken'); gAccessToken=null; document.getElementById('loginOverlay').style.display = 'flex'; return; } 
+        const data = await searchResp.json(); let fileId = null; if(data.files && data.files.length > 0) fileId = data.files[0].id; 
+        
+        // Include App Pass in Cloud Data
+        const payload = { 
+            smartNotesData: allData,
+            appGlobalPass: localStorage.getItem(APP_PASS_KEY) // Save global pass to cloud
+        }; 
+        const fileBlob = new Blob([JSON.stringify(payload)], { type: 'application/json' }); 
+        
+        if(fileId) { await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, { method: 'PATCH', headers: { 'Authorization': `Bearer ${gAccessToken}`, 'Content-Type': 'application/json' }, body: fileBlob }); } else { const metadata = { name: FILENAME, mimeType: 'application/json', parents: ['appDataFolder'] }; const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', fileBlob); await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': `Bearer ${gAccessToken}` }, body: form }); } 
+        if(!silent) showNotification("تم الحفظ في السحابة ✅", "success"); } catch(e) { if(!silent) showNotification("فشل الرفع", "error"); } 
+        
+        setSyncLoader(false);
+        document.getElementById('syncText').innerText = "";
+    }
+
+    async function forceSyncFromCloud(silent = false) {
+        if(!gAccessToken) { if(!silent) showNotification("غير مسجل دخول", "error"); return; } 
+        if(!silent) { hideSettingsModal(); showNotification("جاري جلب البيانات...", "info"); }
+        setSyncLoader(true);
+        document.getElementById('syncText').innerText = "تحميل...";
+
+        try { const q = `name = '${FILENAME}' and 'appDataFolder' in parents and trashed = false`; const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder`, { headers: { 'Authorization': `Bearer ${gAccessToken}` } }); const data = await searchResp.json(); if(data.files && data.files.length > 0) { const fileId = data.files[0].id; const fileResp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { 'Authorization': `Bearer ${gAccessToken}` } }); const cloudContent = await fileResp.json(); 
+        
+        // Load data + app pass
+        if(cloudContent) { 
+            if(cloudContent.smartNotesData) allData = cloudContent.smartNotesData; 
+            if(cloudContent.appGlobalPass) localStorage.setItem(APP_PASS_KEY, cloudContent.appGlobalPass); // Sync pass to local
+            else localStorage.removeItem(APP_PASS_KEY); // Or remove if not present
+
+            renderMainGrid(); 
+            if(!silent) showNotification("تم استعادة البيانات ✅", "success"); 
+        } 
+        } else { if(!silent) showNotification("لا توجد نسخة احتياطية", "info"); } } catch(e) { if(!silent) showNotification("فشل الجلب", "error"); } 
+        
+        setSyncLoader(false);
+        document.getElementById('syncText').innerText = "";
+    }
+</script>  
+</body>  
+</html>
