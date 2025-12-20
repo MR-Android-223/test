@@ -14,7 +14,7 @@
             --bg-color: #f8fafc;  
             --primary-color: #2563eb;  
             --folder-color: #f59e0b; 
-            --file-color: #64748b; /* لون افتراضي للملفات */
+            --file-color: #64748b;
             --pdf-color: #ef4444;
             --code-color: #0ea5e9;
             --image-color: #a855f7;
@@ -219,13 +219,24 @@
         .note-card.selected .card-selection-icon { background-color: var(--selection-color); color: white; display: block; }  
         .sort-handle { position: absolute; bottom: 5px; right: 5px; color: #cbd5e1; font-size: 1.2rem; padding: 5px; cursor: grab; z-index: 10; }
 
-        /* --- FAB --- */  
+        /* --- FAB & PASTE BTN --- */  
         .fab {  
             position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px; border-radius: 20px; background: linear-gradient(135deg, var(--secondary-color), #9333ea);   
             color: white; font-size: 2.5rem; line-height: 60px; text-align: center; border: none; box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);   
             cursor: pointer; z-index: 1000; transition: transform 0.2s;  
         }  
         .fab:active { transform: scale(0.9); }  
+
+        .paste-fab {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: var(--success-color); color: white;
+            padding: 12px 24px; border-radius: 50px; border: none;
+            font-family: 'Tajawal'; font-weight: bold; font-size: 1.1rem;
+            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.4);
+            display: none; z-index: 2000; align-items: center; gap: 8px;
+            animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .paste-fab:active { transform: translateX(-50%) scale(0.95); }
 
         /* --- Context Menus --- */  
         #contextMenu, #subNoteContextMenu {  
@@ -244,6 +255,22 @@
         .context-item:hover { background-color: var(--light-bg); color: var(--primary-color); }  
         .context-item.delete { color: var(--danger-color); border-top: 1px solid #f1f5f9; margin-top: 5px; }  
         .context-item.copy-option { border-top: 1px solid #f1f5f9; margin-top: 5px; color: var(--success-color); }
+
+        /* --- Selection Menu Modal (New) --- */
+        #selectionOptionsModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.5); z-index: 6000; 
+            justify-content: center; align-items: center; backdrop-filter: blur(3px);
+        }
+        .selection-menu-card {
+            background: white; width: 85%; max-width: 320px; border-radius: 24px;
+            padding: 10px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            display: flex; flex-direction: column; animation: menuPopup 0.2s ease-out forwards;
+        }
+        .selection-header {
+            text-align: center; padding: 10px; border-bottom: 1px solid #f1f5f9;
+            font-weight: 800; color: var(--primary-color); font-size: 1.1rem;
+        }
 
         /* --- Modals --- */
         .modal {  
@@ -320,6 +347,28 @@
         .note-card.dragging-mobile { position: fixed; z-index: 9999; opacity: 0.9; background-color: #e0e7ff; border: 3px solid var(--primary-color); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); pointer-events: none; width: 150px; height: 150px; transform-origin: center center; }
         .note-card.drag-target-hover { transform: scale(1.05); border: 3px dashed var(--success-color) !important; background-color: #dcfce7 !important; }
 
+        /* --- FILE VIEWER MODAL (NEW) --- */
+        #fileViewerModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.95); z-index: 7000; 
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        .file-viewer-content {
+            max-width: 95%; max-height: 85%; display: flex; 
+            justify-content: center; align-items: center;
+        }
+        .file-viewer-content img, .file-viewer-content iframe {
+            max-width: 100%; max-height: 100%; border-radius: 8px; border: none;
+        }
+        .file-viewer-content iframe { width: 95vw; height: 80vh; background: white; }
+        
+        .viewer-close-btn {
+            position: absolute; top: 20px; left: 20px; 
+            color: white; font-size: 2rem; cursor: pointer; z-index: 7001;
+            background: rgba(255,255,255,0.2); width: 45px; height: 45px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        }
+
         /* --- GOOGLE STYLES --- */
         #loginOverlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -361,6 +410,12 @@
 </head>  
 <body>  
 
+<!-- File Viewer Modal -->
+<div id="fileViewerModal">
+    <div class="viewer-close-btn" onclick="closeFileViewer()">×</div>
+    <div id="fileViewerContainer" class="file-viewer-content"></div>
+</div>
+
 <!-- Google Login Overlay -->
 <div id="loginOverlay">
     <div class="login-card">
@@ -389,17 +444,11 @@
         <span id="syncText"></span>
     </div>
 
+    <!-- زر التحديد الرئيسي (يفتح القائمة المنبثقة الجديدة) -->
     <div id="mainSelectionToolbar" class="main-selection-toolbar">  
         <button id="mainSelectBtn" onclick="toggleMainSelectionMode(true)">تحديد</button>  
-        <span id="mainSelectionControls" style="display: none; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center; width: 100%;">  
-            <span id="mainSelectionCount" style="font-weight: 800; color: var(--primary-color); margin-left: 10px;">0</span>  
-            <button class="toolbar-btn" onclick="selectAllMainNotes()">الكل</button>  
-            <button class="toolbar-btn" id="lockMultipleBtn" style="display:none;" onclick="toggleMultipleLock(true)">🔒 قفل</button>
-            <button class="toolbar-btn" id="unlockMultipleBtn" style="display:none;" onclick="toggleMultipleLock(false)">🔓 إلغاء قفل</button>
-            <button class="toolbar-btn confirm" onclick="deleteSelectedMainNotesWrapper()">حذف</button>  
-            <button class="toolbar-btn cancel" onclick="toggleMainSelectionMode(false)">إلغاء</button>  
-        </span>  
     </div> 
+    
     <h1>ملاحظاتي الذكية</h1>  
     <p class="author-name">Cloud Edition</p>  
 </div>  
@@ -419,9 +468,10 @@
     <button class="context-item" id="lockUnlockBtn" onclick="handleMenuAction('toggleLock')">🔒 قفل/فتح</button>  
     <button class="context-item" onclick="handleMenuAction('edit')">✏️ تعديل الاسم</button>  
     
-    <!-- Dynamic Buttons: Copy (Default) / Move to Main (If inside folder) -->
+    <!-- Dynamic Buttons -->
     <button id="ctxCopyBtn" class="context-item" onclick="handleMenuAction('copyText')">📄 نسخ (المحتوى)</button>
     <button id="ctxMoveBtn" class="context-item" onclick="handleMenuAction('moveToRoot')" style="display:none;">🏠 إضافة للواجهة الرئيسية</button>
+    <button id="ctxDownloadBtn" class="context-item" onclick="handleMenuAction('downloadFile')" style="display:none; color:var(--primary-color);">⬇️ تنزيل الملف</button>
 
     <button class="context-item delete" onclick="handleMenuAction('delete')">🗑️ حذف</button>
 </div>  
@@ -443,7 +493,39 @@
 
 <div id="notesGrid" class="grid-container"></div>  
 
-<button class="fab" onclick="showCreateMenu()">+</button>  
+<button id="mainFab" class="fab" onclick="showCreateMenu()">+</button> 
+<button id="pasteFloatingBtn" class="paste-fab" onclick="pasteItemsHere()">📋 لصق هنا</button>
+
+<!-- NEW: SELECTION OPTIONS MODAL -->
+<div id="selectionOptionsModal" onclick="if(event.target.id === 'selectionOptionsModal') toggleMainSelectionMode(false)">
+    <div class="selection-menu-card">
+        <div class="selection-header">خيارات التحديد</div>
+        
+        <button class="context-item" onclick="handleSelectionAction('selectAll')">
+            <span id="selAllText">✅ تحديد الكل</span>
+        </button>
+
+        <button class="context-item" onclick="handleSelectionAction('toggleLock')">
+            <span id="selLockText">🔒 قفل</span>
+        </button>
+
+        <button class="context-item" onclick="handleSelectionAction('move')">
+            📂 نقل (قص)
+        </button>
+
+        <button class="context-item" onclick="handleSelectionAction('moveToRoot')">
+            🏠 نقل للواجهة الرئيسية
+        </button>
+
+        <button class="context-item delete" onclick="handleSelectionAction('delete')">
+            🗑️ حذف
+        </button>
+
+        <button class="context-item" style="justify-content:center; color:var(--text-secondary);" onclick="toggleMainSelectionMode(false)">
+            إلغاء
+        </button>
+    </div>
+</div>
 
 <div id="detailsModal" class="modal">  
     <div class="modal-content">  
@@ -604,6 +686,10 @@
     let activeInputModalMode = null; 
     let searchMatches = []; let currentSearchIndex = -1;
     let historyStack = []; let historyIndex = -1; let originalContent = ""; 
+    
+    // Clipboard Variables for Move/Paste
+    let itemsClipboard = [];
+    let isPasteMode = false;
 
     // --- GOOGLE API CONFIG ---
     const GOOGLE_CLIENT_ID = '979816526016-ukb9vqtb6u2hlutombpf8rumbjr3o2ua.apps.googleusercontent.com';
@@ -613,14 +699,34 @@
     let gAccessToken = localStorage.getItem('gAccessToken'); 
     let saveTimeout = null; 
 
-    // --- History & Back Button Control ---
+    // --- History & Back Button Control (FIXED) ---
+    function getParentFolderId(list, targetId, parentId = null) {
+        for (let item of list) {
+            if (item.id === targetId) return parentId;
+            if (item.type === 'folder' && item.items) {
+                const found = getParentFolderId(item.items, targetId, item.id);
+                if (found !== undefined) return found; // found is parent or null(root)
+            }
+        }
+        return undefined; // Not found in this branch
+    }
+
     window.addEventListener('popstate', function(event) {
-        if (document.getElementById('inputModal').style.display === 'flex') { 
+        if (document.getElementById('fileViewerModal').style.display === 'flex') {
+            closeFileViewer();
+        }
+        else if (document.getElementById('inputModal').style.display === 'flex') { 
             if (activeInputModalMode === 'edit_clean') { checkSaveChanges(); } else { hideInputModal(false); }
         } 
         else if (document.getElementById('detailsModal').style.display === 'flex') { closeModalInternal(); } 
         else if (document.getElementById('searchInput').value !== '') { clearSearch(); }
-        else if (currentFolderId !== null) { currentFolderId = null; renderMainGrid(); }
+        else if (document.getElementById('selectionOptionsModal').style.display === 'flex') { toggleMainSelectionMode(false); }
+        else if (currentFolderId !== null) {
+            // BACK LOGIC FIX: Go to parent instead of root
+            const parentId = getParentFolderId(allData, currentFolderId);
+            currentFolderId = (parentId === undefined) ? null : parentId; // if undefined, means not found or root
+            renderMainGrid();
+        }
         else if (document.getElementById('loginOverlay').style.display === 'flex') { /* Prevent back from login overlay easily */ }
     });
 
@@ -671,6 +777,17 @@
         if (currentFolderId === null) { navBar.style.display = 'none'; } else { navBar.style.display = 'flex'; const folder = findNoteById(allData, currentFolderId); document.getElementById('currentPathTitle').innerText = folder ? `📁 ${folder.title}` : ''; }
         const list = getCurrentList(); const filteredList = list.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()));
         
+        // Show/Hide Paste Button if in Paste Mode
+        const pasteBtn = document.getElementById('pasteFloatingBtn');
+        const fab = document.getElementById('mainFab');
+        if (isPasteMode) {
+            pasteBtn.style.display = 'flex';
+            fab.style.display = 'none'; // Hide add button while pasting
+        } else {
+            pasteBtn.style.display = 'none';
+            fab.style.display = 'block';
+        }
+
         if (!gAccessToken) {
             grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#dc2626; margin-top:20px;">يجب تسجيل الدخول لعرض الملاحظات.</p>';
             return;
@@ -689,7 +806,6 @@
             // Check for image preview
             let imagePreview = '';
             if(item.type === 'file' && item.content.startsWith('data:image')) {
-                // If it's an image, replace the icon with the image preview
                 imagePreview = `<img src="${item.content}" class="file-preview-img" style="border-radius:12px; height:80px; width:100%; object-fit:cover; margin-bottom:5px;">`;
                 icon = ''; // Remove default icon
             }
@@ -751,12 +867,18 @@
                 if (e.target.classList.contains('sort-handle')) return; 
                 isLongPress = false; // Reset
                 pressTimer = setTimeout(() => { 
+                    // MULTI-SELECT DRAG LOGIC
+                    if (isMainSelectionMode && selectedMainIds.has(item.id)) {
+                        // Let drag handle it, don't show single menu
+                        return;
+                    }
+
                     if (!isMainSelectionMode) {
                         isLongPress = true;
                         if(navigator.vibrate) navigator.vibrate(50);
                         showContextMenu(item.id); 
                     }
-                }, 600); // 600ms for long press
+                }, 600); 
             });
             card.addEventListener('touchend', () => clearTimeout(pressTimer)); 
             card.addEventListener('touchmove', () => clearTimeout(pressTimer));
@@ -785,11 +907,58 @@
     function handleDragLeave(e) { this.classList.remove('drag-target'); }
     async function handleDrop(e) { e.stopPropagation(); const targetId = parseInt(this.getAttribute('data-id')); const targetType = this.getAttribute('data-type'); if (dragSrcId === targetId) return false; document.querySelectorAll('.note-card').forEach(c => c.classList.remove('drag-target')); if (targetType === 'folder') { const action = await showDragActionModal(); if (action === 'move') { moveItemsToFolder(targetId); } else if (action === 'swap') { reorderItems(dragSrcId, targetId); } } else { reorderItems(dragSrcId, targetId); } return false; }
     function handleDragEnd(e) { this.classList.remove('dragging'); document.querySelectorAll('.note-card').forEach(c => c.classList.remove('drag-target')); }
-    function handleTouchStart(e, card) { e.preventDefault(); const touch = e.touches[0]; mobileDragEl = card; dragSrcId = parseInt(card.getAttribute('data-id')); mobileDragClone = card.cloneNode(true); mobileDragClone.classList.add('dragging-mobile'); document.body.appendChild(mobileDragClone); updateClonePosition(touch.clientX, touch.clientY); card.style.opacity = '0.3'; }
+    
+    function handleTouchStart(e, card) { 
+        e.preventDefault(); const touch = e.touches[0]; mobileDragEl = card; 
+        dragSrcId = parseInt(card.getAttribute('data-id')); 
+        
+        // Multi-Drag Visual
+        mobileDragClone = card.cloneNode(true); 
+        if(selectedMainIds.has(dragSrcId) && selectedMainIds.size > 1) {
+             const badge = document.createElement('div');
+             badge.style.cssText = "position:absolute; top:-10px; right:-10px; background:red; color:white; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-weight:bold; border:2px solid white;";
+             badge.innerText = selectedMainIds.size;
+             mobileDragClone.appendChild(badge);
+        }
+
+        mobileDragClone.classList.add('dragging-mobile'); document.body.appendChild(mobileDragClone); updateClonePosition(touch.clientX, touch.clientY); card.style.opacity = '0.3'; 
+    }
+
     function handleTouchMove(e) { if (!mobileDragClone) return; e.preventDefault(); const touch = e.touches[0]; updateClonePosition(touch.clientX, touch.clientY); mobileDragClone.style.display = 'none'; let elementBelow = document.elementFromPoint(touch.clientX, touch.clientY); mobileDragClone.style.display = 'block'; if (!elementBelow) return; let targetCard = elementBelow.closest('.note-card'); if (lastTargetEl && lastTargetEl !== targetCard) { lastTargetEl.classList.remove('drag-target-hover'); } if (targetCard && targetCard !== mobileDragEl) { targetCard.classList.add('drag-target-hover'); lastTargetEl = targetCard; } else { lastTargetEl = null; } }
     async function handleTouchEnd(e) { if (!mobileDragClone) return; mobileDragClone.remove(); mobileDragClone = null; if (mobileDragEl) mobileDragEl.style.opacity = '1'; if (lastTargetEl) { lastTargetEl.classList.remove('drag-target-hover'); const targetId = parseInt(lastTargetEl.getAttribute('data-id')); const targetType = lastTargetEl.getAttribute('data-type'); if (targetType === 'folder') { const action = await showDragActionModal(); if (action === 'move') { moveItemsToFolder(targetId); } else if (action === 'swap') { reorderItems(dragSrcId, targetId); } } else { reorderItems(dragSrcId, targetId); } } mobileDragEl = null; lastTargetEl = null; }
     function updateClonePosition(x, y) { mobileDragClone.style.left = (x - 75) + 'px'; mobileDragClone.style.top = (y - 75) + 'px'; }
-    function moveItemsToFolder(targetFolderId) { const list = getCurrentList(); const targetFolder = findNoteById(allData, targetFolderId); if (!targetFolder || targetFolder.type !== 'folder') return; let itemsToMove = []; if (selectedMainIds.size > 0) { itemsToMove = list.filter(n => selectedMainIds.has(n.id) && n.id !== targetFolderId); } else { itemsToMove = list.filter(n => n.id === dragSrcId && n.id !== targetFolderId); } if (itemsToMove.length === 0) return; if (currentFolderId === null) allData = allData.filter(n => !itemsToMove.includes(n)); else { const currentFolder = findNoteById(allData, currentFolderId); currentFolder.items = currentFolder.items.filter(n => !itemsToMove.includes(n)); } itemsToMove.forEach(item => targetFolder.items.unshift(item)); saveData(); toggleMainSelectionMode(false); renderMainGrid(); }
+    
+    function moveItemsToFolder(targetFolderId) { 
+        const list = getCurrentList(); const targetFolder = findNoteById(allData, targetFolderId); 
+        if (!targetFolder || targetFolder.type !== 'folder') return; 
+        
+        let itemsToMove = []; 
+        // If items are selected, check if dragged item is part of selection
+        if (selectedMainIds.size > 0 && selectedMainIds.has(dragSrcId)) { 
+            itemsToMove = list.filter(n => selectedMainIds.has(n.id) && n.id !== targetFolderId); 
+        } else { 
+            // Only dragged item
+            itemsToMove = list.filter(n => n.id === dragSrcId && n.id !== targetFolderId); 
+        } 
+        
+        if (itemsToMove.length === 0) return; 
+        
+        // Remove from current
+        if (currentFolderId === null) {
+            allData = allData.filter(n => !itemsToMove.includes(n)); 
+        } else { 
+            const currentFolder = findNoteById(allData, currentFolderId); 
+            currentFolder.items = currentFolder.items.filter(n => !itemsToMove.includes(n)); 
+        } 
+        
+        // Add to target
+        itemsToMove.forEach(item => targetFolder.items.unshift(item)); 
+        
+        saveData(); 
+        toggleMainSelectionMode(false); 
+        renderMainGrid(); 
+    }
+
     function reorderItems(srcId, targetId) { let list = getCurrentList(); const srcIndex = list.findIndex(n => n.id === srcId); const targetIndex = list.findIndex(n => n.id === targetId); if (srcIndex < 0 || targetIndex < 0 || srcIndex === targetIndex) return; const [movedItem] = list.splice(srcIndex, 1); list.splice(targetIndex, 0, movedItem); saveData(); renderMainGrid(); }
     
     function openNoteDetails(id) { currentNoteId = id; pushState(); const note = findNoteById(allData, id); if (!note) { return; } document.getElementById('modalTitle').innerText = note.title; if (note.isLocked) { checkPassword(note, () => { document.getElementById('detailsModal').style.display = 'flex'; renderSubNotes(); }); } else { document.getElementById('detailsModal').style.display = 'flex'; renderSubNotes(); } }
@@ -804,9 +973,9 @@
         } 
         else if (item.type === 'file') {
             if (item.isLocked) { 
-                checkPassword(item, () => { openFile(item); }); 
+                checkPassword(item, () => { openImageViewer(item); }); 
             } else { 
-                openFile(item); 
+                openImageViewer(item); 
             }
         }
         else { 
@@ -814,8 +983,38 @@
         } 
     }
 
-    // New Function to Open/Download File
-    function openFile(item) {
+    // --- File Viewer Logic ---
+    function openImageViewer(item) {
+        const modal = document.getElementById('fileViewerModal');
+        const container = document.getElementById('fileViewerContainer');
+        container.innerHTML = ''; // Clear previous
+
+        if (item.content.startsWith('data:image')) {
+            const img = document.createElement('img');
+            img.src = item.content;
+            container.appendChild(img);
+        } else if (item.content.startsWith('data:application/pdf')) {
+            const iframe = document.createElement('iframe');
+            iframe.src = item.content;
+            container.appendChild(iframe);
+        } else {
+            // For other file types, trigger download as fallback or show message
+            showNotification('لا يمكن عرض هذا الملف، جاري التنزيل...', 'info');
+            downloadFile(item);
+            return;
+        }
+
+        modal.style.display = 'flex';
+        pushState(); // Add to history to support back button
+    }
+
+    function closeFileViewer() {
+        document.getElementById('fileViewerModal').style.display = 'none';
+        document.getElementById('fileViewerContainer').innerHTML = '';
+        if (window.history.state && window.history.state.open) { window.history.back(); }
+    }
+
+    function downloadFile(item) {
         const link = document.createElement("a");
         link.href = item.content;
         link.download = item.title;
@@ -871,19 +1070,30 @@
     function showContextMenu(id) { 
         activeCardId = id; 
         const menu = document.getElementById('contextMenu'); 
-        
-        // --- Show/Hide Move/Copy buttons based on context ---
+        const item = findNoteById(allData, activeCardId);
+
+        // --- Context Menu Logic ---
         const copyBtn = document.getElementById('ctxCopyBtn');
         const moveBtn = document.getElementById('ctxMoveBtn');
+        const downloadBtn = document.getElementById('ctxDownloadBtn');
 
-        if (currentFolderId === null) {
-            // We are at root
-            copyBtn.style.display = 'flex';
-            moveBtn.style.display = 'none';
+        // Reset visibility
+        copyBtn.style.display = 'none';
+        moveBtn.style.display = 'none';
+        downloadBtn.style.display = 'none';
+
+        if (item.type === 'file') {
+            // It's a file -> Show Download
+            downloadBtn.style.display = 'flex';
         } else {
-            // We are inside a folder
-            copyBtn.style.display = 'none';
-            moveBtn.style.display = 'flex';
+            // It's a note or folder
+            if (currentFolderId === null) {
+                // At root -> Show Copy
+                copyBtn.style.display = 'flex';
+            } else {
+                // Inside folder -> Show Move to Root
+                moveBtn.style.display = 'flex';
+            }
         }
 
         menu.style.display = 'flex'; 
@@ -902,16 +1112,10 @@
         } else if (action === 'edit') { if (item.isLocked && !(await checkPassword(item))) return; const newTitle = await showInputModal(item.type === 'folder' ? 'تعديل اسم المجلد:' : 'تعديل عنوان الملاحظة:', item.title, 'single'); if (newTitle) { item.title = newTitle; saveData(); renderMainGrid(); } } 
         else if (action === 'toggleLock') { if (item.isLocked) { if (await checkPassword(item)) { item.isLocked = false; item.passwordHash = null; showNotification('تم فتح القفل', 'success'); } } else { const pass = await showPasswordModal(); if (pass) { item.isLocked = true; item.passwordHash = btoa(pass); showNotification('تم القفل', 'success'); } } saveData(); renderMainGrid(); } 
         else if (action === 'copyText') {
-            if (item.type === 'folder') {
-                showNotification('لا يمكن نسخ مجلد كامل كنص', 'info');
-            } else if (item.type === 'file') {
-                showNotification('لا يمكن نسخ محتوى ملف، اضغط لفتحه', 'info');
-            } else {
-                if (item.isLocked && !(await checkPassword(item))) return;
-                const textContent = item.items.join("\n\n---\n\n");
-                navigator.clipboard.writeText(textContent);
-                showNotification('تم نسخ محتوى الملاحظة', 'success');
-            }
+            if (item.isLocked && !(await checkPassword(item))) return;
+            const textContent = item.items.join("\n\n---\n\n");
+            navigator.clipboard.writeText(textContent);
+            showNotification('تم نسخ محتوى الملاحظة', 'success');
         }
         else if (action === 'moveToRoot') {
             if (currentFolderId === null) return; // Already at root
@@ -924,6 +1128,10 @@
                 renderMainGrid();
                 showNotification('تم النقل للواجهة الرئيسية', 'success');
             }
+        }
+        else if (action === 'downloadFile') {
+            if (item.isLocked && !(await checkPassword(item))) return;
+            downloadFile(item);
         }
     }
 
@@ -987,11 +1195,191 @@
     function showSubContextMenu(index) { activeSubNoteIndex = index; const menu = document.getElementById('subNoteContextMenu'); menu.style.display = 'flex'; setTimeout(() => document.addEventListener('click', () => menu.style.display='none', {once:true}), 100); }
     function handleSubNoteAction(action) { const note = findNoteById(allData, currentNoteId); if (action === 'delete') note.items.splice(activeSubNoteIndex, 1); else if (action === 'copy') navigator.clipboard.writeText(note.items[activeSubNoteIndex]); else if (action === 'edit') editSubNote(activeSubNoteIndex); saveData(); renderSubNotes(); document.getElementById('subNoteContextMenu').style.display = 'none'; }
 
-    function toggleMainSelectionMode(active) { isMainSelectionMode = active; selectedMainIds.clear(); document.getElementById('mainSelectBtn').style.display = active ? 'none' : 'block'; document.getElementById('mainSelectionControls').style.display = active ? 'flex' : 'none'; renderMainGrid(); }
-    function toggleMainSelection(id) { selectedMainIds.has(id) ? selectedMainIds.delete(id) : selectedMainIds.add(id); renderMainGrid(); }
-    function updateMainToolbar() { if(isMainSelectionMode) { document.getElementById('mainSelectionCount').innerText = selectedMainIds.size; const list = getCurrentList(); const selectedItems = list.filter(n => selectedMainIds.has(n.id)); const allLocked = selectedItems.length > 0 && selectedItems.every(n => n.isLocked); const allUnlocked = selectedItems.length > 0 && selectedItems.every(n => !n.isLocked); document.getElementById('lockMultipleBtn').style.display = allUnlocked && selectedItems.length > 0 ? 'block' : 'none'; document.getElementById('unlockMultipleBtn').style.display = allLocked && selectedItems.length > 0 ? 'block' : 'none'; } }
-    async function toggleMultipleLock(shouldLock) { if (selectedMainIds.size === 0) return; const list = getCurrentList(); const itemsToProcess = list.filter(n => selectedMainIds.has(n.id)); if (!shouldLock) { if (itemsToProcess.some(item => item.isLocked)) { const pass = await showPasswordModal(); if (!pass) return; const hash = btoa(pass); itemsToProcess.forEach(item => { if (item.isLocked && item.passwordHash === hash) { item.isLocked = false; item.passwordHash = null; } }); showNotification('تم إلغاء قفل العناصر المفتوحة بكلمة المرور.', 'success'); } } else { const pass = await showPasswordModal(); if (!pass) return; const hash = btoa(pass); itemsToProcess.forEach(item => { if (!item.isLocked) { item.isLocked = true; item.passwordHash = hash; } }); showNotification('تم قفل العناصر المحددة.', 'success'); } saveData(); toggleMainSelectionMode(false); }
-    function selectAllMainNotes() { getCurrentList().forEach(i => selectedMainIds.add(i.id)); renderMainGrid(); }
+    // --- MAIN SELECTION LOGIC (UPDATED WITH MODAL) ---
+    function toggleMainSelectionMode(active) { 
+        isMainSelectionMode = active; 
+        
+        // Show/Hide toolbar button
+        document.getElementById('mainSelectBtn').style.display = active ? 'none' : 'block'; 
+        
+        if (active) {
+            // Reset selection but open modal immediately
+            selectedMainIds.clear(); 
+            document.getElementById('selectionOptionsModal').style.display = 'flex';
+            updateSelectionMenuUI();
+        } else {
+            // Close modal
+            document.getElementById('selectionOptionsModal').style.display = 'none';
+            selectedMainIds.clear();
+        }
+        
+        renderMainGrid(); 
+    }
+
+    function toggleMainSelection(id) { 
+        selectedMainIds.has(id) ? selectedMainIds.delete(id) : selectedMainIds.add(id); 
+        
+        // When selection changes, if nothing left, maybe close? No, user might select again.
+        // Update UI of the modal if open (it should be)
+        if (isMainSelectionMode) {
+             document.getElementById('selectionOptionsModal').style.display = 'flex';
+             updateSelectionMenuUI();
+        }
+        renderMainGrid(); 
+    }
+    
+    function updateMainToolbar() {
+        // Kept for compatibility but logic moved to Modal
+    }
+
+    function updateSelectionMenuUI() {
+        // Toggle "Select All" text
+        const list = getCurrentList();
+        const selAllText = document.getElementById('selAllText');
+        if (selectedMainIds.size === list.length && list.length > 0) {
+            selAllText.innerText = "❌ إلغاء تحديد الكل";
+        } else {
+            selAllText.innerText = "✅ تحديد الكل";
+        }
+
+        // Toggle "Lock" text based on selection
+        const selLockText = document.getElementById('selLockText');
+        const selectedItems = list.filter(n => selectedMainIds.has(n.id));
+        const allLocked = selectedItems.length > 0 && selectedItems.every(n => n.isLocked);
+        
+        if (allLocked) {
+            selLockText.innerText = "🔓 إلغاء قفل";
+        } else {
+            selLockText.innerText = "🔒 قفل";
+        }
+    }
+
+    async function handleSelectionAction(action) {
+        const list = getCurrentList();
+        
+        if (action === 'selectAll') {
+            if (selectedMainIds.size === list.length) {
+                selectedMainIds.clear();
+            } else {
+                list.forEach(i => selectedMainIds.add(i.id));
+            }
+            renderMainGrid();
+            updateSelectionMenuUI();
+        }
+        else if (action === 'toggleLock') {
+            if (selectedMainIds.size === 0) return;
+            const itemsToProcess = list.filter(n => selectedMainIds.has(n.id));
+            const allLocked = itemsToProcess.every(n => n.isLocked);
+            
+            if (allLocked) {
+                // Unlock All
+                const pass = await showPasswordModal();
+                if (!pass) return;
+                const hash = btoa(pass);
+                itemsToProcess.forEach(item => {
+                    if (item.passwordHash === hash) {
+                        item.isLocked = false;
+                        item.passwordHash = null;
+                    }
+                });
+                showNotification('تم إلغاء القفل', 'success');
+            } else {
+                // Lock All
+                const pass = await showPasswordModal();
+                if (!pass) return;
+                const hash = btoa(pass);
+                itemsToProcess.forEach(item => {
+                    if (!item.isLocked) {
+                        item.isLocked = true;
+                        item.passwordHash = hash;
+                    }
+                });
+                showNotification('تم القفل', 'success');
+            }
+            saveData();
+            toggleMainSelectionMode(false);
+        }
+        else if (action === 'delete') {
+            deleteSelectedMainNotesWrapper();
+        }
+        else if (action === 'moveToRoot') {
+            if (selectedMainIds.size === 0) return;
+            if (currentFolderId === null) return; // Already at root
+
+            if (await showConfirmModal("نقل العناصر المحددة للواجهة الرئيسية؟")) {
+                 const folder = findNoteById(allData, currentFolderId);
+                 const itemsToMove = folder.items.filter(n => selectedMainIds.has(n.id));
+                 
+                 // Remove from current
+                 folder.items = folder.items.filter(n => !selectedMainIds.has(n.id));
+                 
+                 // Add to root
+                 itemsToMove.forEach(item => allData.unshift(item));
+                 
+                 saveData();
+                 toggleMainSelectionMode(false);
+                 showNotification("تم النقل بنجاح", "success");
+            }
+        }
+        else if (action === 'move') {
+            if (selectedMainIds.size === 0) return;
+            
+            // Start Paste Mode
+            itemsClipboard = list.filter(n => selectedMainIds.has(n.id));
+            
+            // Remove them from current view temporarily? 
+            // Better UX: Keep them, but when pasted, remove from source and add to dest.
+            
+            // Actually request says: "click Paste -> paste in selected location"
+            // We need to know source.
+            
+            isPasteMode = true;
+            document.getElementById('selectionOptionsModal').style.display = 'none';
+            isMainSelectionMode = false;
+            selectedMainIds.clear();
+            
+            renderMainGrid(); // Shows Paste Button
+            showNotification('تم النسخ للحافظة. انتقل للمجلد المطلوب واضغط لصق.', 'info');
+        }
+    }
+
+    async function pasteItemsHere() {
+        if (!isPasteMode || itemsClipboard.length === 0) return;
+        
+        // Remove from source (Hard because we need to know where they came from)
+        // Simplest way: Search entire tree for these IDs and remove them, then add to current.
+        
+        itemsClipboard.forEach(clipItem => {
+            // Helper to remove item by ID from tree
+            removeItemFromTree(allData, clipItem.id);
+        });
+
+        // Add to current location
+        const targetList = getCurrentList();
+        itemsClipboard.forEach(item => targetList.unshift(item));
+
+        saveData();
+        
+        // Reset
+        itemsClipboard = [];
+        isPasteMode = false;
+        renderMainGrid();
+        showNotification("تم اللصق هنا ✅", "success");
+    }
+
+    function removeItemFromTree(list, id) {
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].id === id) {
+                list.splice(i, 1);
+                return true;
+            }
+            if (list[i].type === 'folder' && list[i].items) {
+                if (removeItemFromTree(list[i].items, id)) return true;
+            }
+        }
+        return false;
+    }
+
     async function deleteSelectedMainNotesWrapper() { 
         if (selectedMainIds.size === 0) return; 
         
