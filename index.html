@@ -239,6 +239,11 @@
         .paste-fab:active { transform: translateX(-50%) scale(0.95); }
 
         /* --- Context Menus --- */  
+        #contextMenuOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 4999; display: none; background: transparent;
+        }
+
         #contextMenu, #subNoteContextMenu {  
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(255, 255, 255, 0.98); border: 1px solid var(--border-color);  
             border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); padding: 10px; z-index: 5000; display: none; flex-direction: column; min-width: 220px; overflow: hidden; animation: menuPopup 0.15s ease-out forwards;  
@@ -256,16 +261,15 @@
         .context-item.delete { color: var(--danger-color); border-top: 1px solid #f1f5f9; margin-top: 5px; }  
         .context-item.copy-option { border-top: 1px solid #f1f5f9; margin-top: 5px; color: var(--success-color); }
 
-        /* --- Selection Menu Modal (FIXED: LIKE SETTINGS BUT SMALLER) --- */
+        /* --- Selection Menu Modal --- */
         #selectionOptionsModal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background-color: rgba(0,0,0,0.5); z-index: 6000; 
             justify-content: center; align-items: center; backdrop-filter: blur(3px);
         }
-        /* تصميم يشبه قائمة الإعدادات تماماً */
         .selection-menu-card {
             background-color: white; 
-            width: 90%; max-width: 260px; /* حجم صغير مناسب */
+            width: 90%; max-width: 260px; 
             padding: 20px; 
             border-radius: 24px; 
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
@@ -450,9 +454,9 @@
         <span id="syncText"></span>
     </div>
 
-    <!-- زر التحديد الرئيسي (يفتح القائمة المنبثقة الجديدة) -->
+    <!-- زر التحديد الرئيسي -->
     <div id="mainSelectionToolbar" class="main-selection-toolbar">  
-        <button id="mainSelectBtn" onclick="toggleMainSelectionMode()">خيارات</button>  
+        <button id="mainSelectBtn" onclick="toggleMainSelectionMode(true)">تحديد</button>  
     </div> 
     
     <h1>ملاحظاتي الذكية</h1>  
@@ -470,17 +474,24 @@
     <input type="text" id="searchInput" placeholder="🔍  ابحث في العناوين..." oninput="searchNotes()" autocomplete="off">  
 </div>  
 
-<div id="contextMenu">  
-    <button class="context-item" id="lockUnlockBtn" onclick="handleMenuAction('toggleLock')">🔒 قفل/فتح</button>  
-    <button class="context-item" id="ctxEditBtn" onclick="handleMenuAction('edit')">✏️ تعديل الاسم</button>  
-    
-    <!-- Dynamic Buttons -->
-    <button id="ctxCopyBtn" class="context-item" onclick="handleMenuAction('copyText')">📄 نسخ (المحتوى)</button>
-    <button id="ctxMoveBtn" class="context-item" onclick="handleMenuAction('moveToRoot')" style="display:none;">🏠 إضافة للواجهة الرئيسية</button>
-    <button id="ctxDownloadBtn" class="context-item" onclick="handleMenuAction('downloadFile')" style="display:none; color:var(--primary-color);">⬇️ تنزيل الملف</button>
+<!-- Context Menu Overlay -->
+<div id="contextMenuOverlay" onclick="closeContextMenu()"></div>
 
-    <!-- Multi Select Actions in Context Menu -->
-    <button id="ctxMultiMoveBtn" class="context-item" onclick="handleSelectionAction('move')" style="display:none;">📂 نقل (سحب)</button>
+<div id="contextMenu">  
+    <!-- أزرار القائمة تتغير ديناميكياً بناءً على التحديد -->
+    <button class="context-item" id="lockUnlockBtn" onclick="handleMenuAction('toggleLock')">🔒 قفل/فتح</button>  
+    <button class="context-item" id="ctxMoveBtn" onclick="handleMenuAction('move')">📂 نقل</button>
+    <button class="context-item" id="ctxCopyBtn" onclick="handleMenuAction('copy')">📄 نسخ</button>
+    
+    <button id="ctxAddToHomeBtn" class="context-item" onclick="handleMenuAction('moveToRoot')" style="display:none;">🏠 إضافة للواجهة الرئيسية</button>
+    
+    <!-- Copy Text Content (Only for single text note) -->
+    <button id="ctxCopyContentBtn" class="context-item" onclick="handleMenuAction('copyText')" style="display:none;">📄 نسخ المحتوى</button>
+    
+    <button id="ctxDownloadBtn" class="context-item" onclick="handleMenuAction('downloadFile')" style="display:none; color:var(--primary-color);">⬇️ تنزيل الملف</button>
+    
+    <!-- Edit Name (Only single) -->
+    <button class="context-item" id="ctxEditBtn" onclick="handleMenuAction('edit')">✏️ تعديل الاسم</button>  
 
     <button class="context-item delete" onclick="handleMenuAction('delete')">🗑️ حذف</button>
 </div>  
@@ -505,7 +516,7 @@
 <button id="mainFab" class="fab" onclick="showCreateMenu()">+</button> 
 <button id="pasteFloatingBtn" class="paste-fab" onclick="pasteItemsHere()">📋 لصق هنا</button>
 
-<!-- NEW: SELECTION OPTIONS MODAL (FIXED CENTERED) -->
+<!-- NEW: SELECTION OPTIONS MODAL (CLEANED) -->
 <div id="selectionOptionsModal" onclick="if(event.target.id === 'selectionOptionsModal') document.getElementById('selectionOptionsModal').style.display = 'none'">
     <div class="selection-menu-card">
         <div class="selection-header">خيارات التحديد</div>
@@ -518,20 +529,8 @@
             <span>👆 تحديد فردي</span>
         </button>
 
-        <button class="context-item" onclick="handleSelectionAction('move')">
-            ✋ سحب (نقل)
-        </button>
-
-        <button class="context-item" onclick="handleSelectionAction('toggleLock')">
-            <span id="selLockText">🔒 قفل</span>
-        </button>
-
-        <button class="context-item" onclick="handleSelectionAction('moveToRoot')">
-            🏠 نقل للواجهة الرئيسية
-        </button>
-
-        <button class="context-item delete" onclick="handleSelectionAction('delete')">
-            🗑️ حذف
+        <button class="context-item delete" onclick="handleSelectionAction('cancelAll')">
+            ❌ إلغاء كل العمليات
         </button>
 
         <button class="context-item" style="justify-content:center; color:var(--text-secondary); margin-top:10px; border-top:1px solid #f1f5f9;" onclick="document.getElementById('selectionOptionsModal').style.display = 'none'">
@@ -700,9 +699,10 @@
     let searchMatches = []; let currentSearchIndex = -1;
     let historyStack = []; let historyIndex = -1; let originalContent = ""; 
     
-    // Clipboard Variables for Move/Paste
+    // Clipboard Variables for Move/Copy/Paste
     let itemsClipboard = [];
     let isPasteMode = false;
+    let clipboardAction = 'move'; // 'move' or 'copy'
 
     // --- GOOGLE API CONFIG ---
     const GOOGLE_CLIENT_ID = '979816526016-ukb9vqtb6u2hlutombpf8rumbjr3o2ua.apps.googleusercontent.com';
@@ -712,7 +712,7 @@
     let gAccessToken = localStorage.getItem('gAccessToken'); 
     let saveTimeout = null; 
 
-    // --- History & Back Button Control (FIXED) ---
+    // --- History & Back Button Control ---
     function getParentFolderId(list, targetId, parentId = null) {
         for (let item of list) {
             if (item.id === targetId) return parentId;
@@ -727,6 +727,9 @@
     window.addEventListener('popstate', function(event) {
         if (document.getElementById('fileViewerModal').style.display === 'flex') {
             closeFileViewer();
+        }
+        else if (document.getElementById('contextMenu').style.display === 'flex') {
+            closeContextMenu(); // Close context menu on back
         }
         else if (document.getElementById('inputModal').style.display === 'flex') { 
             if (activeInputModalMode === 'edit_clean') { checkSaveChanges(); } else { hideInputModal(false); }
@@ -796,6 +799,8 @@
         if (isPasteMode) {
             pasteBtn.style.display = 'flex';
             fab.style.display = 'none'; // Hide add button while pasting
+            // Update paste button text based on action
+            pasteBtn.innerText = clipboardAction === 'move' ? '📂 لصق هنا (نقل)' : '📋 لصق هنا (نسخ)';
         } else {
             pasteBtn.style.display = 'none';
             fab.style.display = 'block';
@@ -868,37 +873,55 @@
             
             // Logic for Click vs Long Press
             let isLongPress = false;
+            let pressTimer;
+
             card.onclick = (e) => { 
-                if (isLongPress) return; // Ignore click if long press triggered
+                if (isLongPress) return; 
                 handleCardClick(e, item); 
             }; 
             
             // Context Menu Logic (Right Click + Long Press)
-            card.oncontextmenu = (e) => { e.preventDefault(); isLongPress = true; showContextMenu(item.id); };
-            let pressTimer; 
+            card.oncontextmenu = (e) => { 
+                e.preventDefault(); 
+                // Only show context menu if NOT dragging
+                if(!card.classList.contains('dragging')) {
+                    isLongPress = true; 
+                    showContextMenu(item.id); 
+                }
+            };
+             
             card.addEventListener('touchstart', (e) => { 
                 if (e.target.classList.contains('sort-handle')) return; 
                 isLongPress = false; // Reset
                 pressTimer = setTimeout(() => { 
-                    // MULTI-SELECT DRAG LOGIC
-                    if (isMainSelectionMode && selectedMainIds.has(item.id)) {
-                        // Let drag handle it, don't show single menu
-                        return;
-                    }
-
-                    if (!isMainSelectionMode) {
+                    // Long press trigger
+                    // Only if we haven't started scrolling or dragging
+                    if(!isLongPress) {
                         isLongPress = true;
                         if(navigator.vibrate) navigator.vibrate(50);
+                        
+                        // If we are in Selection Mode, auto-select this item if not selected
+                        if (isMainSelectionMode && !selectedMainIds.has(item.id)) {
+                             toggleMainSelection(item.id);
+                        }
+                        
                         showContextMenu(item.id); 
                     }
                 }, 600); 
             });
+
             card.addEventListener('touchend', () => clearTimeout(pressTimer)); 
-            card.addEventListener('touchmove', () => clearTimeout(pressTimer));
+            
+            // Important: Cancel long press if user scrolls
+            card.addEventListener('touchmove', () => {
+                clearTimeout(pressTimer);
+                isLongPress = false; // Cancel
+            });
             
             addDragEvents(card, item); grid.appendChild(card);
         });
-        updateMainToolbar(); const clearBtn = document.getElementById('clearSearchBtn'); if (filter.length > 0) { clearBtn.style.display = 'flex'; } else { clearBtn.style.display = 'none'; }
+        
+        const clearBtn = document.getElementById('clearSearchBtn'); if (filter.length > 0) { clearBtn.style.display = 'flex'; } else { clearBtn.style.display = 'none'; }
     }
     
     function formatFileSize(bytes) {
@@ -925,7 +948,6 @@
         e.preventDefault(); const touch = e.touches[0]; mobileDragEl = card; 
         dragSrcId = parseInt(card.getAttribute('data-id')); 
         
-        // Multi-Drag Visual: If dragging an item that is selected, drag the whole group
         let isGroupDrag = false;
         if(selectedMainIds.has(dragSrcId) && selectedMainIds.size > 1) {
              isGroupDrag = true;
@@ -938,8 +960,6 @@
              badge.style.cssText = "position:absolute; top:-10px; right:-10px; background:red; color:white; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-weight:bold; border:2px solid white;";
              badge.innerText = selectedMainIds.size;
              mobileDragClone.appendChild(badge);
-             
-             // Stack effect
              mobileDragClone.style.boxShadow = "0 25px 50px -12px rgba(0, 0, 0, 0.4)";
              mobileDragClone.style.transform = "rotate(5deg)";
         }
@@ -956,18 +976,14 @@
         if (!targetFolder || targetFolder.type !== 'folder') return; 
         
         let itemsToMove = []; 
-        // If items are selected, check if dragged item is part of selection
         if (selectedMainIds.size > 0 && selectedMainIds.has(dragSrcId)) { 
-            // Move ALL selected items
             itemsToMove = list.filter(n => selectedMainIds.has(n.id) && n.id !== targetFolderId); 
         } else { 
-            // Only dragged item
             itemsToMove = list.filter(n => n.id === dragSrcId && n.id !== targetFolderId); 
         } 
         
         if (itemsToMove.length === 0) return; 
         
-        // Remove from current
         if (currentFolderId === null) {
             allData = allData.filter(n => !itemsToMove.includes(n)); 
         } else { 
@@ -975,20 +991,28 @@
             currentFolder.items = currentFolder.items.filter(n => !itemsToMove.includes(n)); 
         } 
         
-        // Add to target
         itemsToMove.forEach(item => targetFolder.items.unshift(item)); 
         
         saveData(); 
-        toggleMainSelectionMode(false); // Reset selection after move
-        renderMainGrid(); 
+        // Reset selection if we moved selected items
+        if(selectedMainIds.has(dragSrcId)) {
+             toggleMainSelectionMode(false);
+        } else {
+             renderMainGrid();
+        }
     }
 
     function reorderItems(srcId, targetId) { let list = getCurrentList(); const srcIndex = list.findIndex(n => n.id === srcId); const targetIndex = list.findIndex(n => n.id === targetId); if (srcIndex < 0 || targetIndex < 0 || srcIndex === targetIndex) return; const [movedItem] = list.splice(srcIndex, 1); list.splice(targetIndex, 0, movedItem); saveData(); renderMainGrid(); }
     
     function openNoteDetails(id) { currentNoteId = id; pushState(); const note = findNoteById(allData, id); if (!note) { return; } document.getElementById('modalTitle').innerText = note.title; if (note.isLocked) { checkPassword(note, () => { document.getElementById('detailsModal').style.display = 'flex'; renderSubNotes(); }); } else { document.getElementById('detailsModal').style.display = 'flex'; renderSubNotes(); } }
     function closeModalInternal() { document.getElementById('detailsModal').style.display = 'none'; document.getElementById('subSearchInput').value = ''; toggleSelectionMode(false); }
+    
     function handleCardClick(e, item) { 
-        if (isMainSelectionMode) { e.stopPropagation(); toggleMainSelection(item.id); return; } 
+        if (isMainSelectionMode) { 
+            e.stopPropagation(); 
+            toggleMainSelection(item.id); 
+            return; 
+        } 
         if (e.target.closest('.sort-handle')) { return; } 
         
         if (item.type === 'folder') { 
@@ -1011,7 +1035,7 @@
     function openImageViewer(item) {
         const modal = document.getElementById('fileViewerModal');
         const container = document.getElementById('fileViewerContainer');
-        container.innerHTML = ''; // Clear previous
+        container.innerHTML = ''; 
 
         if (item.content.startsWith('data:image')) {
             const img = document.createElement('img');
@@ -1022,14 +1046,13 @@
             iframe.src = item.content;
             container.appendChild(iframe);
         } else {
-            // For other file types, trigger download as fallback or show message
             showNotification('لا يمكن عرض هذا الملف، جاري التنزيل...', 'info');
             downloadFile(item);
             return;
         }
 
         modal.style.display = 'flex';
-        pushState(); // Add to history to support back button
+        pushState(); 
     }
 
     function closeFileViewer() {
@@ -1094,102 +1117,179 @@
     function showContextMenu(id) { 
         activeCardId = id; 
         const menu = document.getElementById('contextMenu'); 
+        const overlay = document.getElementById('contextMenuOverlay');
         const item = findNoteById(allData, activeCardId);
         
-        // --- Context Menu Logic for Multi-Select ---
-        // If we are in multi-select mode AND this item is selected AND more than 1 item is selected
-        const isMultiAction = selectedMainIds.has(id) && selectedMainIds.size > 1;
+        // Is Multi-Select?
+        const isMultiSelected = selectedMainIds.has(id) && selectedMainIds.size > 1;
 
-        const copyBtn = document.getElementById('ctxCopyBtn');
+        const lockBtn = document.getElementById('lockUnlockBtn');
         const moveBtn = document.getElementById('ctxMoveBtn');
+        const copyBtn = document.getElementById('ctxCopyBtn');
+        const addToHomeBtn = document.getElementById('ctxAddToHomeBtn');
+        const copyContentBtn = document.getElementById('ctxCopyContentBtn');
         const downloadBtn = document.getElementById('ctxDownloadBtn');
         const editBtn = document.getElementById('ctxEditBtn');
-        const multiMoveBtn = document.getElementById('ctxMultiMoveBtn');
-        
-        // Reset visibility
-        copyBtn.style.display = 'none'; // Default hidden (per user request for folders/notes)
-        moveBtn.style.display = 'none';
-        downloadBtn.style.display = 'none';
-        editBtn.style.display = 'flex'; // Default visible
-        multiMoveBtn.style.display = 'none';
 
-        if (isMultiAction) {
-            // Multi-Select Context Menu
-            editBtn.style.display = 'none'; // Hide Edit Name
-            multiMoveBtn.style.display = 'flex'; // Show Move (Drag)
-            
-            // Check Lock Status of group
+        // Reset All
+        lockBtn.style.display = 'none';
+        moveBtn.style.display = 'flex'; // Default show
+        copyBtn.style.display = 'flex'; // Default show
+        addToHomeBtn.style.display = 'none';
+        copyContentBtn.style.display = 'none';
+        downloadBtn.style.display = 'none';
+        editBtn.style.display = 'flex'; // Default show
+
+        if (isMultiSelected) {
+            // --- Multi Select Context ---
+            editBtn.style.display = 'none'; // No rename for multi
+            copyContentBtn.style.display = 'none'; // No text copy for multi
+
             const selItems = getCurrentList().filter(n => selectedMainIds.has(n.id));
             const allLocked = selItems.every(n => n.isLocked);
-            document.getElementById('lockUnlockBtn').innerText = allLocked ? "🔓 إلغاء قفل المحدد" : "🔒 قفل المحدد";
+            const allUnlocked = selItems.every(n => !n.isLocked);
+
+            if (allLocked) {
+                lockBtn.style.display = 'flex'; lockBtn.innerText = "🔓 إلغاء قفل";
+            } else if (allUnlocked) {
+                lockBtn.style.display = 'flex'; lockBtn.innerText = "🔒 قفل";
+            } else {
+                lockBtn.style.display = 'none'; // Mixed state
+            }
+
+            // Add to Home only if inside folder
+            if (currentFolderId !== null) {
+                addToHomeBtn.style.display = 'flex';
+            }
 
         } else {
-            // Single Item Context Menu
-            document.getElementById('lockUnlockBtn').innerText = "🔒 قفل/فتح";
-            
+            // --- Single Item Context ---
+            lockBtn.style.display = 'flex'; 
+            lockBtn.innerText = "🔒 قفل/فتح";
+
+            // Add to Home (if not in root)
+            if (currentFolderId !== null) {
+                addToHomeBtn.style.display = 'flex';
+            }
+
+            // Copy Text Content (Only single non-locked note)
+            // User requested: "Only in SubNotes it is called Copy Content", 
+            // but for main items (Folders/Notes titles), user said:
+            // "folders and notes ... no copy content" -> So keep hidden for main items.
+            // But user said: "Only sub-note has copy content". 
+            // Okay, hiding it for main items as requested.
+
             if (item.type === 'file') {
                 downloadBtn.style.display = 'flex';
-                // Maybe show copy for file? User said "folders and notes no copy".
-                // I'll keep copy hidden for main items generally unless specified.
-            } else {
-                // Folder or Note
-                if (currentFolderId !== null) {
-                     moveBtn.style.display = 'flex'; // Move to Root
-                }
             }
         }
 
+        overlay.style.display = 'block';
         menu.style.display = 'flex'; 
-        setTimeout(() => document.addEventListener('click', () => menu.style.display='none', {once:true}), 100); 
+        
+        // Prevent body scroll when menu open if needed, or rely on overlay
+    }
+
+    function closeContextMenu() {
+        document.getElementById('contextMenu').style.display = 'none';
+        document.getElementById('contextMenuOverlay').style.display = 'none';
     }
 
     async function handleMenuAction(action) {
-        document.getElementById('contextMenu').style.display = 'none'; const item = findNoteById(allData, activeCardId); if (!item) return;
+        closeContextMenu();
+        const item = findNoteById(allData, activeCardId); if (!item) return;
         
+        // 1. Delete Logic
         if (action === 'delete') {
-            // If Multi-Select active on this item
             if (selectedMainIds.has(activeCardId) && selectedMainIds.size > 1) {
-                deleteSelectedMainNotesWrapper();
-                return;
+                deleteSelectedMainNotesWrapper(); return;
             }
-
-            // Single Delete
             if (!await verifyAppPass()) return;
             if (item.isLocked) { const pass = await showPasswordModal(); if (!pass) return; if (btoa(pass) !== item.passwordHash) { showNotification('كلمة المرور خاطئة', 'error'); return; } }
             if (await showConfirmModal(`هل أنت متأكد من حذف "${item.title}"؟`)) { if (currentFolderId === null) allData = allData.filter(n => n.id !== activeCardId); else findNoteById(allData, currentFolderId).items = findNoteById(allData, currentFolderId).items.filter(n => n.id !== activeCardId); saveData(); renderMainGrid(); }
         } 
+        
+        // 2. Edit Name Logic (Single Only)
         else if (action === 'edit') { 
-            // Only for single item
             if (item.isLocked && !(await checkPassword(item))) return; const newTitle = await showInputModal(item.type === 'folder' ? 'تعديل اسم المجلد:' : 'تعديل عنوان الملاحظة:', item.title, 'single'); if (newTitle) { item.title = newTitle; saveData(); renderMainGrid(); } 
         } 
+        
+        // 3. Lock/Unlock Logic
         else if (action === 'toggleLock') { 
-             // If Multi-Select active
+             // If Multi-Select
              if (selectedMainIds.has(activeCardId) && selectedMainIds.size > 1) {
-                handleSelectionAction('toggleLock');
-                return;
+                handleSelectionAction('toggleLock'); return;
              }
-             // Single Lock
+             // Single
              if (item.isLocked) { if (await checkPassword(item)) { item.isLocked = false; item.passwordHash = null; showNotification('تم فتح القفل', 'success'); } } else { const pass = await showPasswordModal(); if (pass) { item.isLocked = true; item.passwordHash = btoa(pass); showNotification('تم القفل', 'success'); } } saveData(); renderMainGrid(); 
         } 
-        else if (action === 'copyText') {
-            if (item.isLocked && !(await checkPassword(item))) return;
-            const textContent = item.items.join("\n\n---\n\n");
-            navigator.clipboard.writeText(textContent);
-            showNotification('تم نسخ محتوى الملاحظة', 'success');
+        
+        // 4. Move / Copy Logic
+        else if (action === 'move' || action === 'copy') {
+             // Handle Multi or Single
+             const list = getCurrentList();
+             let itemsToProcess = [];
+             
+             if (selectedMainIds.has(activeCardId) && selectedMainIds.size > 1) {
+                 itemsToProcess = list.filter(n => selectedMainIds.has(n.id));
+             } else {
+                 itemsToProcess = [item];
+             }
+
+             // Check Locks? Usually move/copy doesn't require unlock unless content access.
+             // But for security, let's allow moving locked items (like files).
+
+             itemsClipboard = itemsToProcess; // Store objects
+             clipboardAction = action; // 'move' or 'copy'
+             isPasteMode = true;
+             
+             // Exit selection mode visually but keep clipboard
+             toggleMainSelectionMode(false); 
+             // Show Paste Button immediately in current screen? Yes.
+             renderMainGrid();
+             
+             showNotification(action === 'move' ? 'تم القص. انتقل للوجهة واضغط لصق.' : 'تم النسخ. انتقل للوجهة واضغط لصق.', 'info');
         }
+
+        // 5. Add to Home Logic
         else if (action === 'moveToRoot') {
-            // Only visible for single item inside folder
             if (currentFolderId === null) return;
-            const folder = findNoteById(allData, currentFolderId);
-            const itemIndex = folder.items.findIndex(n => n.id === activeCardId);
-            if(itemIndex !== -1) {
-                const [item] = folder.items.splice(itemIndex, 1);
-                allData.unshift(item); // Move to root
-                saveData();
-                renderMainGrid();
-                showNotification('تم النقل للواجهة الرئيسية', 'success');
+            
+            // Handle Multi or Single
+            let itemsToProcess = [];
+            const list = getCurrentList();
+            
+            if (selectedMainIds.has(activeCardId) && selectedMainIds.size > 1) {
+                 itemsToProcess = list.filter(n => selectedMainIds.has(n.id));
+            } else {
+                 itemsToProcess = [item];
+            }
+
+            if (await showConfirmModal("إضافة العناصر للواجهة الرئيسية؟")) {
+                 const folder = findNoteById(allData, currentFolderId);
+                 
+                 // Remove from current folder (Move logic) or Clone (Shortcut)?
+                 // User said "Add to Home". Typically means shortcut or move. 
+                 // Based on previous code "moveToRoot", it was moving.
+                 
+                 itemsToProcess.forEach(itm => {
+                     // Remove from current
+                     folder.items = folder.items.filter(n => n.id !== itm.id);
+                     // Add to root
+                     allData.unshift(itm);
+                 });
+                 
+                 saveData();
+                 
+                 // IMPORTANT: Do NOT navigate to root. Stay here.
+                 // Just refresh current view (items will disappear).
+                 toggleMainSelectionMode(false); // Clear selection
+                 renderMainGrid(); 
+                 
+                 showNotification('تمت الإضافة للواجهة الرئيسية', 'success');
             }
         }
+        
         else if (action === 'downloadFile') {
             if (item.isLocked && !(await checkPassword(item))) return;
             downloadFile(item);
@@ -1211,7 +1311,6 @@
         showNotification('جاري المعالجة...', 'info');
 
         for (let file of files) {
-            // Updated limit to 10MB
             if (file.size > 10 * 1024 * 1024) {
                 showNotification(`الملف ${file.name} كبير جداً (تجاوز 10 ميجا)`, 'error');
                 continue;
@@ -1226,8 +1325,6 @@
                     content: base64, 
                     isLocked: false
                 };
-                
-                // Add to current context (Root or Folder)
                 getCurrentList().unshift(newItem);
             } catch(e) {
                 showNotification('فشل قراءة الملف', 'error');
@@ -1236,7 +1333,7 @@
         
         saveData();
         renderMainGrid();
-        event.target.value = ''; // Reset input
+        event.target.value = ''; 
     }
 
     const toBase64 = file => new Promise((resolve, reject) => {
@@ -1256,58 +1353,33 @@
     function showSubContextMenu(index) { activeSubNoteIndex = index; const menu = document.getElementById('subNoteContextMenu'); menu.style.display = 'flex'; setTimeout(() => document.addEventListener('click', () => menu.style.display='none', {once:true}), 100); }
     function handleSubNoteAction(action) { const note = findNoteById(allData, currentNoteId); if (action === 'delete') note.items.splice(activeSubNoteIndex, 1); else if (action === 'copy') navigator.clipboard.writeText(note.items[activeSubNoteIndex]); else if (action === 'edit') editSubNote(activeSubNoteIndex); saveData(); renderSubNotes(); document.getElementById('subNoteContextMenu').style.display = 'none'; }
 
-    // --- MAIN SELECTION LOGIC (UPDATED) ---
-    function toggleMainSelectionMode(forceOn = false) { 
-        // If mode is active (true), we just want to OPEN the modal again, not toggle mode off
-        if (isMainSelectionMode) {
+    // --- MAIN SELECTION LOGIC ---
+    function toggleMainSelectionMode(active) { 
+        if (active) {
+            // Open Modal only
             document.getElementById('selectionOptionsModal').style.display = 'flex';
             updateSelectionMenuUI();
         } else {
-            // Activate mode
-            isMainSelectionMode = true;
-            document.getElementById('mainSelectBtn').innerText = "خيارات"; // Keep text as is
-            selectedMainIds.clear(); 
-            document.getElementById('selectionOptionsModal').style.display = 'flex';
-            updateSelectionMenuUI();
-            renderMainGrid(); 
+            // Cancel All Operations
+            isMainSelectionMode = false;
+            selectedMainIds.clear();
+            document.getElementById('selectionOptionsModal').style.display = 'none';
+            renderMainGrid();
         }
     }
 
     function toggleMainSelection(id) { 
         selectedMainIds.has(id) ? selectedMainIds.delete(id) : selectedMainIds.add(id); 
-        // Do not auto-open menu
         renderMainGrid(); 
     }
     
-    function updateMainToolbar() {
-        // Updated: If nothing selected, button says "Options", if selection active, button stays "Options"
-        const btn = document.getElementById('mainSelectBtn');
-        if(!isMainSelectionMode) {
-            btn.style.display = 'block';
-        } else {
-            btn.style.display = 'block'; // Always visible now
-        }
-    }
-
     function updateSelectionMenuUI() {
-        // Toggle "Select All" text
         const list = getCurrentList();
         const selAllText = document.getElementById('selAllText');
         if (selectedMainIds.size === list.length && list.length > 0) {
             selAllText.innerText = "❌ إلغاء تحديد الكل";
         } else {
             selAllText.innerText = "✅ تحديد الكل";
-        }
-
-        // Toggle "Lock" text based on selection
-        const selLockText = document.getElementById('selLockText');
-        const selectedItems = list.filter(n => selectedMainIds.has(n.id));
-        const allLocked = selectedItems.length > 0 && selectedItems.every(n => n.isLocked);
-        
-        if (allLocked) {
-            selLockText.innerText = "🔓 إلغاء قفل";
-        } else {
-            selLockText.innerText = "🔒 قفل";
         }
     }
 
@@ -1320,102 +1392,45 @@
             } else {
                 list.forEach(i => selectedMainIds.add(i.id));
             }
+            // Activate selection mode if not already
+            isMainSelectionMode = true;
+            document.getElementById('selectionOptionsModal').style.display = 'none';
             renderMainGrid();
-            updateSelectionMenuUI();
         }
         else if (action === 'individual') {
-            // Individual selection means simply closing the menu but KEEPING selection mode
+            isMainSelectionMode = true;
             document.getElementById('selectionOptionsModal').style.display = 'none';
+            renderMainGrid();
         }
-        else if (action === 'toggleLock') {
-            if (selectedMainIds.size === 0) return;
-            const itemsToProcess = list.filter(n => selectedMainIds.has(n.id));
-            const allLocked = itemsToProcess.every(n => n.isLocked);
-            
-            if (allLocked) {
-                // Unlock All
-                const pass = await showPasswordModal();
-                if (!pass) return;
-                const hash = btoa(pass);
-                itemsToProcess.forEach(item => {
-                    if (item.passwordHash === hash) {
-                        item.isLocked = false;
-                        item.passwordHash = null;
-                    }
-                });
-                showNotification('تم إلغاء القفل', 'success');
-            } else {
-                // Lock All
-                const pass = await showPasswordModal();
-                if (!pass) return;
-                const hash = btoa(pass);
-                itemsToProcess.forEach(item => {
-                    if (!item.isLocked) {
-                        item.isLocked = true;
-                        item.passwordHash = hash;
-                    }
-                });
-                showNotification('تم القفل', 'success');
-            }
-            saveData();
-            // Close modal but keep selection? Or reset? Usually reset action.
-            document.getElementById('selectionOptionsModal').style.display = 'none';
-            isMainSelectionMode = false; selectedMainIds.clear(); renderMainGrid();
+        else if (action === 'cancelAll') {
+            toggleMainSelectionMode(false);
         }
-        else if (action === 'delete') {
-            deleteSelectedMainNotesWrapper();
-            document.getElementById('selectionOptionsModal').style.display = 'none';
-        }
-        else if (action === 'moveToRoot') {
-            if (selectedMainIds.size === 0) return;
-            if (currentFolderId === null) return; // Already at root
-
-            if (await showConfirmModal("نقل العناصر المحددة للواجهة الرئيسية؟")) {
-                 const folder = findNoteById(allData, currentFolderId);
-                 const itemsToMove = folder.items.filter(n => selectedMainIds.has(n.id));
-                 
-                 // Remove from current
-                 folder.items = folder.items.filter(n => !selectedMainIds.has(n.id));
-                 
-                 // Add to root
-                 itemsToMove.forEach(item => allData.unshift(item));
-                 
-                 saveData();
-                 document.getElementById('selectionOptionsModal').style.display = 'none';
-                 isMainSelectionMode = false; selectedMainIds.clear(); renderMainGrid();
-                 showNotification("تم النقل بنجاح", "success");
-            }
-        }
-        else if (action === 'move') {
-            if (selectedMainIds.size === 0) return;
-            
-            // Start Paste Mode
-            itemsClipboard = list.filter(n => selectedMainIds.has(n.id));
-            
-            isPasteMode = true;
-            document.getElementById('selectionOptionsModal').style.display = 'none';
-            isMainSelectionMode = false;
-            selectedMainIds.clear();
-            
-            renderMainGrid(); // Shows Paste Button
-            showNotification('تم النسخ للحافظة. انتقل للمجلد المطلوب واضغط لصق.', 'info');
-        }
+        
+        // The rest (Lock, Move, etc) are now in Context Menu (Long Press) as requested
     }
 
     async function pasteItemsHere() {
         if (!isPasteMode || itemsClipboard.length === 0) return;
         
-        // Remove from source (Hard because we need to know where they came from)
-        // Simplest way: Search entire tree for these IDs and remove them, then add to current.
-        
-        itemsClipboard.forEach(clipItem => {
-            // Helper to remove item by ID from tree
-            removeItemFromTree(allData, clipItem.id);
-        });
-
-        // Add to current location
-        const targetList = getCurrentList();
-        itemsClipboard.forEach(item => targetList.unshift(item));
+        if (clipboardAction === 'move') {
+            // Remove from source (Tree search)
+            itemsClipboard.forEach(clipItem => {
+                removeItemFromTree(allData, clipItem.id);
+            });
+            // Add to current
+            const targetList = getCurrentList();
+            itemsClipboard.forEach(item => targetList.unshift(item));
+        } 
+        else if (clipboardAction === 'copy') {
+            // Clone items
+            const targetList = getCurrentList();
+            itemsClipboard.forEach(item => {
+                const copy = JSON.parse(JSON.stringify(item));
+                copy.id = Date.now() + Math.random(); // New ID
+                copy.title = copy.title + " (نسخة)";
+                targetList.unshift(copy);
+            });
+        }
 
         saveData();
         
@@ -1423,7 +1438,7 @@
         itemsClipboard = [];
         isPasteMode = false;
         renderMainGrid();
-        showNotification("تم اللصق هنا ✅", "success");
+        showNotification("تم اللصق بنجاح ✅", "success");
     }
 
     function removeItemFromTree(list, id) {
@@ -1442,7 +1457,6 @@
     async function deleteSelectedMainNotesWrapper() { 
         if (selectedMainIds.size === 0) return; 
         
-        // Require Global App Password for bulk delete
         if (!await verifyAppPass()) return;
 
         const list = getCurrentList(); 
@@ -1541,7 +1555,6 @@
         if(searchResp.status === 401) { localStorage.removeItem('gAccessToken'); gAccessToken=null; document.getElementById('loginOverlay').style.display = 'flex'; return; } 
         const data = await searchResp.json(); let fileId = null; if(data.files && data.files.length > 0) fileId = data.files[0].id; 
         
-        // Include App Pass in Cloud Data
         const payload = { 
             smartNotesData: allData,
             appGlobalPass: localStorage.getItem(APP_PASS_KEY) // Save global pass to cloud
@@ -1563,11 +1576,10 @@
 
         try { const q = `name = '${FILENAME}' and 'appDataFolder' in parents and trashed = false`; const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder`, { headers: { 'Authorization': `Bearer ${gAccessToken}` } }); const data = await searchResp.json(); if(data.files && data.files.length > 0) { const fileId = data.files[0].id; const fileResp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { 'Authorization': `Bearer ${gAccessToken}` } }); const cloudContent = await fileResp.json(); 
         
-        // Load data + app pass
         if(cloudContent) { 
             if(cloudContent.smartNotesData) allData = cloudContent.smartNotesData; 
             if(cloudContent.appGlobalPass) localStorage.setItem(APP_PASS_KEY, cloudContent.appGlobalPass); // Sync pass to local
-            else localStorage.removeItem(APP_PASS_KEY); // Or remove if not present
+            else localStorage.removeItem(APP_PASS_KEY); 
 
             renderMainGrid(); 
             if(!silent) showNotification("تم استعادة البيانات ✅", "success"); 
