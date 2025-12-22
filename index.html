@@ -3,27 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تست الشات فقط</title>
+    <title>تست الشات النهائي</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body { font-family: 'Cairo', sans-serif; background: #eee; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        
-        /* زر الشات */
         .chat-widget-btn { position: fixed; bottom: 20px; left: 20px; background: #3e2723; color: white; padding: 10px 20px; border-radius: 30px; cursor: pointer; display:flex; align-items:center; gap:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        
-        /* صندوق الشات */
         .chat-box { position: fixed; bottom: 80px; left: 20px; width: 320px; height: 500px; background: white; border: 1px solid #bf360c; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.3); }
         .chat-header { background: #bf360c; color: white; padding: 10px 15px; text-align: right; }
         .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #fff8e1; display: flex; flex-direction: column; gap: 10px; }
-        
-        /* الرسائل */
         .bot-msg, .user-msg { padding: 10px 15px; border-radius: 15px; width: fit-content; max-width: 85%; font-size: 0.95em; line-height: 1.4; }
         .bot-msg { background: #fff; align-self: flex-end; border: 1px solid #ddd; border-top-right-radius: 2px; }
         .user-msg { background: #bf360c; color: white; align-self: flex-start; border-top-left-radius: 2px; }
         .error-msg { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; align-self: center; width: 95%; font-size: 0.8em; direction: ltr; text-align: left; }
-
-        /* الكتابة */
         .chat-footer { padding: 10px; background: #fff; border-top: 1px solid #ddd; display: flex; gap: 5px; }
         input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 25px; outline: none; }
         button { background: #bf360c; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
@@ -31,14 +23,12 @@
 </head>
 <body>
 
-    <!-- زر فتح الشات -->
     <div class="chat-widget-btn" onclick="document.getElementById('chatBox').style.display = 'flex'">
-        <i class="fa-solid fa-robot"></i> جربني
+        <i class="fa-solid fa-robot"></i> جربني الآن
     </div>
 
-    <!-- صندوق الشات -->
     <div class="chat-box" id="chatBox">
-        <div class="chat-header">تجربة Gemini API</div>
+        <div class="chat-header">تجربة Gemini Pro</div>
         <div class="chat-body" id="chatBody">
             <div class="bot-msg">جاهز للتجربة.. اكتب أي شي!</div>
         </div>
@@ -49,22 +39,22 @@
     </div>
 
 <script>
-    // === المفتاح وإعدادات الاتصال ===
+    // === استخدام المفتاح الأول ===
     const API_KEY = "AIzaSyAj-IfQXii7e9PtkfZLXRiLQf_wnyCiA90";
-    // نجرب الموديل القياسي 1.5 فلاش
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    
+    // === التغيير هنا: استخدمنا gemini-pro بدلاً من gemini-1.5-flash ===
+    // هذا الموديل أقدم قليلاً ولكنه يعمل دائماً
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
 
     async function send() {
         const input = document.getElementById("userInput");
         const txt = input.value.trim();
         if(!txt) return;
 
-        // عرض رسالة المستخدم
         const body = document.getElementById("chatBody");
         body.innerHTML += `<div class="user-msg">${txt}</div>`;
         input.value = "";
         
-        // رسالة انتظار
         const loadId = "load" + Date.now();
         body.innerHTML += `<div class="bot-msg" id="${loadId}">جاري الاتصال بجوجل...</div>`;
         body.scrollTop = body.scrollHeight;
@@ -85,10 +75,8 @@
             document.getElementById(loadId).remove();
 
             if (data.error) {
-                // عرض الخطأ التقني الحقيقي
-                body.innerHTML += `<div class="bot-msg error-msg">❌ خطأ من جوجل:<br>Code: ${data.error.code}<br>Message: ${data.error.message}</div>`;
+                body.innerHTML += `<div class="bot-msg error-msg">❌ خطأ:<br>${data.error.message}</div>`;
             } else if (data.candidates && data.candidates[0].content) {
-                // نجاح!
                 const reply = data.candidates[0].content.parts[0].text;
                 body.innerHTML += `<div class="bot-msg">${reply}</div>`;
             }
