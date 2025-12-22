@@ -1,120 +1,124 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>مساعد مطعمي الذكي</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #111;
-    color: #fff;
-    margin: 0;
-    padding: 0;
-}
-.container {
-    max-width: 600px;
-    margin: 40px auto;
-    background: #1c1c1c;
-    border-radius: 10px;
-    padding: 20px;
-}
-h1 {
-    text-align: center;
-    color: #f4b400;
-}
-.chat-box {
-    height: 350px;
-    overflow-y: auto;
-    border: 1px solid #333;
-    padding: 10px;
-    margin-bottom: 10px;
-    background: #000;
-}
-.message {
-    margin-bottom: 10px;
-}
-.user {
-    color: #4fc3f7;
-}
-.bot {
-    color: #a5d6a7;
-}
-input {
-    width: 80%;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-}
-button {
-    width: 18%;
-    padding: 10px;
-    background: #f4b400;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-button:hover {
-    background: #d89c00;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تجربة مساعد ميدو الذكي</title>
+  <style>
+    body { font-family: sans-serif; background: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    
+    /* تصميم الشات */
+    .chat-box {
+      width: 350px; height: 500px; background: white;
+      border: 2px solid #bf360c; border-radius: 15px;
+      display: flex; flex-direction: column;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .chat-header {
+      background: #bf360c; color: white; padding: 15px;
+      font-weight: bold; text-align: center; font-size: 1.2em;
+    }
+    .chat-body {
+      flex: 1; padding: 15px; overflow-y: auto; background: #fff8e1;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .message {
+      padding: 10px 15px; border-radius: 15px; width: fit-content;
+      max-width: 80%; font-size: 0.95em; line-height: 1.4;
+    }
+    .bot-msg { background: #fff; align-self: flex-end; border: 1px solid #ddd; border-top-right-radius: 2px; }
+    .user-msg { background: #bf360c; color: white; align-self: flex-start; border-top-left-radius: 2px; }
+    
+    .chat-footer { padding: 10px; background: #fff; border-top: 1px solid #ddd; display: flex; gap: 5px; }
+    .chat-footer input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 25px; outline: none; }
+    .chat-footer button {
+      background: #bf360c; color: white; border: none; width: 40px; height: 40px;
+      border-radius: 50%; cursor: pointer; font-size: 1.2em;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🤖 مساعد المطعم الذكي</h1>
-    <div class="chat-box" id="chat"></div>
-    <input type="text" id="userInput" placeholder="اسأل عن الأكلات، الأسعار، التوصيل...">
-    <button onclick="sendMessage()">إرسال</button>
+<div class="chat-box">
+  <div class="chat-header">🤖 تجربة مساعد ميدو</div>
+  <div class="chat-body" id="chatBody">
+    <div class="message bot-msg">أهلاً يا غالي! جربني واسألني عن المنيو أو الأسعار؟</div>
+  </div>
+  <div class="chat-footer">
+    <input type="text" id="userInput" placeholder="اكتب رسالتك..." onkeypress="handleEnter(event)">
+    <button onclick="sendMessage()">➤</button>
+  </div>
 </div>
 
 <script>
-const API_KEY = "AIzaSyBpb4tW1ZgW4g0tQnwSeXJ3ahIYTI46mzo";
+  // مفتاحك
+  const API_KEY = "AIzaSyBpb4tW1ZgW4g0tQnwSeXJ3ahIYTI46mzo";
 
-const systemPrompt = `
-أنت مساعد ذكي لمطعم.
-تتكلم باللهجة العربية اللطيفة.
-مهمتك:
-- اقتراح أكلات
-- شرح مكونات الأطباق
-- الرد على أسئلة الزبائن
-- أسلوبك ودود ومهذب
-- لا تذكر أنك ذكاء اصطناعي
-`;
+  // معلومات المطعم (عقل البوت)
+  const SYSTEM_PROMPT = `
+  أنت مساعد مطعم "ميدو ملك البسترما".
+  تحدث بلهجة لبنانية.
+  المنيو:
+  - بسترما/روستو: 400,000
+  - سجق/مقانق: 350,000
+  - هوت دوغ: 300,000
+  - كيلو بسترما: 2,400,000
+  الموقع: الشياح.
+  `;
 
-async function sendMessage() {
+  function handleEnter(e) { if(e.key === "Enter") sendMessage(); }
+
+  async function sendMessage() {
     const input = document.getElementById("userInput");
-    const chat = document.getElementById("chat");
-    const userText = input.value.trim();
-    if (!userText) return;
+    const txt = input.value.trim();
+    if(!txt) return;
 
-    chat.innerHTML += `<div class="message user">👤 ${userText}</div>`;
+    const body = document.getElementById("chatBody");
+    // عرض رسالة المستخدم
+    body.innerHTML += `<div class="message user-msg">${txt}</div>`;
     input.value = "";
-    chat.scrollTop = chat.scrollHeight;
+    body.scrollTop = body.scrollHeight;
 
-    const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
-        {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [{
-                    role: "user",
-                    parts: [{ text: systemPrompt + "\n\nسؤال الزبون: " + userText }]
-                }]
-            })
-        }
-    );
+    // عرض "جاري الكتابة"
+    const loadingDiv = document.createElement("div");
+    loadingDiv.className = "message bot-msg";
+    loadingDiv.innerText = "...";
+    body.appendChild(loadingDiv);
+    body.scrollTop = body.scrollHeight;
 
-    const data = await response.json();
-    let reply = "صار في مشكلة، جرّب مرة تانية.";
+    try {
+      // الاتصال بجوجل
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: txt }] }],
+          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] }
+        })
+      });
 
-    if (data.candidates && data.candidates.length > 0) {
-        reply = data.candidates[0].content.parts[0].text;
+      const data = await response.json();
+      
+      // إزالة نقاط الانتظار
+      loadingDiv.remove();
+
+      if (data.error) {
+        // في حال وجود خطأ من جوجل (مثلاً المفتاح محظور)
+        body.innerHTML += `<div class="message bot-msg" style="color:red">خطأ: ${data.error.message}</div>`;
+      } else {
+        // النجاح
+        const reply = data.candidates[0].content.parts[0].text;
+        body.innerHTML += `<div class="message bot-msg">${reply}</div>`;
+      }
+
+    } catch (error) {
+      loadingDiv.remove();
+      body.innerHTML += `<div class="message bot-msg" style="color:red">خطأ في الاتصال! تأكد أنك رفعت الملف على الموقع المسموح به.</div>`;
+      console.error(error);
     }
-
-    chat.innerHTML += `<div class="message bot">🍽️ ${reply}</div>`;
-    chat.scrollTop = chat.scrollHeight;
-}
+    
+    body.scrollTop = body.scrollHeight;
+  }
 </script>
 
 </body>
