@@ -3,75 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مساعد مطعم ميدو ملك البسترما</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>موقع مطعم ميدو ملك البسترما</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2em;
+        }
+
+        section {
+            padding: 20px;
+        }
+
+        .menu-item {
+            margin: 15px;
+            font-size: 1.2em;
+        }
+
+        .price {
+            color: green;
+        }
+
+        .contact-info {
+            margin-top: 20px;
+            font-size: 1.1em;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+            text-align: center;
+        }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif;">
+<body>
 
     <header>
-        <h1>مرحبًا بك في مطعم ميدو ملك البسترما!</h1>
-        <p>أنا هنا للمساعدة في اختيار طلبك والرد على استفساراتك. كيف يمكنني مساعدتك اليوم؟</p>
+        <h1>مرحبًا في مطعم ميدو ملك البسترما!</h1>
+        <p>تذوق ألذ البسترما، الروستو، والسجق في لبنان</p>
     </header>
 
-    <section id="chatbox">
-        <div id="messages"></div>
-        <input type="text" id="userInput" placeholder="أدخل طلبك هنا..." />
-        <button onclick="sendMessage()">إرسال</button>
+    <section>
+        <h2>قائمة الطعام</h2>
+
+        <div class="menu-item">
+            <p>بسترما - <span class="price">400,000 ل.ل</span></p>
+        </div>
+        <div class="menu-item">
+            <p>روستو - <span class="price">400,000 ل.ل</span></p>
+        </div>
+        <div class="menu-item">
+            <p>سجق - <span class="price">350,000 ل.ل</span></p>
+        </div>
+        <div class="menu-item">
+            <p>مقانق - <span class="price">350,000 ل.ل</span></p>
+        </div>
+        <div class="menu-item">
+            <p>هوت دوغ - <span class="price">300,000 ل.ل</span></p>
+        </div>
+        <div class="menu-item">
+            <p>روستو مع جبنة موزريلا - <span class="price">450,000 ل.ل</span></p>
+        </div>
+
+        <div class="contact-info">
+            <p>الموقع: الشياح - طريق صيدا القديمة</p>
+            <p>ساعات العمل: يومياً من 10 صباحاً حتى 11:30 ليلاً</p>
+            <p>الدليفري متوفر لجميع مناطق بيروت</p>
+        </div>
     </section>
 
-    <script>
-        const messagesDiv = document.getElementById("messages");
-        const userInput = document.getElementById("userInput");
+    <footer>
+        <p>&copy; 2025 ميدو ملك البسترما. جميع الحقوق محفوظة.</p>
+    </footer>
 
-        async function sendMessage() {
-            const inputText = userInput.value.trim();
-            if (!inputText) return;
-
-            // عرض رسالة المستخدم
-            messagesDiv.innerHTML += `<p><strong>أنت:</strong> ${inputText}</p>`;
-            userInput.value = "";
-
-            // استدعاء API الخاص بـ OpenAI
-            const response = await getOpenAIResponse(inputText);
-            messagesDiv.innerHTML += `<p><strong>مساعد ميدو:</strong> ${response}</p>`;
-        }
-
-        async function getOpenAIResponse(inputText) {
-            const prompt = `
-                أنت المساعد الذكي لمطعم "ميدو ملك البسترما" في لبنان.
-                تحدث باللهجة اللبنانية الودودة والمحترمة.
-                زبون قال: "${inputText}"
-                رد عليه بشكل مناسب.
-
-                معلومات المطعم:
-                - الموقع: الشياح - طريق صيدا القديمة.
-                - الفروع الأخرى: خلدة، الجيّة.
-                - الدوام: يومياً من 10 صباحاً حتى 11:30 ليلاً.
-                - اللحمة: طازجة وحلال 100%.
-                - الدليفري: متوفر لكل بيروت.
-            `;
-
-            try {
-                const result = await axios.post('https://api.openai.com/v1/completions', {
-                    model: "gpt-3.5-turbo",
-                    prompt: prompt,
-                    max_tokens: 150,
-                    temperature: 0.7,
-                    n: 1
-                }, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer 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`
-                    }
-                });
-
-                return result.data.choices[0].text.trim();
-            } catch (error) {
-                console.error('Error:', error);
-                return "عذراً، حدث خطأ في التواصل مع المساعد.";
-            }
-        }
-    </script>
+    <!-- إضافة كود Tidio الخاص بالمساعد الذكي -->
+    <script src="//code.tidio.co/ktauetfxrtwzqsgpd467mjpaecmrjivk.js" async></script>
 
 </body>
 </html>
