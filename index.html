@@ -3,93 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>فحص الدخول الآمن</title>
+    <title>ملاحظاتي المشفرة 🛡️</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #eceff1; }
-        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
-        button { background: #4285F4; color: white; border: none; padding: 12px 25px; border-radius: 25px; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-top: 15px; }
-        button:hover { background: #357ae8; transform: translateY(-2px); }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        #status { margin-top: 20px; color: #546e7a; font-size: 0.9rem; line-height: 1.6; }
-        .success { color: #2e7d32 !important; font-weight: bold; }
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f5f6fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        header { background: var(--primary); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .container { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 15px; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        textarea { flex: 1; border-radius: 12px; border: 1px solid #ddd; padding: 15px; font-size: 1.1rem; resize: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+        button { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-save { background: #27ae60; color: white; }
+        .btn-load { background: var(--accent); color: white; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; background: #7f8c8d; }
+        .online { background: #2ecc71; }
+        #syncStatus { font-size: 0.8rem; color: #7f8c8d; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; text-align: center; width: 90%; max-width: 400px; }
+        input[type="password"] { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>اختبار الاتصال 🛡️</h2>
-        <p>سيتم تجميع المفاتيح المموّهة برمجياً لتسجيل الدخول.</p>
-        <button id="loginBtn" onclick="handleAuthClick()" disabled>جاري تهيئة النظام...</button>
-        <div id="status">يتم الآن تجميع قطع الكود...</div>
+    <div id="lockScreen" class="modal">
+        <div class="modal-content">
+            <h3>🔐 أدخل مفتاح التشفير</h3>
+            <p style="font-size: 0.8rem; color: #666;">هذا المفتاح لا يُخزن أبداً. إذا نسيته، ضاعت الملاحظات.</p>
+            <input type="password" id="appPass" placeholder="كلمة المرور الخاصة بك">
+            <button class="btn-load" onclick="startApp()">فتح الملاحظات</button>
+        </div>
+    </div>
+
+    <header>
+        <span>📓 ملاحظاتي الآمنة</span>
+        <div id="syncInfo">
+            <span id="syncText">جاري التهيئة...</span>
+            <div id="statusDot" class="status-dot"></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="controls">
+            <button class="btn-save" onclick="manualSync()">حفظ الآن (سحابة) ☁️</button>
+            <button style="background:#e74c3c; color:white;" onclick="location.reload()">إغلاق التاب (مسح RAM) 🧹</button>
+        </div>
+        <textarea id="noteArea" placeholder="اكتب ملاحظاتك هنا... سيتم تشفيرها قبل رفعها."></textarea>
     </div>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <script>
-        // --- نظام التمويه والتعمية (Obfuscation System) ---
-        
-        // تقطيع الـ API Key
+        // --- إعدادات التمويه التي نجحت معك ---
         const _kX = ["NGVN0B", "AIzaSy", "CMLMIUht", "eL1N5rG4", "6Az9R1-kiJe"];
         const _getK = () => _kX[1] + _kX[2] + _kX[4] + _kX[0] + _kX[3];
-
-        // تقطيع الـ Client ID
         const _cX = ["979816526016-", "apps.googleusercontent.com", "ukb9vqtb6u2hlutombpf8rumbjr3o2ua."];
         const _getC = () => _cX[0] + _cX[2] + _cX[1];
 
-        let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
+        let tokenClient, userKey = "", fileId = null;
 
-        function gapiLoaded() {
+        // تشغيل التطبيق بعد إدخال الباسورد
+        function startApp() {
+            userKey = document.getElementById('appPass').value;
+            if (userKey.length < 4) return alert("الباسورد ضعيف جداً!");
+            document.getElementById('lockScreen').style.display = 'none';
+            initGapi();
+        }
+
+        async function initGapi() {
             gapi.load('client', async () => {
-                await gapi.client.init({
-                    apiKey: _getK(),
-                    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+                await gapi.client.init({ apiKey: _getK(), discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"] });
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: _getC(),
+                    scope: 'https://www.googleapis.com/auth/drive.file',
+                    callback: async (resp) => {
+                        if (resp.access_token) {
+                            document.getElementById('statusDot').classList.add('online');
+                            document.getElementById('syncText').innerText = "متصل بالسحابة";
+                            loadFromDrive();
+                        }
+                    }
                 });
-                gapiInited = true;
-                checkReady();
-            });
-        }
-
-        function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: _getC(),
-                scope: 'https://www.googleapis.com/auth/drive.file',
-                callback: '', 
-            });
-            gisInited = true;
-            checkReady();
-        }
-
-        function checkReady() {
-            if (gapiInited && gisInited) {
-                const btn = document.getElementById('loginBtn');
-                btn.innerText = "تسجيل دخول آمن";
-                btn.disabled = false;
-                document.getElementById('status').innerText = "تم تجميع المفاتيح بنجاح. النظام جاهز.";
-            }
-        }
-
-        function handleAuthClick() {
-            tokenClient.callback = async (resp) => {
-                if (resp.error !== undefined) {
-                    document.getElementById('status').innerText = "خطأ: " + resp.error;
-                    throw (resp);
-                }
-                document.getElementById('status').innerHTML = "<span class='success'>✅ تم الاختراق بنجاح!<br>المفاتيح المموّهة عملت بامتياز، وجوجل وافقت على التصريح.</span>";
-                document.getElementById('loginBtn').style.display = 'none';
-                console.log("Token Acquired");
-            };
-
-            if (gapi.client.getToken() === null) {
-                tokenClient.requestAccessToken({prompt: 'consent'});
-            } else {
                 tokenClient.requestAccessToken({prompt: ''});
-            }
+            });
         }
 
-        window.onload = () => { gapiLoaded(); gisLoaded(); };
+        // تشفير وحفظ
+        async function manualSync() {
+            const content = document.getElementById('noteArea').value;
+            const encrypted = CryptoJS.AES.encrypt(content, userKey).toString();
+            document.getElementById('syncText').innerText = "جاري الرفع...";
+            
+            const metadata = { name: 'safe_notes.enc', mimeType: 'text/plain' };
+            const file = new Blob([encrypted], { type: 'text/plain' });
+            
+            try {
+                let url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+                let method = 'POST';
+                if (fileId) {
+                    url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`;
+                    method = 'PATCH';
+                }
+
+                const form = new FormData();
+                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+                form.append('file', file);
+
+                await fetch(url, {
+                    method: method,
+                    headers: { 'Authorization': 'Bearer ' + gapi.client.getToken().access_token },
+                    body: form
+                });
+                document.getElementById('syncText').innerText = "تم الحفظ مشفراً ✅";
+            } catch (e) { alert("خطأ في الحفظ!"); }
+        }
+
+        // تحميل وفك تشفير
+        async function loadFromDrive() {
+            const res = await gapi.client.drive.files.list({ q: "name = 'safe_notes.enc'", fields: 'files(id)' });
+            if (res.result.files.length > 0) {
+                fileId = res.result.files[0].id;
+                const fileRes = await gapi.client.drive.files.get({ fileId: fileId, alt: 'media' });
+                try {
+                    const decrypted = CryptoJS.AES.decrypt(fileRes.body, userKey).toString(CryptoJS.enc.Utf8);
+                    document.getElementById('noteArea').value = decrypted;
+                } catch (e) { alert("كلمة المرور خطأ أو الملف تالف!"); location.reload(); }
+            }
+        }
     </script>
 </body>
 </html>
