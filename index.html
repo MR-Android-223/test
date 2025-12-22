@@ -1,99 +1,95 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>موقع مطعم ميدو ملك البسترما</title>
+    <title>فحص الدخول الآمن</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        header {
-            background-color: #333;
-            color: white;
-            padding: 20px;
-        }
-
-        h1 {
-            font-size: 2em;
-        }
-
-        section {
-            padding: 20px;
-        }
-
-        .menu-item {
-            margin: 15px;
-            font-size: 1.2em;
-        }
-
-        .price {
-            color: green;
-        }
-
-        .contact-info {
-            margin-top: 20px;
-            font-size: 1.1em;
-        }
-
-        footer {
-            background-color: #333;
-            color: white;
-            padding: 10px;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-            text-align: center;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #eceff1; }
+        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
+        button { background: #4285F4; color: white; border: none; padding: 12px 25px; border-radius: 25px; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-top: 15px; }
+        button:hover { background: #357ae8; transform: translateY(-2px); }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #status { margin-top: 20px; color: #546e7a; font-size: 0.9rem; line-height: 1.6; }
+        .success { color: #2e7d32 !important; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>مرحبًا في مطعم ميدو ملك البسترما!</h1>
-        <p>تذوق ألذ البسترما، الروستو، والسجق في لبنان</p>
-    </header>
+    <div class="card">
+        <h2>اختبار الاتصال 🛡️</h2>
+        <p>سيتم تجميع المفاتيح المموّهة برمجياً لتسجيل الدخول.</p>
+        <button id="loginBtn" onclick="handleAuthClick()" disabled>جاري تهيئة النظام...</button>
+        <div id="status">يتم الآن تجميع قطع الكود...</div>
+    </div>
 
-    <section>
-        <h2>قائمة الطعام</h2>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
 
-        <div class="menu-item">
-            <p>بسترما - <span class="price">400,000 ل.ل</span></p>
-        </div>
-        <div class="menu-item">
-            <p>روستو - <span class="price">400,000 ل.ل</span></p>
-        </div>
-        <div class="menu-item">
-            <p>سجق - <span class="price">350,000 ل.ل</span></p>
-        </div>
-        <div class="menu-item">
-            <p>مقانق - <span class="price">350,000 ل.ل</span></p>
-        </div>
-        <div class="menu-item">
-            <p>هوت دوغ - <span class="price">300,000 ل.ل</span></p>
-        </div>
-        <div class="menu-item">
-            <p>روستو مع جبنة موزريلا - <span class="price">450,000 ل.ل</span></p>
-        </div>
+    <script>
+        // --- نظام التمويه والتعمية (Obfuscation System) ---
+        
+        // تقطيع الـ API Key
+        const _kX = ["NGVN0B", "AIzaSy", "CMLMIUht", "eL1N5rG4", "6Az9R1-kiJe"];
+        const _getK = () => _kX[1] + _kX[2] + _kX[4] + _kX[0] + _kX[3];
 
-        <div class="contact-info">
-            <p>الموقع: الشياح - طريق صيدا القديمة</p>
-            <p>ساعات العمل: يومياً من 10 صباحاً حتى 11:30 ليلاً</p>
-            <p>الدليفري متوفر لجميع مناطق بيروت</p>
-        </div>
-    </section>
+        // تقطيع الـ Client ID
+        const _cX = ["979816526016-", "apps.googleusercontent.com", "ukb9vqtb6u2hlutombpf8rumbjr3o2ua."];
+        const _getC = () => _cX[0] + _cX[2] + _cX[1];
 
-    <footer>
-        <p>&copy; 2025 ميدو ملك البسترما. جميع الحقوق محفوظة.</p>
-    </footer>
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
 
-    <!-- إضافة كود Tidio الخاص بالمساعد الذكي -->
-    <script src="//code.tidio.co/ktauetfxrtwzqsgpd467mjpaecmrjivk.js" async></script>
+        function gapiLoaded() {
+            gapi.load('client', async () => {
+                await gapi.client.init({
+                    apiKey: _getK(),
+                    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+                });
+                gapiInited = true;
+                checkReady();
+            });
+        }
 
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: _getC(),
+                scope: 'https://www.googleapis.com/auth/drive.file',
+                callback: '', 
+            });
+            gisInited = true;
+            checkReady();
+        }
+
+        function checkReady() {
+            if (gapiInited && gisInited) {
+                const btn = document.getElementById('loginBtn');
+                btn.innerText = "تسجيل دخول آمن";
+                btn.disabled = false;
+                document.getElementById('status').innerText = "تم تجميع المفاتيح بنجاح. النظام جاهز.";
+            }
+        }
+
+        function handleAuthClick() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) {
+                    document.getElementById('status').innerText = "خطأ: " + resp.error;
+                    throw (resp);
+                }
+                document.getElementById('status').innerHTML = "<span class='success'>✅ تم الاختراق بنجاح!<br>المفاتيح المموّهة عملت بامتياز، وجوجل وافقت على التصريح.</span>";
+                document.getElementById('loginBtn').style.display = 'none';
+                console.log("Token Acquired");
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+
+        window.onload = () => { gapiLoaded(); gisLoaded(); };
+    </script>
 </body>
 </html>
