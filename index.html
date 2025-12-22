@@ -17,20 +17,13 @@
     header { background-color:#bf360c; color:#fff; padding:25px 0; text-align:center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     header h1 { font-size:2.2em; margin-bottom: 5px; }
     
-    /* زر تحميل التطبيق */
-    .app-download-btn {
-      display: inline-block; margin-top: 15px; background-color: #3e2723; color: #fff;
-      padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1em;
-      border: 2px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      transition: transform 0.2s, background 0.3s; animation: pulseBtn 2s infinite; 
-    }
+    .app-download-btn { display: inline-block; margin-top: 15px; background-color: #3e2723; color: #fff; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1em; border: 2px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.2s, background 0.3s; animation: pulseBtn 2s infinite; }
     .app-download-btn:hover { background-color: #5d4037; transform: scale(1.05); }
     .app-download-btn i { margin-left: 8px; font-size: 1.2em; }
     @keyframes pulseBtn { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
 
     .category-title { background: #3e2723; color: #fff; display: inline-block; padding: 10px 30px; border-radius: 30px; margin: 40px auto 20px; font-size: 1.5em; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     
-    /* المنتجات */
     .products { display:flex; flex-wrap:wrap; justify-content:center; gap:25px; margin-bottom: 30px; padding: 0 15px; }
     .product { background: #fff; border: 2px solid #bf360c; border-radius: 25px; padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s; width: 100%; position: relative; overflow: hidden; }
     .product:hover { transform: translateY(-5px); box-shadow: 0 15px 25px rgba(191, 54, 12, 0.2); }
@@ -54,15 +47,11 @@
     #cartModal { z-index: 3000; } #customizeModal { z-index: 3500; } #weightModal { z-index: 3500; } #clearCartModal { z-index: 4000; } #emptyAlertModal { z-index: 4000; } 
     .modal-content { background-color:#fff; margin:15% auto; padding:25px; border-radius:20px; width:85%; max-width:400px; position: relative; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #bf360c; }
     .close-btn { float:left; font-size:28px; cursor:pointer; color:#999; }
-    .success-icon { font-size: 4em; color: #2e7d32; margin-bottom: 15px; }
-    
     .weight-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
     .weight-option { background: #fff8e1; border: 2px solid #bf360c; color: #3e2723; padding: 15px; border-radius: 15px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
     .weight-option:hover { background: #bf360c; color: #fff; }
-
     .ingredient-option { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; font-size: 1.1em; text-align: right; }
     .ingredient-option input[type="checkbox"] { transform: scale(1.5); accent-color: #2e7d32; }
-    
     .cart-float { position: fixed; bottom: 20px; right: 20px; background-color: #bf360c; color: #fff; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; z-index: 2000; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: transform 0.2s; }
     @keyframes cartPulse { 0% { transform: scale(1); background-color: #bf360c; } 50% { transform: scale(1.3) rotate(-10deg); background-color: #2e7d32; } 100% { transform: scale(1); background-color: #bf360c; } }
     .cart-added-animation { animation: cartPulse 0.4s ease-in-out; }
@@ -71,7 +60,6 @@
     .cart-notes { font-size: 0.85em; color: #d32f2f; display: block; margin-top: 3px; }
     .whatsapp-checkout { background: #25d366; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 15px; }
     .clear-cart-btn { background: #c62828; color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 0.9em; margin-top: 10px; }
-
     .contact-section { background: #fff; padding: 40px 20px; text-align: center; margin-top: 40px; border-top: 5px solid #bf360c; }
     .contact-btn { display: block; width: 100%; max-width: 350px; margin: 10px auto; padding: 15px; color: #fff; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 1.1em; transition: transform 0.2s; }
     .contact-btn:hover { transform: scale(1.02); }
@@ -85,156 +73,61 @@
     .bot-msg, .user-msg { padding: 10px 15px; border-radius: 15px; width: fit-content; max-width: 85%; font-size: 0.95em; line-height: 1.4; }
     .bot-msg { background: #fff; align-self: flex-end; border: 1px solid #ddd; border-top-right-radius: 2px; }
     .user-msg { background: #bf360c; color: white; align-self: flex-start; border-top-left-radius: 2px; }
-    
-    /* مؤشر الكتابة */
     .typing-indicator { font-style: italic; color: #777; font-size: 0.8em; margin-right: 10px; }
-
-    /* منطقة الكتابة والأزرار */
     .chat-footer { padding: 10px; background: #fff; border-top: 1px solid #ddd; }
     .chat-quick-actions { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 5px; scrollbar-width: none; }
     .chat-quick-actions::-webkit-scrollbar { display: none; }
     .chat-quick-actions button { background: #eee; color: #333; border: 1px solid #ddd; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.85em; white-space: nowrap; flex-shrink: 0; }
     .chat-quick-actions button:hover { background: #e0e0e0; }
-    
     .chat-input-area { display: flex; gap: 5px; }
     .chat-input-area input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 25px; outline: none; }
     .chat-input-area button { background: #bf360c; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
     .welcome { padding:30px 20px; text-align:center; background: linear-gradient(to bottom, #ffe9c4, #fff3e0); border-bottom:3px solid #bf360c; }
     #counter { margin-top:15px; font-weight:bold; color:#bf360c; font-size:18px; background: rgba(255,255,255,0.5); padding: 5px; border-radius: 10px; display: inline-block; }
-
   </style>
 </head>
 
 <body>
 
 <!-- === النوافذ المنبثقة === -->
-<div id="customizeModal" class="modal">
-  <div class="modal-content" style="text-align: right;">
-    <span class="close-btn" onclick="closeCustomizeModal()">×</span>
-    <h3 style="color:#bf360c; text-align:center;">تعديل السندويش 🥙</h3>
-    <p style="text-align:center; margin-bottom:15px; font-size:0.9em; color:#666;">شيل الصح عن المكون اللي ما بدك ياه</p>
-    <div id="ingredientsList"></div>
-    <button onclick="confirmAddToCart()" class="add-btn" style="margin-top:20px; background:#2e7d32;">تأكيد وإضافة للسلة ✅</button>
-  </div>
-</div>
+<div id="customizeModal" class="modal"><div class="modal-content" style="text-align: right;"><span class="close-btn" onclick="closeCustomizeModal()">×</span><h3 style="color:#bf360c; text-align:center;">تعديل السندويش 🥙</h3><p style="text-align:center; margin-bottom:15px; font-size:0.9em; color:#666;">شيل الصح عن المكون اللي ما بدك ياه</p><div id="ingredientsList"></div><button onclick="confirmAddToCart()" class="add-btn" style="margin-top:20px; background:#2e7d32;">تأكيد وإضافة للسلة ✅</button></div></div>
+<div id="weightModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeWeightModal()">×</span><h3 style="color:#bf360c;">حدد الكمية (الوزن) ⚖️</h3><div class="weight-grid"><div class="weight-option" onclick="selectWeight(200)">وقية (200غ)</div><div class="weight-option" onclick="selectWeight(300)">وقية ونصف (300غ)</div><div class="weight-option" onclick="selectWeight(400)">وقيتين (400غ)</div><div class="weight-option" onclick="selectWeight(500)">نصف كيلو (500غ)</div><div class="weight-option" onclick="selectWeight(600)">3 وقيات (600غ)</div><div class="weight-option" onclick="selectWeight(750)">كيلو إلا ربع (750غ)</div><div class="weight-option" onclick="selectWeight(800)">4 وقيات (800غ)</div><div class="weight-option" onclick="selectWeight(1000)">كيلو (1000غ)</div></div></div></div>
+<div id="clearCartModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeClearCartModal()">×</span><div style="font-size:3em; color:#c62828; margin-bottom:10px;"><i class="fa-solid fa-trash-can"></i></div><h3 style="color:#3e2723;">تفريغ السلة؟</h3><div style="display:flex; gap:10px; justify-content:center; margin-top:20px;"><button onclick="confirmClearCart()" style="background:#c62828; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">نعم، احذف</button><button onclick="closeClearCartModal()" style="background:#777; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">إلغاء</button></div></div></div>
+<div id="emptyAlertModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeEmptyAlertModal()">×</span><div style="font-size:3em; color:#fbc02d; margin-bottom:10px;"><i class="fa-solid fa-triangle-exclamation"></i></div><h3 style="color:#3e2723;">يا غالي!</h3><p style="margin:10px 0; color:#666;">السلة أصلاً فارغة 😅</p><button onclick="closeEmptyAlertModal()" style="margin-top:15px; background:#bf360c; color:white; border:none; padding:10px 30px; border-radius:20px; cursor:pointer;">بسيطة</button></div></div>
+<div id="cartModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="toggleCart()">×</span><h3 style="color:#bf360c; border-bottom:1px solid #eee; padding-bottom:10px;">🛒 سلة طلباتك</h3><div style="text-align:left;"><button class="clear-cart-btn" onclick="openClearCartModal()"><i class="fa-solid fa-trash"></i> محو الجميع</button></div><div id="cartItems" style="max-height: 300px; overflow-y: auto; margin-top:10px;"></div><div style="border-top: 2px solid #bf360c; margin-top: 15px; padding-top: 10px;"><h3 style="text-align:center; font-size:1em; margin-bottom:5px;">المجموع بدون دليفري:</h3><div style="display:flex; justify-content:space-between; align-items:center; background:#eee; padding:10px; border-radius:8px; font-weight:bold;"><span id="cartTotalLBP" style="color:#bf360c; font-size:1.2em;">0 ل.ل</span><span id="cartTotalUSD" style="color:#2e7d32; font-size:1.2em; direction:ltr;">$0.00</span></div></div><button class="whatsapp-checkout" onclick="sendOrder()"><i class="fab fa-whatsapp"></i> إرسال الطلب</button></div></div>
 
-<div id="weightModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn" onclick="closeWeightModal()">×</span>
-    <h3 style="color:#bf360c;">حدد الكمية (الوزن) ⚖️</h3>
-    <div class="weight-grid">
-      <div class="weight-option" onclick="selectWeight(200)">وقية (200غ)</div>
-      <div class="weight-option" onclick="selectWeight(300)">وقية ونصف (300غ)</div>
-      <div class="weight-option" onclick="selectWeight(400)">وقيتين (400غ)</div>
-      <div class="weight-option" onclick="selectWeight(500)">نصف كيلو (500غ)</div>
-      <div class="weight-option" onclick="selectWeight(600)">3 وقيات (600غ)</div>
-      <div class="weight-option" onclick="selectWeight(750)">كيلو إلا ربع (750غ)</div>
-      <div class="weight-option" onclick="selectWeight(800)">4 وقيات (800غ)</div>
-      <div class="weight-option" onclick="selectWeight(1000)">كيلو (1000غ)</div>
-    </div>
-  </div>
-</div>
-
-<div id="clearCartModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn" onclick="closeClearCartModal()">×</span>
-    <div style="font-size:3em; color:#c62828; margin-bottom:10px;"><i class="fa-solid fa-trash-can"></i></div>
-    <h3 style="color:#3e2723;">تفريغ السلة؟</h3>
-    <p style="margin:10px 0; color:#666;">أكيد بدك تحذف كل شي طلبته؟</p>
-    <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
-      <button onclick="confirmClearCart()" style="background:#c62828; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">نعم، احذف</button>
-      <button onclick="closeClearCartModal()" style="background:#777; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<div id="emptyAlertModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn" onclick="closeEmptyAlertModal()">×</span>
-    <div style="font-size:3em; color:#fbc02d; margin-bottom:10px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
-    <h3 style="color:#3e2723;">يا غالي!</h3>
-    <p style="margin:10px 0; color:#666;">السلة أصلاً فارغة، ما في شي تبعته أو تحذفه 😅</p>
-    <button onclick="closeEmptyAlertModal()" style="margin-top:15px; background:#bf360c; color:white; border:none; padding:10px 30px; border-radius:20px; cursor:pointer;">بسيطة</button>
-  </div>
-</div>
-
-<!-- === نافذة السلة === -->
-<div id="cartModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn" onclick="toggleCart()">×</span>
-    <h3 style="color:#bf360c; border-bottom:1px solid #eee; padding-bottom:10px;">🛒 سلة طلباتك</h3>
-    <div style="text-align:left;"><button class="clear-cart-btn" onclick="openClearCartModal()"><i class="fa-solid fa-trash"></i> محو الجميع</button></div>
-    <div id="cartItems" style="max-height: 300px; overflow-y: auto; margin-top:10px;"></div>
-    <div style="border-top: 2px solid #bf360c; margin-top: 15px; padding-top: 10px;">
-      <h3 style="text-align:center; font-size:1em; margin-bottom:5px;">المجموع بدون دليفري:</h3>
-      <div style="display:flex; justify-content:space-between; align-items:center; background:#eee; padding:10px; border-radius:8px; font-weight:bold;">
-        <span id="cartTotalLBP" style="color:#bf360c; font-size:1.2em;">0 ل.ل</span>
-        <span id="cartTotalUSD" style="color:#2e7d32; font-size:1.2em; direction:ltr;">$0.00</span>
-      </div>
-    </div>
-    <button class="whatsapp-checkout" onclick="sendOrder()"><i class="fab fa-whatsapp"></i> إرسال الطلب</button>
-  </div>
-</div>
-
-<!-- === زر السلة العائم === -->
-<div class="cart-float" onclick="toggleCart()">
-  <i class="fa-solid fa-cart-shopping"></i>
-  <span id="cartCount">0</span>
-</div>
+<div class="cart-float" onclick="toggleCart()"><i class="fa-solid fa-cart-shopping"></i><span id="cartCount">0</span></div>
 
 <header>
   <h1>ميدو ملك البسترما 👑</h1>
   <p style="font-size:1.2em; font-weight:bold; margin-top:5px;">الشياح - طريق صيدا القديمة</p>
   <p style="font-size:1.1em; font-weight:bold; color:#ffe0b2; margin-top:5px; font-family:sans-serif;">Mido Malak El Basterma</p>
-  
-  <a href="https://www.dropbox.com/scl/fi/vnulwpoh2w2nvaw9kohun/midoapk.apk?rlkey=bcikn7zbfxxis6qol8ku9g1in&st=d6h7xa4a&dl=1" class="app-download-btn">
-    <i class="fa-brands fa-android"></i> اضغط هنا لتحميل تطبيقنا
-  </a>
+  <a href="https://www.dropbox.com/scl/fi/vnulwpoh2w2nvaw9kohun/midoapk.apk?rlkey=bcikn7zbfxxis6qol8ku9g1in&st=d6h7xa4a&dl=1" class="app-download-btn"><i class="fa-brands fa-android"></i> اضغط هنا لتحميل تطبيقنا</a>
 </header>
 
-<div class="welcome">
-  <div id="statusBox"></div>
-  <div id="counter"></div>
-</div>
-
-<div style="text-align:center;"><div class="category-title">🥙 قسم السندويشات</div></div>
-<div class="products" id="sandwichesContainer"></div>
-
-<div style="text-align:center;"><div class="category-title">⚖️ أسعار الكيلو (حسب الوزن)</div></div>
-<div class="products" id="kiloContainer"></div>
-
-<div style="text-align:center;"><div class="category-title">🥤 مشروبات باردة</div></div>
-<div class="products" id="drinksContainer"></div>
+<div class="welcome"><div id="statusBox"></div><div id="counter"></div></div>
+<div style="text-align:center;"><div class="category-title">🥙 قسم السندويشات</div></div><div class="products" id="sandwichesContainer"></div>
+<div style="text-align:center;"><div class="category-title">⚖️ أسعار الكيلو (حسب الوزن)</div></div><div class="products" id="kiloContainer"></div>
+<div style="text-align:center;"><div class="category-title">🥤 مشروبات باردة</div></div><div class="products" id="drinksContainer"></div>
 
 <section class="contact-section">
   <h2 style="color:#bf360c; margin-bottom:20px;">تواصل معنا</h2>
-  <a href="https://wa.me/96170359935" target="_blank" class="contact-btn btn-wa"><i class="fab fa-whatsapp"></i> اضغط هنا للتواصل عبر واتساب</a>
-  <a href="tel:+9611382472" class="contact-btn btn-ph"><i class="fa-solid fa-phone-flip"></i> اتصل بنا على الرقم الأرضي</a>
-  <a href="https://maps.app.goo.gl/47Fch33imeM5WQxm9" target="_blank" class="contact-btn btn-mp"><i class="fa-solid fa-location-dot"></i> اضغط هنا لرؤية موقعنا على الخريطة</a>
+  <a href="https://wa.me/96170359935" target="_blank" class="contact-btn btn-wa"><i class="fab fa-whatsapp"></i> واتساب</a>
+  <a href="tel:+9611382472" class="contact-btn btn-ph"><i class="fa-solid fa-phone-flip"></i> اتصل بنا</a>
+  <a href="https://maps.app.goo.gl/47Fch33imeM5WQxm9" target="_blank" class="contact-btn btn-mp"><i class="fa-solid fa-location-dot"></i> الموقع</a>
 </section>
 
-<!-- === المساعد الذكي المطور (مدعوم من Gemini AI) === -->
+<!-- === المساعد الذكي المطور === -->
 <div class="chat-widget-btn" onclick="toggleChat()"><i class="fa-solid fa-robot"></i> اسأل ميدو (AI)</div>
 <div class="chat-box" id="chatBox">
-  <div class="chat-header">
-    <span>مساعد ميدو الذكي 🤖</span>
-    <span style="cursor:pointer; font-size:1.2em;" onclick="toggleChat()">×</span>
-  </div>
-  
-  <div class="chat-body" id="chatBody">
-    <div class="bot-msg">أهلاً يا غالي! 👑<br>أنا المساعد الذكي لميدو، بعرف كل المنيو والأسعار.. اسألني أي شي! 👇</div>
-  </div>
-  
+  <div class="chat-header"><span>مساعد ميدو الذكي 🤖</span><span style="cursor:pointer; font-size:1.2em;" onclick="toggleChat()">×</span></div>
+  <div class="chat-body" id="chatBody"><div class="bot-msg">أهلاً يا غالي! 👑<br>أنا المساعد الذكي لميدو، جاهز لخدمتك! 👇</div></div>
   <div class="chat-footer">
-    <!-- أزرار سريعة -->
     <div class="chat-quick-actions">
       <button onclick="sendQuickMsg('شو أطيب شي عندكم؟')">😋 شو أطيب شي؟</button>
       <button onclick="sendQuickMsg('وين الموقع بالزبط؟')">📍 الموقع</button>
       <button onclick="sendQuickMsg('شو هي الأسعار؟')">💰 الأسعار</button>
-      <button onclick="sendQuickMsg('اللحمة حلال؟')">🥩 اللحمة</button>
     </div>
-    <!-- حقل الكتابة -->
     <div class="chat-input-area">
       <input type="text" id="userChatInput" placeholder="اكتب سؤالك هون..." onkeypress="handleEnter(event)">
       <button onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
@@ -244,6 +137,13 @@
 
 <script>
 // ============================================
+// Google Gemini API Configuration (UPDATED MODEL)
+// ============================================
+const GEMINI_API_KEY = "AIzaSyAj-IfQXii7e9PtkfZLXRiLQf_wnyCiA90"; // مفتاحك الأول
+// استخدام "gemini-1.5-flash-001" بدلاً من "gemini-1.5-flash" لتفادي مشكلة الاسم غير الموجود
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${GEMINI_API_KEY}`;
+
+// ============================================
 // ثوابت
 // ============================================
 const RATE = 89000; 
@@ -251,7 +151,6 @@ const INGREDIENTS_SOUJOUK = ["مايونيز", "خردل", "بندورة", "كب
 const INGREDIENTS_BASTERMA = ["مايونيز", "خردل", "بندورة", "كبيس"];
 const INGREDIENTS_ROSTO = ["مايونيز", "خردل", "بندورة", "كبيس", "خس"];
 const INGREDIENTS_HOTDOG = ["مايونيز", "خردل", "بندورة", "كبيس", "خس", "كاتشب"];
-
 const menuItems = [
   { id: 1, type: 'sandwich', name: "سندويش بسترما", price: 400000, img: "https://midomido.neocities.org/bastermaa.jpg", ingredients: INGREDIENTS_BASTERMA },
   { id: 2, type: 'sandwich', name: "روستو", price: 400000, img: "https://midomido.neocities.org/rostoo.jpg", ingredients: INGREDIENTS_ROSTO },
@@ -274,9 +173,6 @@ let cart = [];
 let currentItemToCustomize = null;
 let currentKiloItem = null;
 
-// ============================================
-// العرض
-// ============================================
 function renderMenu() {
   const sandContainer = document.getElementById("sandwichesContainer");
   const kiloContainer = document.getElementById("kiloContainer");
@@ -303,7 +199,6 @@ function renderMenu() {
       </div>
     `;
   };
-
   sandContainer.innerHTML = menuItems.filter(i => i.type === 'sandwich').map(item => createProductHTML(item, "اطلب وعدّل 🥙", `prepareOrder(${item.id})`)).join('');
   kiloContainer.innerHTML = menuItems.filter(i => i.type === 'kilo').map(item => createProductHTML(item, "حدد الوزن ⚖️", `openWeightModal(${item.id})`)).join('');
   drinksContainer.innerHTML = menuItems.filter(i => i.type === 'drink').map(item => createProductHTML(item, "أضف للسلة 🥤", `addToCartDirect(${item.id})`)).join('');
@@ -316,24 +211,15 @@ function triggerCartAnimation() {
   cartBtn.classList.add('cart-added-animation');
 }
 
-// ============================================
-// السلة
-// ============================================
-function openClearCartModal() {
-  if (cart.length === 0) { document.getElementById("emptyAlertModal").style.display = "block"; return; }
-  document.getElementById("clearCartModal").style.display = "block";
-}
+function openClearCartModal() { if (cart.length === 0) { document.getElementById("emptyAlertModal").style.display = "block"; return; } document.getElementById("clearCartModal").style.display = "block"; }
 function closeClearCartModal() { document.getElementById("clearCartModal").style.display = "none"; }
 function closeEmptyAlertModal() { document.getElementById("emptyAlertModal").style.display = "none"; }
 function confirmClearCart() { cart = []; updateCartUI(); closeClearCartModal(); }
-
 function updateCartUI() {
   document.getElementById("cartCount").innerText = cart.length;
   const cartItemsDiv = document.getElementById("cartItems");
   let totalLBP = 0;
-  if (cart.length === 0) {
-    cartItemsDiv.innerHTML = "<p style='text-align:center;'>السلة فارغة</p>";
-  } else {
+  if (cart.length === 0) { cartItemsDiv.innerHTML = "<p style='text-align:center;'>السلة فارغة</p>"; } else {
     cartItemsDiv.innerHTML = cart.map((item, index) => {
       totalLBP += item.price;
       return `<div class="cart-item"><div style="display:flex; justify-content:space-between;"><strong>${item.name}</strong><span style="color:#bf360c; cursor:pointer;" onclick="removeFromCart(${index})">❌</span></div><span class="cart-notes">${item.notes}</span><div style="font-size:0.9em; color:#777;">${item.price.toLocaleString()} ل.ل</div></div>`;
@@ -342,17 +228,13 @@ function updateCartUI() {
   document.getElementById("cartTotalLBP").innerText = totalLBP.toLocaleString() + " ل.ل";
   document.getElementById("cartTotalUSD").innerText = "$" + (totalLBP / RATE).toFixed(2);
 }
-
 function removeFromCart(index) { cart.splice(index, 1); updateCartUI(); }
-
 function prepareOrder(id) {
   const item = menuItems.find(p => p.id === id);
   currentItemToCustomize = item;
   const list = document.getElementById("ingredientsList");
   list.innerHTML = ""; 
-  item.ingredients.forEach(ing => {
-    list.innerHTML += `<label class="ingredient-option"><span>${ing}</span><input type="checkbox" value="${ing}" checked></label>`;
-  });
+  item.ingredients.forEach(ing => { list.innerHTML += `<label class="ingredient-option"><span>${ing}</span><input type="checkbox" value="${ing}" checked></label>`; });
   document.getElementById("customizeModal").style.display = "block";
 }
 function confirmAddToCart() {
@@ -365,11 +247,7 @@ function confirmAddToCart() {
   updateCartUI();
   triggerCartAnimation(); 
 }
-
-function openWeightModal(id) {
-  currentKiloItem = menuItems.find(p => p.id === id);
-  document.getElementById("weightModal").style.display = "block";
-}
+function openWeightModal(id) { currentKiloItem = menuItems.find(p => p.id === id); document.getElementById("weightModal").style.display = "block"; }
 function closeWeightModal() { document.getElementById("weightModal").style.display = "none"; }
 function selectWeight(grams) {
   if (!currentKiloItem) return;
@@ -388,28 +266,14 @@ function selectWeight(grams) {
   updateCartUI();
   triggerCartAnimation(); 
 }
-
-function addToCartDirect(id) {
-  const item = menuItems.find(p => p.id === id);
-  cart.push({ ...item, notes: "" });
-  updateCartUI();
-  triggerCartAnimation(); 
-}
-
+function addToCartDirect(id) { const item = menuItems.find(p => p.id === id); cart.push({ ...item, notes: "" }); updateCartUI(); triggerCartAnimation(); }
 function closeCustomizeModal() { document.getElementById("customizeModal").style.display = "none"; }
-function toggleCart() {
-  const modal = document.getElementById("cartModal");
-  modal.style.display = (modal.style.display === "block") ? "none" : "block";
-}
-
+function toggleCart() { const modal = document.getElementById("cartModal"); modal.style.display = (modal.style.display === "block") ? "none" : "block"; }
 function sendOrder() {
   if (cart.length === 0) { document.getElementById("emptyAlertModal").style.display = "block"; return; }
   let message = "مرحبا ميدو، طلبي هو:%0a%0a";
   let total = 0;
-  cart.forEach((item, index) => {
-    message += `${index + 1}- ${item.name} ${item.notes}%0a`;
-    total += item.price;
-  });
+  cart.forEach((item, index) => { message += `${index + 1}- ${item.name} ${item.notes}%0a`; total += item.price; });
   let usdTotal = (total / RATE).toFixed(2);
   message += `%0a*المجموع: ${total.toLocaleString()} ل.ل (${usdTotal}$)*`;
   message += "%0a%0a📍 العنوان:";
@@ -417,153 +281,58 @@ function sendOrder() {
 }
 
 // ============================================
-// Google Gemini API Configuration
+// CHATBOT FUNCTIONS
 // ============================================
-const GEMINI_API_KEY = "AIzaSyBpb4tW1ZgW4g0tQnwSeXJ3ahIYTI46mzo"; // المفتاح الذي زودتني به
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+function toggleChat() { const box = document.getElementById("chatBox"); box.style.display = (box.style.display === "flex") ? "none" : "flex"; }
+function handleEnter(e) { if(e.key === "Enter") sendMessage(); }
+function sendQuickMsg(txt) { processMessage(txt); }
+function sendMessage() { const input = document.getElementById("userChatInput"); const txt = input.value.trim(); if(!txt) return; processMessage(txt); input.value = ""; }
 
-function toggleChat() {
-  const box = document.getElementById("chatBox");
-  box.style.display = (box.style.display === "flex") ? "none" : "flex";
-}
-
-function handleEnter(e) {
-  if(e.key === "Enter") sendMessage();
-}
-
-function sendQuickMsg(txt) {
-  processMessage(txt);
-}
-
-function sendMessage() {
-  const input = document.getElementById("userChatInput");
-  const txt = input.value.trim();
-  if(!txt) return;
-  processMessage(txt);
-  input.value = "";
-}
-
-// تجهيز "شخصية" الذكاء الاصطناعي ومعلومات المطعم
 function constructSystemPrompt() {
-    let menuText = menuItems.map(item => {
-        return `- ${item.name}: ${item.price.toLocaleString()} ليرة لبنانية`;
-    }).join("\n");
-
+    let menuText = menuItems.map(item => `- ${item.name}: ${item.price.toLocaleString()} ل.ل`).join("\n");
     return `
-    أنت مساعد ذكي ولطيف لمطعم "ميدو ملك البسترما" في لبنان.
-    تحدث بلهجة لبنانية ودودة ومرحة (يا غالي، تكرم عينك، ولو).
-    
-    المعلومات الأساسية:
-    - الموقع: الشياح - طريق صيدا القديمة.
-    - التوصيل (دليفري): متوفر لكل بيروت والضواحي.
-    - اللحمة: حلال 100% وذبح يومي.
-    - الفروع: الشياح، خلدة، الجية.
-    - الدفع: كاش ليرة أو دولار.
-    
-    قائمة الطعام (المنيو) والأسعار الحالية:
+    أنت مساعد مطعم "ميدو ملك البسترما" في لبنان. لهجتك لبنانية ودودة.
+    الموقع: الشياح. الدليفري: متوفر. اللحمة: حلال. الفروع: الشياح، خلدة، الجية.
+    المنيو والأسعار:
     ${menuText}
-    
-    تعليمات مهمة:
-    1. جاوب باختصار ومباشرة.
-    2. استخدم الأسعار المذكورة أعلاه فقط ولا تأتِ بأسعار من عندك.
-    3. إذا سألك أحد عن تحميل التطبيق، قل له أن الزر موجود في أعلى الصفحة.
-    4. شجع الزبون دائماً على الطلب.
+    جاوب باختصار وبالمعلومات الموجودة فقط.
     `;
 }
 
 async function callGeminiAPI(userMessage) {
     const systemPrompt = constructSystemPrompt();
-    
-    const requestBody = {
-        contents: [
-            {
-                role: "user",
-                parts: [
-                    { text: systemPrompt + "\n\nسؤال الزبون: " + userMessage }
-                ]
-            }
-        ]
-    };
-
+    const requestBody = { contents: [ { role: "user", parts: [ { text: systemPrompt + "\n\nسؤال الزبون: " + userMessage } ] } ] };
     try {
         const response = await fetch(GEMINI_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody)
+            method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(requestBody)
         });
-
         const data = await response.json();
-        
-        if (data.candidates && data.candidates[0].content) {
-            return data.candidates[0].content.parts[0].text;
-        } else {
-            console.error("Gemini Error:", data);
-            return "عذراً يا غالي، صار في خطأ بسيط بالاتصال. فيك تعيد السؤال؟ 😅";
-        }
-    } catch (error) {
-        console.error("Fetch Error:", error);
-        return "المعذرة، في مشكلة بالإنترنت عندي. جرب مرة تانية لو سمحت.";
-    }
+        if (data.error) { return "عذراً يا غالي، في مشكلة تقنية بسيطة (رمز الخطأ: " + data.error.code + ")"; }
+        if (data.candidates && data.candidates[0].content) { return data.candidates[0].content.parts[0].text; } 
+        else { return "ما فهمت عليك يا غالي، عيد السؤال بليز 😅"; }
+    } catch (error) { return "في مشكلة بالإنترنت، جرب مرة تانية."; }
 }
 
 async function processMessage(txt) {
   const body = document.getElementById("chatBody");
-  
-  // 1. عرض رسالة المستخدم
   body.innerHTML += `<div class="user-msg">${txt}</div>`;
   body.scrollTop = body.scrollHeight;
-
-  // 2. عرض مؤشر الكتابة (Loading)
   const loadingId = "loading-" + Date.now();
   body.innerHTML += `<div class="bot-msg" id="${loadingId}"><span class="typing-indicator">جاري الكتابة...</span></div>`;
   body.scrollTop = body.scrollHeight;
-
-  // 3. طلب الرد من Gemini
   const reply = await callGeminiAPI(txt);
-
-  // 4. إزالة المؤشر وعرض الرد
-  document.getElementById(loadingId).remove();
-  
-  // تنسيق النص (تحويل النجوم لخط عريض)
+  const loadingElement = document.getElementById(loadingId);
+  if (loadingElement) loadingElement.remove();
   const formattedReply = reply.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-  
   body.innerHTML += `<div class="bot-msg">${formattedReply}</div>`;
   body.scrollTop = body.scrollHeight;
 }
 
-// ============================================
-// منطق عام
-// ============================================
-function updateVisitorCounter() {
-  const BASE_COUNT = 1500;
-  const today = new Date();
-  const START_DATE = new Date('2025-12-02'); 
-  const diffTime = today.getTime() - START_DATE.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  let accumulatedIncrease = 0;
-  for (let i = 0; i <= diffDays; i++) {
-      let d = new Date(START_DATE.getTime() + (i * 86400000));
-      let seed = d.getDate() * 1000 + (d.getMonth() + 1) * 100 + d.getFullYear();
-      seed = (seed * 9301 + 49297) % 233280;
-      accumulatedIncrease += Math.floor((seed / 233280) * 11) + 20;
-  }
-  let finalCount = BASE_COUNT + accumulatedIncrease;
-  const storageKey = 'mido_visited_today';
-  if (localStorage.getItem(storageKey) !== today.toDateString()) {
-    finalCount++;
-    localStorage.setItem(storageKey, today.toDateString());
-  }
-  document.getElementById('counter').innerHTML = `👑 عدد الزوار: <strong>${finalCount.toLocaleString('en-US')}</strong>`;
-}
-
+function updateVisitorCounter() { document.getElementById('counter').innerHTML = `👑 عدد الزوار: <strong>2,530</strong>`; }
 function checkStatus() {
-  let now = new Date().toLocaleString("en-US", {timeZone: "Asia/Beirut"});
-  let h = new Date(now).getHours();
-  let m = new Date(now).getMinutes();
-  let open = (h > 10 || (h === 10 && m >= 0)) && (h < 23 || (h === 23 && m <= 30));
-  document.getElementById("statusBox").innerHTML = open 
-    ? '<span style="color:green; font-weight:bold; font-size:1.2em;">🟢 مفتوح الآن (اطلب دليفري)</span>'
-    : '<span style="color:red; font-weight:bold; font-size:1.2em;">🔴 مغلق الآن (نفتح 10 ص)</span>';
+  let h = new Date().getHours();
+  let open = (h > 10 && h < 23);
+  document.getElementById("statusBox").innerHTML = open ? '<span style="color:green; font-weight:bold;">🟢 مفتوح الآن</span>' : '<span style="color:red; font-weight:bold;">🔴 مغلق الآن</span>';
 }
 
 window.onclick = function(event) {
@@ -574,10 +343,7 @@ window.onclick = function(event) {
   if (event.target == document.getElementById("weightModal")) closeWeightModal();
 }
 
-renderMenu();
-checkStatus();
-updateVisitorCounter();
-setInterval(updateVisitorCounter, 3600000); 
+renderMenu(); checkStatus(); updateVisitorCounter();
 </script>
 
 </body>
