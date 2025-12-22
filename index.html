@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   
   <style>
-    /* === تنسيقات عامة === */
+    /* === نفس التنسيقات السابقة تماماً === */
     * { margin:0; padding:0; box-sizing:border-box; font-family:'Cairo', sans-serif; }
     body { background-color:#fff3e0; color:#3e2723; line-height:1.6; padding-bottom: 80px; }
     
@@ -137,11 +137,11 @@
 
 <script>
 // ============================================
-// Google Gemini API Configuration (UPDATED MODEL)
+// Google Gemini API Configuration (Gemini Pro - Safest)
 // ============================================
-const GEMINI_API_KEY = "AIzaSyAj-IfQXii7e9PtkfZLXRiLQf_wnyCiA90"; // مفتاحك الأول
-// استخدام "gemini-1.5-flash-001" بدلاً من "gemini-1.5-flash" لتفادي مشكلة الاسم غير الموجود
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_API_KEY = "AIzaSyAj-IfQXii7e9PtkfZLXRiLQf_wnyCiA90"; 
+// استخدام "gemini-pro" لأنه النسخة الأقدم والأكثر توافقاً مع المفاتيح العامة
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
 // ============================================
 // ثوابت
