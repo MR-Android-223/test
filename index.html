@@ -54,6 +54,7 @@
     #cartModal { z-index: 3000; } #customizeModal { z-index: 3500; } #weightModal { z-index: 3500; } #clearCartModal { z-index: 4000; } #emptyAlertModal { z-index: 4000; } 
     .modal-content { background-color:#fff; margin:15% auto; padding:25px; border-radius:20px; width:85%; max-width:400px; position: relative; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #bf360c; }
     .close-btn { float:left; font-size:28px; cursor:pointer; color:#999; }
+    .success-icon { font-size: 4em; color: #2e7d32; margin-bottom: 15px; }
     
     .weight-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
     .weight-option { background: #fff8e1; border: 2px solid #bf360c; color: #3e2723; padding: 15px; border-radius: 15px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
@@ -85,6 +86,7 @@
     .bot-msg { background: #fff; align-self: flex-end; border: 1px solid #ddd; border-top-right-radius: 2px; }
     .user-msg { background: #bf360c; color: white; align-self: flex-start; border-top-left-radius: 2px; }
     
+    /* مؤشر الكتابة */
     .typing-indicator { font-style: italic; color: #777; font-size: 0.8em; margin-right: 10px; }
 
     /* منطقة الكتابة والأزرار */
@@ -241,12 +243,6 @@
 </div>
 
 <script>
-// ============================================
-// Google Gemini API Configuration (NEW KEY)
-// ============================================
-const GEMINI_API_KEY = "AIzaSyBpb4tW1ZgW4g0tQnwSeXJ3ahIYTI46mzo"; // المفتاح الجديد من AI Studio
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
 // ============================================
 // ثوابت
 // ============================================
@@ -421,8 +417,11 @@ function sendOrder() {
 }
 
 // ============================================
-// CHATBOT FUNCTIONS
+// Google Gemini API Configuration
 // ============================================
+const GEMINI_API_KEY = "AIzaSyBpb4tW1ZgW4g0tQnwSeXJ3ahIYTI46mzo"; // المفتاح الذي زودتني به
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
 function toggleChat() {
   const box = document.getElementById("chatBox");
   box.style.display = (box.style.display === "flex") ? "none" : "flex";
@@ -444,6 +443,7 @@ function sendMessage() {
   input.value = "";
 }
 
+// تجهيز "شخصية" الذكاء الاصطناعي ومعلومات المطعم
 function constructSystemPrompt() {
     let menuText = menuItems.map(item => {
         return `- ${item.name}: ${item.price.toLocaleString()} ليرة لبنانية`;
@@ -494,15 +494,11 @@ async function callGeminiAPI(userMessage) {
 
         const data = await response.json();
         
-        if (data.error) {
-            console.error("Gemini API Error:", data.error.message);
-            return "عذراً يا غالي، في مشكلة تقنية بسيطة: " + data.error.message;
-        }
-
         if (data.candidates && data.candidates[0].content) {
             return data.candidates[0].content.parts[0].text;
         } else {
-            return "عذراً يا غالي، ما قدرت افهم عليك. فيك تعيد السؤال؟ 😅";
+            console.error("Gemini Error:", data);
+            return "عذراً يا غالي، صار في خطأ بسيط بالاتصال. فيك تعيد السؤال؟ 😅";
         }
     } catch (error) {
         console.error("Fetch Error:", error);
@@ -526,8 +522,7 @@ async function processMessage(txt) {
   const reply = await callGeminiAPI(txt);
 
   // 4. إزالة المؤشر وعرض الرد
-  const loadingElement = document.getElementById(loadingId);
-  if (loadingElement) loadingElement.remove();
+  document.getElementById(loadingId).remove();
   
   // تنسيق النص (تحويل النجوم لخط عريض)
   const formattedReply = reply.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
