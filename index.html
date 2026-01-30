@@ -8,17 +8,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* --- الألوان الفخمة والهادئة --- */
+        /* --- تعريف الألوان للوضعين --- */
         :root {
-            --bg-main: #0f172a;       /* كحلي غامق (لون الخلفية) */
-            --bg-card: #1e293b;       /* لون الكرت */
-            --primary: #3b82f6;       /* أزرق رسمي */
-            --text-main: #f8fafc;     /* أبيض للنصوص */
-            --text-muted: #94a3b8;    /* رمادي للنصوص الفرعية */
+            /* الوضع الليلي (الافتراضي) */
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --primary: #3b82f6;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
             --border: rgba(255,255,255,0.05);
+            --header-bg: rgba(15, 23, 42, 0.95);
         }
 
-        * { box-sizing: border-box; }
+        [data-theme="light"] {
+            /* الوضع النهاري */
+            --bg-main: #f1f5f9;
+            --bg-card: #ffffff;
+            --primary: #2563eb;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: rgba(0,0,0,0.1);
+            --header-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        * { box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
 
         body {
             background-color: var(--bg-main);
@@ -28,12 +41,12 @@
             padding-bottom: 50px;
         }
 
-        /* --- الهيدر الثابت --- */
+        /* --- الهيدر --- */
         header {
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(15, 23, 42, 0.95);
+            background: var(--header-bg);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             padding: 15px 20px;
@@ -42,257 +55,122 @@
             align-items: center;
         }
 
-        .logo {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: white;
-            letter-spacing: 0.5px;
-        }
+        .logo { font-size: 1.4rem; font-weight: 800; color: var(--text-main); }
         .logo span { color: var(--primary); }
 
-        .menu-btn {
-            font-size: 1.4rem;
-            cursor: pointer;
-            color: white;
-            transition: 0.3s;
-        }
-        .menu-btn:hover { color: var(--primary); }
+        .header-actions { display: flex; align-items: center; gap: 20px; }
 
-        /* --- القائمة الجانبية (Sidebar) --- */
+        /* زر التبديل بين الليل والنهار */
+        .theme-toggle {
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        .menu-btn { font-size: 1.4rem; cursor: pointer; color: var(--text-main); }
+
+        /* --- القائمة الجانبية --- */
         .sidebar {
-            height: 100%;
-            width: 0;
-            position: fixed;
-            z-index: 2000;
-            top: 0;
-            right: 0;
-            background-color: #111827;
-            overflow-x: hidden;
-            transition: 0.4s;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
-            padding-top: 20px;
+            height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0;
+            background-color: var(--bg-card); overflow-x: hidden; transition: 0.4s;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.2); padding-top: 20px;
         }
 
-        .sidebar-header {
-            text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 10px;
-        }
-
-        /* صورتك الشخصية */
-        .profile-img {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--primary);
-            margin-bottom: 10px;
-            background-color: #1f2937;
-        }
-
-        .sidebar a {
-            padding: 15px 25px;
-            text-decoration: none;
-            font-size: 1rem;
-            color: #cbd5e1;
-            display: flex;
-            align-items: center;
-            transition: 0.2s;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-        }
-
+        .sidebar-header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+        .profile-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin-bottom: 10px; }
+        .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 1rem; color: var(--text-muted); display: flex; align-items: center; border-bottom: 1px solid var(--border); }
         .sidebar a i { width: 35px; font-size: 1.2rem; color: var(--primary); }
-        .sidebar a:hover { background: rgba(59, 130, 246, 0.1); color: white; padding-right: 35px; }
+        .sidebar a:hover { background: var(--primary); color: white; }
+        .sidebar a:hover i { color: white; }
 
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            left: 20px;
-            font-size: 25px;
-            color: #94a3b8;
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
+        .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: var(--text-muted); background: none; border: none; cursor: pointer; }
 
-        #overlay {
-            position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0;
-            background: rgba(0,0,0,0.6); z-index: 1500; backdrop-filter: blur(2px);
-        }
-
-        /* --- القسم الرئيسي (Hero & Search) --- */
-        .hero {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .hero h1 { margin: 0 0 10px; font-size: 1.8rem; }
-        .hero p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px; }
-
-        /* مربع البحث الأنيق */
-        .search-box {
-            position: relative;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
+        /* --- الواجهة والبحث --- */
+        .hero { text-align: center; padding: 40px 20px; }
+        .search-box { position: relative; max-width: 500px; margin: 0 auto; }
         .search-box input {
-            width: 100%;
-            background: var(--bg-card);
-            border: 1px solid #334155;
-            padding: 15px 45px 15px 20px;
-            border-radius: 12px;
-            color: white;
-            font-family: 'Cairo';
-            font-size: 1rem;
-            outline: none;
-            transition: 0.3s;
+            width: 100%; background: var(--bg-card); border: 1px solid var(--border);
+            padding: 15px 45px 15px 20px; border-radius: 12px; color: var(--text-main);
+            font-family: 'Cairo'; outline: none;
         }
-
-        .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         .search-icon { position: absolute; right: 15px; top: 16px; color: var(--text-muted); }
 
-        /* --- شبكة التطبيقات --- */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* عمودين للموبايل */
-            gap: 15px;
-            padding: 10px 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
+        /* --- الشبكة والكرت --- */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; max-width: 1000px; margin: 0 auto; }
         @media(min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
 
-        /* تصميم الكرت (ستايل المتجر) */
         .card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 15px;
-            text-decoration: none;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 1px solid var(--border);
-            position: relative;
-            transition: transform 0.2s;
+            background: var(--bg-card); border-radius: 16px; padding: 15px; text-decoration: none;
+            color: var(--text-main); display: flex; flex-direction: column; align-items: center;
+            border: 1px solid var(--border); transition: 0.3s;
         }
+        .card img { width: 70px; height: 70px; border-radius: 14px; margin-bottom: 12px; object-fit: cover; }
+        .card-title { font-size: 0.9rem; font-weight: 600; text-align: center; margin-bottom: 10px; }
+        .get-btn { background: var(--primary); color: white; font-size: 0.8rem; font-weight: bold; padding: 6px 25px; border-radius: 50px; }
 
-        .card:active { transform: scale(0.98); } /* تأثير عند الضغط */
-
-        .mod-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(59, 130, 246, 0.15);
-            color: var(--primary);
-            font-size: 0.65rem;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-
-        .card img {
-            width: 70px;
-            height: 70px;
-            border-radius: 14px;
-            margin-bottom: 12px;
-            object-fit: cover;
-            background: #0f172a;
-        }
-
-        .card-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 10px;
-            line-height: 1.3;
-            height: 38px; /* ارتفاع ثابت للعنوان */
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .get-btn {
-            background: #334155;
-            color: #e2e8f0;
-            font-size: 0.8rem;
-            font-weight: bold;
-            padding: 6px 25px;
-            border-radius: 50px;
-            transition: 0.3s;
-        }
-
-        .card:hover .get-btn { background: var(--primary); color: white; }
-
-        /* رسالة التحميل */
-        .status { grid-column: span 2; text-align: center; color: var(--text-muted); margin-top: 20px; }
-
+        #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo">M.<span>Al.Boushi</span></div>
-        <i class="fas fa-bars menu-btn" onclick="openNav()"></i>
+        <div class="header-actions">
+            <div class="theme-toggle" onclick="toggleTheme()">
+                <i id="theme-icon" class="fas fa-sun"></i>
+            </div>
+            <i class="fas fa-bars menu-btn" onclick="openNav()"></i>
+        </div>
     </header>
 
     <div id="mySidebar" class="sidebar">
         <button class="close-btn" onclick="closeNav()">&times;</button>
-        
         <div class="sidebar-header">
-            <img src="https://midomido.neocities.org/mohammadalboushi.png" alt="Mohammad Al Boushi" class="profile-img">
-            <h3 style="margin:5px 0; color:white; font-size:1.1rem;">Mohammad Al Boushi</h3>
-            <span style="color: var(--text-muted); font-size: 0.8rem;">Admin & Developer</span>
+            <img src="https://midomido.neocities.org/mohammadalboushi.png" class="profile-img">
+            <h3 style="margin:5px 0;">Mohammad Al Boushi</h3>
         </div>
-
-        <a href="https://wa.me/963938624226" target="_blank">
-            <i class="fab fa-whatsapp" style="color:#25D366;"></i> واتساب
-        </a>
-        <a href="https://www.facebook.com/share/1AZTCywPbC/" target="_blank">
-            <i class="fab fa-facebook" style="color:#1877F2;"></i> فيسبوك
-        </a>
-        <a href="https://www.instagram.com/m_al_boushi" target="_blank">
-            <i class="fab fa-instagram" style="color:#E4405F;"></i> انستغرام
-        </a>
-        <a href="tel:+963938624226">
-            <i class="fas fa-phone"></i> اتصال هاتفي
-        </a>
-        <a href="https://wa.me/963938624226?text=مرحباً، أريد طلب تطبيق..." target="_blank" style="margin-top:15px; border-top:1px solid var(--border); color:#fbbf24;">
-            <i class="fas fa-crown"></i> اطلب تطبيق خاص
-        </a>
+        <a href="https://wa.me/963938624226" target="_blank"><i class="fab fa-whatsapp"></i> واتساب</a>
+        <a href="https://www.facebook.com/share/1AZTCywPbC/" target="_blank"><i class="fab fa-facebook"></i> فيسبوك</a>
     </div>
     <div id="overlay" onclick="closeNav()"></div>
 
     <div class="hero">
         <h1>متجر التطبيقات</h1>
-        <p>الأفضل لتحميل البرامج المعدلة والمدفوعة</p>
-        
         <div class="search-box">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="searchInput" placeholder="ابحث عن تطبيق أو لعبة...">
+            <input type="text" id="searchInput" placeholder="ابحث...">
         </div>
     </div>
 
-    <div class="grid" id="container">
-        <div class="status">جاري الاتصال بالسيرفر...</div>
-    </div>
+    <div class="grid" id="container"></div>
 
     <script>
-        /* كود القائمة */
-        function openNav() {
-            document.getElementById("mySidebar").style.width = "280px";
-            document.getElementById("overlay").style.display = "block";
-        }
-        function closeNav() {
-            document.getElementById("mySidebar").style.width = "0";
-            document.getElementById("overlay").style.display = "none";
+        // دالة تبديل الوضع
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            
+            if (body.getAttribute('data-theme') === 'light') {
+                body.removeAttribute('data-theme');
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            }
         }
 
-        /* كود جلب البيانات */
+        // حفظ خيار المستخدم عند التحديث
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').className = 'fas fa-moon';
+        }
+
+        function openNav() { document.getElementById("mySidebar").style.width = "280px"; document.getElementById("overlay").style.display = "block"; }
+        function closeNav() { document.getElementById("mySidebar").style.width = "0"; document.getElementById("overlay").style.display = "none"; }
+
+        // كود جلب البيانات (استخدم رابطك الجديد هنا)
         const csvUrl = "https://docs.google.com/spreadsheets/d/1CIJMAArhiP3jlYAs6s4-lCn4CXI6IucLQKwPpJqzRd4/gviz/tq?tqx=out:csv";
         let allApps = [];
 
@@ -301,62 +179,23 @@
                 const response = await fetch(csvUrl);
                 const text = await response.text();
                 const rows = text.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
-                
                 const container = document.getElementById('container');
                 container.innerHTML = '';
-
                 rows.forEach(col => {
                     const name = col[0]?.replace(/"/g, '').trim();
                     const link = col[1]?.replace(/"/g, '').trim();
                     const img  = col[2]?.replace(/"/g, '').trim();
-
                     if (name && link && link.includes('http')) {
-                        // هنا يكمن الذكاء: فحص نوع الرابط لتغيير الكلام
-                        let btnText = "GET"; // الافتراضي
-                        let badgeText = "MOD"; // الافتراضي
-                        let lowerLink = link.toLowerCase();
-
-                        if (lowerLink.endsWith('.pdf')) {
-                            btnText = "قراءة";
-                            badgeText = "PDF";
-                        } else if (lowerLink.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-                            btnText = "مشاهدة";
-                            badgeText = "IMG";
-                        } else if (lowerLink.match(/\.(mp3|wav|m4a)$/)) {
-                            btnText = "استماع";
-                            badgeText = "AUDIO";
-                        }
-
                         const card = document.createElement('a');
                         card.className = 'card';
-                        card.href = link;
-                        card.target = '_blank'; // يفتح في لسان جديد ليسمح للموبايل باختيار التطبيق
-                        
-                        card.innerHTML = `
-                            <span class="mod-badge">${badgeText}</span>
-                            <img src="${img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
-                            <div class="card-title">${name}</div>
-                            <div class="get-btn">${btnText}</div>
-                        `;
+                        card.href = link; card.target = '_blank';
+                        card.innerHTML = `<img src="${img}"><div class="card-title">${name}</div><div class="get-btn">GET</div>`;
                         container.appendChild(card);
                         allApps.push({ element: card, name: name.toLowerCase() });
                     }
                 });
-            } catch (e) {
-                document.getElementById('container').innerHTML = "<div class='status'>تأكد من الاتصال بالإنترنت</div>";
-            }
+            } catch (e) { console.log("Error"); }
         }
-
-        /* كود البحث */
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            
-            allApps.forEach(app => {
-                const isVisible = app.name.includes(val);
-                app.element.style.display = isVisible ? 'flex' : 'none';
-            });
-        });
-
         loadApps();
     </script>
 </body>
