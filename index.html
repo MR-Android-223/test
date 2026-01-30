@@ -347,6 +347,7 @@
             box-shadow: var(--shadow);
             backdrop-filter: blur(10px);
             overflow: hidden;
+            cursor: pointer;
         }
 
         .card::before {
@@ -382,6 +383,7 @@
             font-weight: bold;
             backdrop-filter: blur(5px);
             border: 1px solid rgba(59, 130, 246, 0.2);
+            z-index: 10;
         }
 
         .card img {
@@ -548,7 +550,7 @@
         
         <div class="sidebar-header">
             <img src="https://midomido.neocities.org/mohammadalboushi.png" alt="Mohammad Al Boushi" class="profile-img">
-            <h3 style="margin:10px 0; color:white; font-size:1.2rem;">محمد alboushi</h3>
+            <h3 style="margin:10px 0; color:white; font-size:1.2rem;">Mohammad Al Boushi</h3>
             <span style="color: var(--text-muted); font-size: 0.9rem;">المطور & الإداري</span>
         </div>
 
@@ -581,13 +583,13 @@
         <p>أفضل مكان لتحميل البرامج المعدلة والمدفوعة والألعاب الحصرية</p>
         
         <div class="extra-buttons">
-            <a href="#featured" class="extra-btn">
+            <a href="#" class="extra-btn" onclick="return false;">
                 <i class="fas fa-star"></i> المميزة
             </a>
-            <a href="#new" class="extra-btn">
+            <a href="#" class="extra-btn" onclick="return false;">
                 <i class="fas fa-fire"></i> جديدة
             </a>
-            <a href="#popular" class="extra-btn">
+            <a href="#" class="extra-btn" onclick="return false;">
                 <i class="fas fa-chart-line"></i> شعبية
             </a>
         </div>
@@ -616,7 +618,7 @@
     <div class="grid" id="container">
         <div class="status">
             <div class="loading"></div>
-            جاري تحميل التطبيقات...
+            جاري الاتصال بالسيرفر وجلب التطبيقات...
         </div>
     </div>
 
@@ -643,80 +645,95 @@
 
         // تحسينات إضافية
         function showAbout() {
-            alert('مرحباً بك في متجر M.Al.Boushi!\n\nنقدم لك أفضل التطبيقات المعدلة والمدفوعة.\nمطور من قبل محمد alboushi.');
+            alert('مرحباً بك في متجر M.Al.Boushi!\n\nنقدم لك أفضل التطبيقات المعدلة والمدفوعة.\nمطور من قبل Mohammad Al Boushi.');
             closeNav();
         }
 
         function showContact() {
-            alert('تواصل معنا:\nواتساب: +963938624226\nبريد: m.al.boushi@example.com');
+            alert('تواصل معنا:\nواتساب: +963938624226');
             closeNav();
         }
 
-        // بيانات تجريبية حتى يتم تحميل البيانات الحقيقية
-        const sampleApps = [
-            { name: "Adobe Photoshop", link: "https://example.com/photoshop", img: "https://play-lh.googleusercontent.com/8l9W3UyGjHmBMrXr_8Z44vFvO9tY7k0V4Y3v8F4U5Y2p6K7r1E9o0A2B3C4D5E6F7G8.jpg", type: "MOD" },
-            { name: "Spotify Premium", link: "https://example.com/spotify", img: "https://play-lh.googleusercontent.com/8l9W3UyGjHmBMrXr_8Z44vFvO9tY7k0V4Y3v8F4U5Y2p6K7r1E9o0A2B3C4D5E6F7G8.jpg", type: "PREMIUM" },
-            { name: "Netflix Mod", link: "https://example.com/netflix", img: "https://play-lh.googleusercontent.com/8l9W3UyGjHmBMrXr_8Z44vFvO9tY7k0V4Y3v8F4U5Y2p6K7r1E9o0A2B3C4D5E6F7G8.jpg", type: "MOD" },
-            { name: "Microsoft Office", link: "https://example.com/office", img: "https://play-lh.googleusercontent.com/8l9W3UyGjHmBMrXr_8Z44vFvO9tY7k0V4Y3v8F4U5Y2p6K7r1E9o0A2B3C4D5E6F7G8.jpg", type: "PAID" },
-            { name: "WhatsApp Business", link: "https://example.com/whatsapp", img: "https://play-lh.googleusercontent.com/8l9W3UyGjHmBMrXr_8Z44vFvO9tY7k0V4Y3v8F4U5Y2p6K7r1E9o0A2B3C4D5E6F7G8.jpg", type: "MOD" },
-            { name: "Instagram Pro", link: "https://example.com/instagram", img: "https://play-lh.googleusercontent.com/8l9W3UyGjHmBMrXr_8Z44vFvO9tY7k0V4Y3v8F4U5Y2p6K7r1E9o0A2B3C4D5E6F7G8.jpg", type: "PRO" }
-        ];
-
+        // --- كود جلب البيانات من Google Sheet (تم إعادته) ---
+        const csvUrl = "https://docs.google.com/spreadsheets/d/1CIJMAArhiP3jlYAs6s4-lCn4CXI6IucLQKwPpJqzRd4/gviz/tq?tqx=out:csv";
         let allApps = [];
 
         async function loadApps() {
             try {
-                // تأخير قصير لعرض تأثير التحميل
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                const response = await fetch(csvUrl);
+                const text = await response.text();
+                // تحليل ملف CSV
+                const rows = text.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
                 
                 const container = document.getElementById('container');
                 container.innerHTML = '';
 
-                // استخدام البيانات التجريبية
-                sampleApps.forEach(app => {
-                    const card = createAppCard(app);
-                    container.appendChild(card);
-                    allApps.push({ element: card, name: app.name.toLowerCase() });
+                let validAppsCount = 0;
+
+                rows.forEach(col => {
+                    const name = col[0]?.replace(/"/g, '').trim();
+                    const link = col[1]?.replace(/"/g, '').trim();
+                    const img  = col[2]?.replace(/"/g, '').trim();
+
+                    if (name && link && link.includes('http')) {
+                        validAppsCount++;
+                        
+                        // تحديد نوع الملف لتغيير لون وشكل الزر
+                        let btnText = "تحميل";
+                        let badgeText = "MOD";
+                        let badgeColor = "#3b82f6"; // أزرق افتراضي
+                        let lowerLink = link.toLowerCase();
+
+                        if (lowerLink.endsWith('.pdf')) {
+                            btnText = "قراءة";
+                            badgeText = "PDF";
+                            badgeColor = "#ef4444"; // أحمر
+                        } else if (lowerLink.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
+                            btnText = "مشاهدة";
+                            badgeText = "IMG";
+                            badgeColor = "#f59e0b"; // برتقالي
+                        } else if (lowerLink.match(/\.(mp3|wav|m4a)$/)) {
+                            btnText = "استماع";
+                            badgeText = "AUDIO";
+                            badgeColor = "#10b981"; // أخضر
+                        }
+
+                        // إنشاء الكرت بالتصميم الجديد
+                        const card = document.createElement('a');
+                        card.className = 'card';
+                        card.href = link;
+                        card.target = '_blank'; // مهم جداً لفتح الرابط
+                        card.title = name;
+
+                        card.innerHTML = `
+                            <span class="mod-badge" style="background: rgba(${hexToRgb(badgeColor)}, 0.15); color: ${badgeColor};">
+                                ${badgeText}
+                            </span>
+                            <img src="${img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
+                            <div class="card-title">${name}</div>
+                            <div class="get-btn">${btnText}</div>
+                        `;
+                        container.appendChild(card);
+                        allApps.push({ element: card, name: name.toLowerCase() });
+                    }
                 });
 
-                // تحديث العدادات
-                updateStats();
-                
+                // تحديث العدادات بناءً على البيانات الحقيقية
+                updateStats(validAppsCount);
+
             } catch (e) {
-                console.error('Error loading apps:', e);
+                console.error(e);
                 document.getElementById('container').innerHTML = `
                     <div class="status">
                         <i class="fas fa-exclamation-triangle" style="color: var(--danger); margin-right: 10px;"></i>
-                        حدث خطأ أثناء تحميل التطبيقات
+                        فشل الاتصال بالسيرفر، تأكد من الإنترنت
                         <br><small style="font-size: 0.9rem; margin-top: 10px; display: block;">جرب تحديث الصفحة</small>
                     </div>
                 `;
             }
         }
 
-        function createAppCard(app) {
-            const card = document.createElement('a');
-            card.className = 'card';
-            card.href = app.link;
-            card.target = '_blank';
-            card.title = app.name;
-
-            let badgeColor = '#3b82f6';
-            if (app.type === 'PREMIUM') badgeColor = '#f59e0b';
-            else if (app.type === 'PRO') badgeColor = '#8b5cf6';
-            else if (app.type === 'PAID') badgeColor = '#10b981';
-
-            card.innerHTML = `
-                <span class="mod-badge" style="background: rgba(${hexToRgb(badgeColor)}, 0.15); color: ${badgeColor};">
-                    ${app.type}
-                </span>
-                <img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
-                <div class="card-title">${app.name}</div>
-                <div class="get-btn">تحميل</div>
-            `;
-            return card;
-        }
-
+        // دالة مساعدة لتحويل Hex إلى RGB للشفافية
         function hexToRgb(hex) {
             const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ? 
@@ -725,15 +742,15 @@
                 parseInt(result[3], 16) : '0, 0, 0';
         }
 
-        function updateStats() {
+        // تحديث العدادات بأرقام حقيقية ووهمية للزينة
+        function updateStats(realCount) {
             const appCount = document.getElementById('appCount');
             const downloadCount = document.getElementById('downloadCount');
             const ratingCount = document.getElementById('ratingCount');
 
-            // تأثير العد التدريجي
-            animateValue(appCount, 0, sampleApps.length, 1000);
-            animateValue(downloadCount, 0, 150, 1500, 'K');
-            animateValue(ratingCount, 4.5, 4.9, 800);
+            animateValue(appCount, 0, realCount, 1000);
+            animateValue(downloadCount, 0, realCount * 15, 1500, 'K'); // رقم تقريبي للتنزيلات
+            animateValue(ratingCount, 4.0, 4.9, 800);
         }
 
         function animateValue(element, start, end, duration, suffix = '') {
@@ -753,30 +770,16 @@
         // كود البحث
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
-            
             allApps.forEach(app => {
                 const isVisible = app.name.includes(val);
                 app.element.style.display = isVisible ? 'flex' : 'none';
             });
         });
 
-        // تحميل التطبيقات عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', () => {
-            loadApps();
-        });
+        // تشغيل الدالة عند التحميل
+        loadApps();
 
-        // تحسينات إضافية
-        // تأثير عند النقر على البطاقات
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.card')) {
-                e.target.closest('.card').classList.add('pulse');
-                setTimeout(() => {
-                    e.target.closest('.card').classList.remove('pulse');
-                }, 2000);
-            }
-        });
-
-        // تأثيرات تمرير الشاشة
+        // تأثيرات حركية للخلفية
         window.addEventListener('scroll', () => {
             const scrolled = window.pageYOffset;
             const rate = scrolled * -0.5;
@@ -785,4 +788,3 @@
     </script>
 </body>
 </html>
-
