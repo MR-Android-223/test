@@ -311,16 +311,32 @@
                     const img  = col[2]?.replace(/"/g, '').trim();
 
                     if (name && link && link.includes('http')) {
+                        // هنا يكمن الذكاء: فحص نوع الرابط لتغيير الكلام
+                        let btnText = "GET"; // الافتراضي
+                        let badgeText = "MOD"; // الافتراضي
+                        let lowerLink = link.toLowerCase();
+
+                        if (lowerLink.endsWith('.pdf')) {
+                            btnText = "قراءة";
+                            badgeText = "PDF";
+                        } else if (lowerLink.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
+                            btnText = "مشاهدة";
+                            badgeText = "IMG";
+                        } else if (lowerLink.match(/\.(mp3|wav|m4a)$/)) {
+                            btnText = "استماع";
+                            badgeText = "AUDIO";
+                        }
+
                         const card = document.createElement('a');
                         card.className = 'card';
                         card.href = link;
-                        card.target = '_blank';
+                        card.target = '_blank'; // يفتح في لسان جديد ليسمح للموبايل باختيار التطبيق
                         
                         card.innerHTML = `
-                            <span class="mod-badge">MOD</span>
+                            <span class="mod-badge">${badgeText}</span>
                             <img src="${img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
                             <div class="card-title">${name}</div>
-                            <div class="get-btn">GET</div>
+                            <div class="get-btn">${btnText}</div>
                         `;
                         container.appendChild(card);
                         allApps.push({ element: card, name: name.toLowerCase() });
@@ -334,15 +350,11 @@
         /* كود البحث */
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
-            let hasResult = false;
             
             allApps.forEach(app => {
                 const isVisible = app.name.includes(val);
                 app.element.style.display = isVisible ? 'flex' : 'none';
-                if(isVisible) hasResult = true;
             });
-
-            // إذا لم يتم العثور على نتائج، يمكنك إظهار رسالة (اختياري)
         });
 
         loadApps();
