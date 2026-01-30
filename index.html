@@ -3,99 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M.Al.Boushi Store - أفضل متجر تطبيقات</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>M.Al.Boushi Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* تعريف المتغيرات للألوان (الوضع الليلي افتراضي) */
         :root {
-            --bg-main: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            --bg-card: linear-gradient(145deg, #1e293b 0%, #1a2436 100%);
-            --primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            --primary-color: #3b82f6;
-            --secondary: #8b5cf6;
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --border: rgba(255,255,255,0.1);
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --shadow: 0 10px 25px rgba(0,0,0,0.3);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --primary: #3b82f6;
+            --border: rgba(255,255,255,0.08);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --header-bg: rgba(15, 23, 42, 0.95);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        /* متغيرات الوضع النهاري */
+        [data-theme="light"] {
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --border: rgba(0,0,0,0.08);
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            --header-bg: rgba(255, 255, 255, 0.95);
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background: var(--bg-main);
+            background-color: var(--bg-body);
             color: var(--text-main);
             font-family: 'Cairo', sans-serif;
             min-height: 100vh;
-            position: relative;
+            transition: background-color 0.3s, color 0.3s;
             overflow-x: hidden;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        /* الهيدر الثابت */
+        /* الهيدر */
         header {
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(20px);
+            background: var(--header-bg);
+            backdrop-filter: blur(8px); /* تخفيف البلور */
             border-bottom: 1px solid var(--border);
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--shadow);
         }
 
-        .logo {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: var(--text-main);
-            letter-spacing: 0.5px;
+        .header-left {
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-        .logo span {
-            background: var(--primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            gap: 15px;
         }
 
-        .menu-btn {
-            font-size: 1.4rem;
+        /* اللوغو المعدل */
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--text-main);
+            direction: ltr; /* لجعل الاسم بالانجليزي يظهر بشكل صحيح */
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .logo .m-letter { color: var(--primary); font-size: 1.6rem; }
+        .logo .boushi { color: var(--text-main); }
+
+        /* أزرار الهيدر */
+        .icon-btn {
+            font-size: 1.3rem;
             cursor: pointer;
             color: var(--text-main);
-            transition: var(--transition);
-            padding: 10px;
-            border-radius: 10px;
-            background: rgba(59, 130, 246, 0.1);
+            transition: 0.2s;
+            padding: 5px;
         }
-        .menu-btn:hover {
-            color: var(--primary-color);
-            transform: scale(1.1);
-            background: rgba(59, 130, 246, 0.2);
-        }
+        .icon-btn:hover { color: var(--primary); transform: scale(1.1); }
 
         /* القائمة الجانبية */
         .sidebar {
@@ -105,310 +93,183 @@
             z-index: 2000;
             top: 0;
             right: 0;
-            background: rgba(17, 24, 39, 0.98);
-            backdrop-filter: blur(20px);
+            background-color: #111827; /* دائماً داكن للقائمة */
             overflow-x: hidden;
-            transition: var(--transition);
-            box-shadow: -5px 0 30px rgba(0,0,0,0.4);
-            padding-top: 80px;
+            transition: 0.3s;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+            padding-top: 20px;
         }
 
         .sidebar-header {
             text-align: center;
-            padding: 30px 20px 20px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 10px;
         }
 
         .profile-img {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
             object-fit: cover;
-            border: 4px solid var(--primary-color);
-            margin-bottom: 15px;
+            border: 3px solid var(--primary);
+            margin-bottom: 10px;
             background-color: #1f2937;
-            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
         }
 
         .sidebar a {
-            padding: 15px 30px;
+            padding: 15px 25px;
             text-decoration: none;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #cbd5e1;
             display: flex;
             align-items: center;
-            transition: var(--transition);
+            transition: 0.2s;
             border-bottom: 1px solid rgba(255,255,255,0.03);
         }
 
-        .sidebar a i {
-            width: 40px;
-            font-size: 1.3rem;
-            color: var(--primary-color);
-            transition: var(--transition);
-        }
-        .sidebar a:hover {
-            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%);
-            color: white;
-            padding-right: 40px;
-        }
-        .sidebar a:hover i {
-            color: var(--primary-color);
-            transform: scale(1.1);
-        }
+        .sidebar a i { width: 35px; font-size: 1.2rem; color: var(--primary); }
+        .sidebar a:hover { background: rgba(59, 130, 246, 0.1); color: white; padding-right: 35px; }
 
         .close-btn {
             position: absolute;
-            top: 20px;
+            top: 15px;
             left: 20px;
-            font-size: 28px;
-            color: var(--text-muted);
+            font-size: 25px;
+            color: #94a3b8;
             background: none;
             border: none;
             cursor: pointer;
-            transition: var(--transition);
-            padding: 10px;
-            border-radius: 10px;
-        }
-        .close-btn:hover {
-            color: var(--primary-color);
-            background: rgba(59, 130, 246, 0.1);
         }
 
         #overlay {
-            position: fixed;
-            display: none;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 1500;
-            backdrop-filter: blur(5px);
+            position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0;
+            background: rgba(0,0,0,0.6); z-index: 1500;
         }
 
         /* القسم الرئيسي */
         .hero {
             text-align: center;
-            padding: 50px 20px 30px;
-            position: relative;
-            overflow: hidden;
+            padding: 40px 20px;
+            background: radial-gradient(circle at top, rgba(59, 130, 246, 0.08), transparent 60%);
         }
 
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.1), transparent 30%);
-            animation: rotate 10s linear infinite;
-            z-index: -1;
-        }
+        .hero h1 { margin: 0 0 10px; font-size: 1.8rem; }
+        .hero p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .hero h1 {
-            margin: 0 0 15px;
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: var(--primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 2px 10px rgba(59, 130, 246, 0.2);
-        }
-
-        .hero p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            margin-bottom: 35px;
-            opacity: 0.9;
-        }
-
-        /* مربع البحث */
-        .search-box {
-            position: relative;
-            max-width: 600px;
-            margin: 0 auto 40px;
-        }
-        
-        .search-box input {
-            width: 100%;
-            background: rgba(30, 41, 59, 0.8);
-            border: 2px solid rgba(59, 130, 246, 0.2);
-            padding: 18px 60px 18px 25px;
-            border-radius: 15px;
-            color: white;
-            font-family: 'Cairo';
-            font-size: 1.1rem;
-            outline: none;
-            transition: var(--transition);
-            backdrop-filter: blur(10px);
-        }
-
-        .search-box input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 1.2rem;
-        }
-
-        .search-box input:focus + .search-icon {
-            color: var(--primary-color);
-        }
-
-        /* عداد التطبيقات */
+        /* الإحصائيات */
         .stats {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .stat-item {
-            background: rgba(30, 41, 59, 0.7);
-            padding: 15px 25px;
-            border-radius: 12px;
-            text-align: center;
-            min-width: 120px;
-            border: 1px solid var(--border);
-            transition: var(--transition);
-        }
-
-        .stat-item:hover {
-            transform: translateY(-5px);
-            background: rgba(59, 130, 246, 0.1);
-            border-color: var(--primary-color);
-        }
-
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-top: 5px;
-        }
-
-        /* شبكة التطبيقات */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 20px;
-            padding: 0 20px 50px;
-            max-width: 1400px;
+            margin-bottom: 30px;
+        }
+        .stat-item {
+            text-align: center;
+            background: var(--bg-card);
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .stat-num { font-weight: 800; color: var(--primary); font-size: 1.2rem; display: block; }
+        .stat-lbl { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* البحث */
+        .search-box {
+            position: relative;
+            max-width: 500px;
             margin: 0 auto;
         }
-
-        @media(min-width: 768px) {
-            .grid {
-                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            }
+        .search-box input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 15px 45px 15px 20px;
+            border-radius: 50px;
+            color: var(--text-main);
+            font-family: 'Cairo';
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+            box-shadow: var(--shadow);
         }
+        .search-box input:focus { border-color: var(--primary); }
+        .search-icon { position: absolute; right: 20px; top: 16px; color: var(--text-muted); }
 
-        @media(min-width: 1024px) {
-            .grid {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            }
+        /* الشبكة */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 10px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
         }
+        @media(min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
 
-        /* تصميم الكرت */
+        /* الكرت */
         .card {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 20px 15px;
+            border-radius: 16px;
+            padding: 15px;
             text-decoration: none;
-            color: white;
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
             align-items: center;
             border: 1px solid var(--border);
             position: relative;
-            transition: var(--transition);
+            transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-            overflow: hidden;
-            cursor: pointer;
         }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.1), transparent);
-            opacity: 0;
-            transition: var(--transition);
-        }
-
-        .card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        .card:hover::before {
-            opacity: 1;
-        }
+        
+        /* إزالة التأثيرات الثقيلة والاكتفاء بالحركة البسيطة */
+        .card:active { transform: scale(0.97); }
 
         .mod-badge {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(59, 130, 246, 0.15);
-            color: var(--primary-color);
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 20px;
+            top: 10px;
+            left: 10px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 6px;
             font-weight: bold;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            z-index: 10;
         }
+
+        /* زر القلب */
+        .heart-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            z-index: 5;
+            transition: 0.2s;
+            background: transparent;
+            border: none;
+        }
+        .heart-btn.active { color: #ef4444; transform: scale(1.1); }
 
         .card img {
-            width: 80px;
-            height: 80px;
-            border-radius: 18px;
-            margin-bottom: 15px;
+            width: 75px;
+            height: 75px;
+            border-radius: 16px;
+            margin-bottom: 12px;
             object-fit: cover;
             background: #0f172a;
-            border: 2px solid rgba(59, 130, 246, 0.2);
-            transition: var(--transition);
-        }
-
-        .card:hover img {
-            transform: scale(1.1);
-            border-color: var(--primary-color);
         }
 
         .card-title {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             text-align: center;
-            margin-bottom: 12px;
-            line-height: 1.4;
-            height: 45px;
+            margin-bottom: 10px;
+            line-height: 1.3;
+            height: 38px;
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -416,133 +277,44 @@
         }
 
         .get-btn {
-            background: linear-gradient(135deg, #334155 0%, #475569 100%);
-            color: #e2e8f0;
-            font-size: 0.85rem;
-            font-weight: 600;
-            padding: 8px 30px;
-            border-radius: 25px;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .card:hover .get-btn {
-            background: var(--primary);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .get-btn:hover {
-            transform: scale(1.1);
-        }
-
-        /* رسالة التحميل */
-        .status {
-            grid-column: 1 / -1;
-            text-align: center;
-            color: var(--text-muted);
-            margin: 50px 0;
-            font-size: 1.2rem;
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* تأثيرات إضافية */
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
-
-        /* أزرار إضافية */
-        .extra-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .extra-btn {
-            background: rgba(30, 41, 59, 0.7);
+            background: var(--bg-body);
             color: var(--text-main);
             border: 1px solid var(--border);
-            padding: 12px 25px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 6px 25px;
+            border-radius: 50px;
+            transition: 0.3s;
         }
+        .card:hover .get-btn { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .extra-btn:hover {
-            background: var(--primary);
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-
-        /* Footer */
+        .status { grid-column: span 2; text-align: center; color: var(--text-muted); margin-top: 20px; }
+        
         footer {
             text-align: center;
             padding: 30px 20px;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            margin-top: 30px;
             border-top: 1px solid var(--border);
-            margin-top: 50px;
-        }
-
-        /* تحسينات للهاتف */
-        @media(max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .stats {
-                gap: 15px;
-            }
-            
-            .stat-item {
-                min-width: 100px;
-                padding: 12px 15px;
-            }
-            
-            .stat-number {
-                font-size: 1.5rem;
-            }
         }
     </style>
 </head>
 <body>
 
     <header>
+        <!-- اللوغو كما طلبت -->
         <div class="logo">
-            <i class="fas fa-cube"></i>
-            M.<span>Al.Boushi</span>
+            <span class="m-letter">M</span>
+            <span class="boushi">.Al.Boushi</span>
         </div>
-        <i class="fas fa-bars menu-btn" onclick="openNav()"></i>
+
+        <div class="header-left">
+            <!-- زر تبديل الوضع (شمس/قمر) -->
+            <i class="fas fa-moon icon-btn" id="themeBtn" onclick="toggleTheme()"></i>
+            <!-- زر القائمة -->
+            <i class="fas fa-bars icon-btn" onclick="openNav()"></i>
+        </div>
     </header>
 
     <div id="mySidebar" class="sidebar">
@@ -550,92 +322,78 @@
         
         <div class="sidebar-header">
             <img src="https://midomido.neocities.org/mohammadalboushi.png" alt="Mohammad Al Boushi" class="profile-img">
-            <h3 style="margin:10px 0; color:white; font-size:1.2rem;">Mohammad Al Boushi</h3>
-            <span style="color: var(--text-muted); font-size: 0.9rem;">المطور & الإداري</span>
+            <h3 style="margin:5px 0; color:white; font-size:1.1rem;">Mohammad Al Boushi</h3>
+            <span style="color: var(--text-muted); font-size: 0.8rem;">Admin & Developer</span>
         </div>
 
-        <a href="https://wa.me/963938624226" target="_blank">
-            <i class="fab fa-whatsapp" style="color:#25D366;"></i> واتساب
-        </a>
-        <a href="https://www.facebook.com/share/1AZTCywPbC/" target="_blank">
-            <i class="fab fa-facebook" style="color:#1877F2;"></i> فيسبوك
-        </a>
-        <a href="https://www.instagram.com/m_al_boushi" target="_blank">
-            <i class="fab fa-instagram" style="color:#E4405F;"></i> انستغرام
-        </a>
-        <a href="tel:+963938624226">
-            <i class="fas fa-phone-alt"></i> اتصال هاتفي
-        </a>
-        <a href="https://wa.me/963938624226?text=مرحباً، أريد طلب تطبيق..." target="_blank" style="margin-top:20px; border-top:1px solid var(--border); color:#fbbf24;">
+        <a href="https://wa.me/963938624226" target="_blank"><i class="fab fa-whatsapp" style="color:#25D366;"></i> واتساب</a>
+        <a href="https://www.facebook.com/share/1AZTCywPbC/" target="_blank"><i class="fab fa-facebook" style="color:#1877F2;"></i> فيسبوك</a>
+        <a href="https://www.instagram.com/m_al_boushi" target="_blank"><i class="fab fa-instagram" style="color:#E4405F;"></i> انستغرام</a>
+        <a href="tel:+963938624226"><i class="fas fa-phone"></i> اتصال هاتفي</a>
+        <a href="https://wa.me/963938624226?text=مرحباً، أريد طلب تطبيق..." target="_blank" style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); color:#fbbf24;">
             <i class="fas fa-crown"></i> اطلب تطبيق خاص
-        </a>
-        <a href="#" onclick="showAbout()" style="margin-top:10px; color:#8b5cf6;">
-            <i class="fas fa-info-circle"></i> حول المتجر
-        </a>
-        <a href="#" onclick="showContact()" style="color:#10b981;">
-            <i class="fas fa-envelope"></i> اتصل بنا
         </a>
     </div>
     <div id="overlay" onclick="closeNav()"></div>
 
     <div class="hero">
-        <h1>✨ متجر التطبيقات</h1>
-        <p>أفضل مكان لتحميل البرامج المعدلة والمدفوعة والألعاب الحصرية</p>
-        
-        <div class="extra-buttons">
-            <a href="#" class="extra-btn" onclick="return false;">
-                <i class="fas fa-star"></i> المميزة
-            </a>
-            <a href="#" class="extra-btn" onclick="return false;">
-                <i class="fas fa-fire"></i> جديدة
-            </a>
-            <a href="#" class="extra-btn" onclick="return false;">
-                <i class="fas fa-chart-line"></i> شعبية
-            </a>
-        </div>
+        <h1>متجر التطبيقات</h1>
+        <p>التطبيقات المعدلة والمدفوعة بين يديك</p>
         
         <div class="stats">
             <div class="stat-item">
-                <span class="stat-number" id="appCount">0</span>
-                <span class="stat-label">تطبيقات</span>
+                <span class="stat-num" id="appCount">0</span>
+                <span class="stat-lbl">تطبيق</span>
             </div>
             <div class="stat-item">
-                <span class="stat-number" id="downloadCount">0K</span>
-                <span class="stat-label">تنزيل</span>
+                <span class="stat-num">5K+</span> <!-- الرقم المعدل -->
+                <span class="stat-lbl">تنزيل</span>
             </div>
             <div class="stat-item">
-                <span class="stat-number" id="ratingCount">4.9</span>
-                <span class="stat-label">التقييم</span>
+                <span class="stat-num">4.9</span>
+                <span class="stat-lbl">تقييم</span>
             </div>
         </div>
-        
+
         <div class="search-box">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="searchInput" placeholder="🔍 ابحث عن تطبيق أو لعبة...">
+            <input type="text" id="searchInput" placeholder="ابحث عن تطبيق أو لعبة...">
         </div>
     </div>
 
     <div class="grid" id="container">
-        <div class="status">
-            <div class="loading"></div>
-            جاري الاتصال بالسيرفر وجلب التطبيقات...
-        </div>
+        <div class="status">جاري الاتصال بالسيرفر...</div>
     </div>
 
     <footer>
-        <p>&copy; 2026 M.Al.Boushi Store - جميع الحقوق محفوظة</p>
-        <p style="margin-top: 5px; font-size: 0.8rem; color: var(--text-muted);">
-            تم التحديث في: <span id="updateDate"></span>
-        </p>
+        &copy; 2026 M.Al.Boushi Store - جميع الحقوق محفوظة
     </footer>
 
     <script>
-        // تحديث تاريخ اليوم
-        document.getElementById('updateDate').textContent = new Date().toLocaleDateString('ar-SA');
+        /* --- 1. كود الوضع الليلي/النهاري --- */
+        const themeBtn = document.getElementById('themeBtn');
+        
+        // التحقق من الوضع المحفوظ
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            themeBtn.classList.replace('fa-moon', 'fa-sun');
+        }
 
-        // كود القائمة
+        function toggleTheme() {
+            if (document.body.hasAttribute('data-theme')) {
+                document.body.removeAttribute('data-theme');
+                themeBtn.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.setAttribute('data-theme', 'light');
+                themeBtn.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        /* --- 2. كود القائمة --- */
         function openNav() {
-            document.getElementById("mySidebar").style.width = "320px";
+            document.getElementById("mySidebar").style.width = "280px";
             document.getElementById("overlay").style.display = "block";
         }
         function closeNav() {
@@ -643,18 +401,30 @@
             document.getElementById("overlay").style.display = "none";
         }
 
-        // تحسينات إضافية
-        function showAbout() {
-            alert('مرحباً بك في متجر M.Al.Boushi!\n\nنقدم لك أفضل التطبيقات المعدلة والمدفوعة.\nمطور من قبل Mohammad Al Boushi.');
-            closeNav();
+        /* --- 3. نظام المفضلة (القلب) --- */
+        function getFavorites() {
+            return JSON.parse(localStorage.getItem('favorites')) || [];
         }
 
-        function showContact() {
-            alert('تواصل معنا:\nواتساب: +963938624226');
-            closeNav();
+        function toggleFavorite(btn, appName) {
+            // منع الانتقال للرابط عند ضغط القلب
+            event.preventDefault();
+            event.stopPropagation();
+
+            let favs = getFavorites();
+            if (favs.includes(appName)) {
+                favs = favs.filter(item => item !== appName);
+                btn.classList.remove('active');
+                btn.classList.replace('fa-solid', 'fa-regular');
+            } else {
+                favs.push(appName);
+                btn.classList.add('active');
+                btn.classList.replace('fa-regular', 'fa-solid');
+            }
+            localStorage.setItem('favorites', JSON.stringify(favs));
         }
 
-        // --- كود جلب البيانات من Google Sheet (تم إعادته) ---
+        /* --- 4. جلب البيانات --- */
         const csvUrl = "https://docs.google.com/spreadsheets/d/1CIJMAArhiP3jlYAs6s4-lCn4CXI6IucLQKwPpJqzRd4/gviz/tq?tqx=out:csv";
         let allApps = [];
 
@@ -662,13 +432,13 @@
             try {
                 const response = await fetch(csvUrl);
                 const text = await response.text();
-                // تحليل ملف CSV
                 const rows = text.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
                 
                 const container = document.getElementById('container');
                 container.innerHTML = '';
-
-                let validAppsCount = 0;
+                
+                let count = 0;
+                const favs = getFavorites(); // جلب المفضلة الحالية
 
                 rows.forEach(col => {
                     const name = col[0]?.replace(/"/g, '').trim();
@@ -676,40 +446,30 @@
                     const img  = col[2]?.replace(/"/g, '').trim();
 
                     if (name && link && link.includes('http')) {
-                        validAppsCount++;
-                        
-                        // تحديد نوع الملف لتغيير لون وشكل الزر
-                        let btnText = "تحميل";
+                        count++;
+                        let btnText = "GET"; 
                         let badgeText = "MOD";
-                        let badgeColor = "#3b82f6"; // أزرق افتراضي
                         let lowerLink = link.toLowerCase();
 
-                        if (lowerLink.endsWith('.pdf')) {
-                            btnText = "قراءة";
-                            badgeText = "PDF";
-                            badgeColor = "#ef4444"; // أحمر
-                        } else if (lowerLink.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-                            btnText = "مشاهدة";
-                            badgeText = "IMG";
-                            badgeColor = "#f59e0b"; // برتقالي
-                        } else if (lowerLink.match(/\.(mp3|wav|m4a)$/)) {
-                            btnText = "استماع";
-                            badgeText = "AUDIO";
-                            badgeColor = "#10b981"; // أخضر
-                        }
+                        if (lowerLink.endsWith('.pdf')) { btnText = "قراءة"; badgeText = "PDF"; }
+                        else if (lowerLink.match(/\.(jpg|png|webp)$/)) { btnText = "مشاهدة"; badgeText = "IMG"; }
+                        else if (lowerLink.match(/\.(mp3|wav)$/)) { btnText = "استماع"; badgeText = "AUDIO"; }
 
-                        // إنشاء الكرت بالتصميم الجديد
+                        // التحقق هل هذا التطبيق في المفضلة؟
+                        const isFav = favs.includes(name);
+                        const heartClass = isFav ? "fa-solid active" : "fa-regular";
+
                         const card = document.createElement('a');
                         card.className = 'card';
                         card.href = link;
-                        card.target = '_blank'; // مهم جداً لفتح الرابط
-                        card.title = name;
-
+                        card.target = '_blank';
+                        
                         card.innerHTML = `
-                            <span class="mod-badge" style="background: rgba(${hexToRgb(badgeColor)}, 0.15); color: ${badgeColor};">
-                                ${badgeText}
-                            </span>
-                            <img src="${img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
+                            <span class="mod-badge">${badgeText}</span>
+                            <button class="heart-btn" onclick="toggleFavorite(this, '${name}')">
+                                <i class="${heartClass} fa-heart"></i>
+                            </button>
+                            <img src="${img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'" loading="lazy">
                             <div class="card-title">${name}</div>
                             <div class="get-btn">${btnText}</div>
                         `;
@@ -717,74 +477,24 @@
                         allApps.push({ element: card, name: name.toLowerCase() });
                     }
                 });
-
-                // تحديث العدادات بناءً على البيانات الحقيقية
-                updateStats(validAppsCount);
+                
+                // تحديث عداد التطبيقات
+                document.getElementById('appCount').innerText = count;
 
             } catch (e) {
-                console.error(e);
-                document.getElementById('container').innerHTML = `
-                    <div class="status">
-                        <i class="fas fa-exclamation-triangle" style="color: var(--danger); margin-right: 10px;"></i>
-                        فشل الاتصال بالسيرفر، تأكد من الإنترنت
-                        <br><small style="font-size: 0.9rem; margin-top: 10px; display: block;">جرب تحديث الصفحة</small>
-                    </div>
-                `;
+                document.getElementById('container').innerHTML = "<div class='status'>تأكد من الاتصال بالإنترنت</div>";
             }
         }
 
-        // دالة مساعدة لتحويل Hex إلى RGB للشفافية
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? 
-                parseInt(result[1], 16) + ', ' + 
-                parseInt(result[2], 16) + ', ' + 
-                parseInt(result[3], 16) : '0, 0, 0';
-        }
-
-        // تحديث العدادات بأرقام حقيقية ووهمية للزينة
-        function updateStats(realCount) {
-            const appCount = document.getElementById('appCount');
-            const downloadCount = document.getElementById('downloadCount');
-            const ratingCount = document.getElementById('ratingCount');
-
-            animateValue(appCount, 0, realCount, 1000);
-            animateValue(downloadCount, 0, realCount * 15, 1500, 'K'); // رقم تقريبي للتنزيلات
-            animateValue(ratingCount, 4.0, 4.9, 800);
-        }
-
-        function animateValue(element, start, end, duration, suffix = '') {
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                const value = Math.floor(progress * (end - start) + start);
-                element.textContent = value + suffix;
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
-
-        // كود البحث
+        /* كود البحث */
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             allApps.forEach(app => {
-                const isVisible = app.name.includes(val);
-                app.element.style.display = isVisible ? 'flex' : 'none';
+                app.element.style.display = app.name.includes(val) ? 'flex' : 'none';
             });
         });
 
-        // تشغيل الدالة عند التحميل
         loadApps();
-
-        // تأثيرات حركية للخلفية
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const rate = scrolled * -0.5;
-            document.body.style.backgroundPosition = `center ${rate}px`;
-        });
     </script>
 </body>
 </html>
