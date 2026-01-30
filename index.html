@@ -1,202 +1,350 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M.Al.Boushi Store</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* --- تعريف الألوان للوضعين --- */
-        :root {
-            /* الوضع الليلي (الافتراضي) */
-            --bg-main: #0f172a;
-            --bg-card: #1e293b;
-            --primary: #3b82f6;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: rgba(255,255,255,0.05);
-            --header-bg: rgba(15, 23, 42, 0.95);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M.Al.Boushi Store</title>
 
-        [data-theme="light"] {
-            /* الوضع النهاري */
-            --bg-main: #f1f5f9;
-            --bg-card: #ffffff;
-            --primary: #2563eb;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: rgba(0,0,0,0.1);
-            --header-bg: rgba(255, 255, 255, 0.95);
-        }
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-        * { box-sizing: border-box; transition: background-color 0.3s, color 0.3s; }
+<style>
+:root{
+--bg:#0f172a;
+--card:#1e293b;
+--primary:#3b82f6;
+--text:#f8fafc;
+--muted:#94a3b8;
+--border:rgba(255,255,255,.06);
+}
 
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            font-family: 'Cairo', sans-serif;
-            margin: 0;
-            padding-bottom: 50px;
-        }
+*{box-sizing:border-box}
 
-        /* --- الهيدر --- */
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: var(--header-bg);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+body{
+margin:0;
+font-family:'Cairo',sans-serif;
+background:var(--bg);
+color:var(--text);
+}
 
-        .logo { font-size: 1.4rem; font-weight: 800; color: var(--text-main); }
-        .logo span { color: var(--primary); }
+header{
+position:sticky;
+top:0;
+z-index:100;
+background:rgba(15,23,42,.95);
+backdrop-filter:blur(10px);
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 20px;
+border-bottom:1px solid var(--border);
+}
 
-        .header-actions { display: flex; align-items: center; gap: 20px; }
+.logo{
+font-weight:800;
+font-size:1.3rem;
+}
+.logo span{color:var(--primary)}
 
-        /* زر التبديل بين الليل والنهار */
-        .theme-toggle {
-            font-size: 1.3rem;
-            cursor: pointer;
-            color: var(--text-main);
-        }
+.hero{
+padding:30px 20px;
+text-align:center;
+}
 
-        .menu-btn { font-size: 1.4rem; cursor: pointer; color: var(--text-main); }
+.search{
+position:relative;
+max-width:500px;
+margin:0 auto;
+}
 
-        /* --- القائمة الجانبية --- */
-        .sidebar {
-            height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0;
-            background-color: var(--bg-card); overflow-x: hidden; transition: 0.4s;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.2); padding-top: 20px;
-        }
+.search input{
+width:100%;
+padding:14px 45px 14px 15px;
+border-radius:14px;
+border:1px solid #334155;
+background:var(--card);
+color:white;
+font-size:1rem;
+outline:none;
+}
 
-        .sidebar-header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
-        .profile-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin-bottom: 10px; }
-        .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 1rem; color: var(--text-muted); display: flex; align-items: center; border-bottom: 1px solid var(--border); }
-        .sidebar a i { width: 35px; font-size: 1.2rem; color: var(--primary); }
-        .sidebar a:hover { background: var(--primary); color: white; }
-        .sidebar a:hover i { color: white; }
+.search i{
+position:absolute;
+top:15px;
+right:15px;
+color:var(--muted);
+}
 
-        .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: var(--text-muted); background: none; border: none; cursor: pointer; }
+.filters{
+display:flex;
+gap:10px;
+overflow-x:auto;
+padding:10px 20px;
+}
 
-        /* --- الواجهة والبحث --- */
-        .hero { text-align: center; padding: 40px 20px; }
-        .search-box { position: relative; max-width: 500px; margin: 0 auto; }
-        .search-box input {
-            width: 100%; background: var(--bg-card); border: 1px solid var(--border);
-            padding: 15px 45px 15px 20px; border-radius: 12px; color: var(--text-main);
-            font-family: 'Cairo'; outline: none;
-        }
-        .search-icon { position: absolute; right: 15px; top: 16px; color: var(--text-muted); }
+.filter{
+padding:6px 14px;
+border-radius:20px;
+background:#334155;
+color:#e2e8f0;
+font-size:.8rem;
+white-space:nowrap;
+cursor:pointer;
+}
 
-        /* --- الشبكة والكرت --- */
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; max-width: 1000px; margin: 0 auto; }
-        @media(min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+.filter.active{
+background:var(--primary);
+color:white;
+}
 
-        .card {
-            background: var(--bg-card); border-radius: 16px; padding: 15px; text-decoration: none;
-            color: var(--text-main); display: flex; flex-direction: column; align-items: center;
-            border: 1px solid var(--border); transition: 0.3s;
-        }
-        .card img { width: 70px; height: 70px; border-radius: 14px; margin-bottom: 12px; object-fit: cover; }
-        .card-title { font-size: 0.9rem; font-weight: 600; text-align: center; margin-bottom: 10px; }
-        .get-btn { background: var(--primary); color: white; font-size: 0.8rem; font-weight: bold; padding: 6px 25px; border-radius: 50px; }
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+padding:15px;
+}
 
-        #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
-    </style>
+@media(min-width:768px){
+.grid{grid-template-columns:repeat(4,1fr)}
+}
+
+.card{
+background:var(--card);
+border-radius:16px;
+padding:15px;
+text-align:center;
+position:relative;
+border:1px solid var(--border);
+}
+
+.card img{
+width:70px;
+height:70px;
+border-radius:14px;
+object-fit:cover;
+margin-bottom:10px;
+}
+
+.card h4{
+font-size:.9rem;
+margin:0 0 10px;
+height:38px;
+overflow:hidden;
+}
+
+.badge{
+position:absolute;
+top:10px;
+left:10px;
+font-size:.65rem;
+padding:3px 8px;
+border-radius:6px;
+background:rgba(59,130,246,.15);
+color:var(--primary);
+font-weight:bold;
+}
+
+.actions{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.btn{
+background:#334155;
+color:white;
+padding:6px 18px;
+border-radius:20px;
+font-size:.8rem;
+cursor:pointer;
+}
+
+.fav{
+color:#64748b;
+cursor:pointer;
+font-size:1.1rem;
+}
+
+.fav.active{color:#ef4444}
+
+/* Skeleton */
+.skeleton{
+background:linear-gradient(90deg,#1e293b,#334155,#1e293b);
+background-size:200% 100%;
+animation:load 1.2s infinite;
+}
+
+@keyframes load{
+0%{background-position:200% 0}
+100%{background-position:-200% 0}
+}
+
+/* Modal */
+.modal{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,.6);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:200;
+}
+
+.modal-box{
+background:#020617;
+border-radius:20px;
+padding:20px;
+width:90%;
+max-width:350px;
+text-align:center;
+}
+
+.modal-box img{
+width:90px;
+height:90px;
+border-radius:18px;
+margin-bottom:10px;
+}
+
+.modal-box h3{margin:10px 0}
+
+.modal-box a{
+display:block;
+margin-top:15px;
+background:var(--primary);
+color:white;
+padding:10px;
+border-radius:25px;
+text-decoration:none;
+}
+</style>
 </head>
+
 <body>
 
-    <header>
-        <div class="logo">M.<span>Al.Boushi</span></div>
-        <div class="header-actions">
-            <div class="theme-toggle" onclick="toggleTheme()">
-                <i id="theme-icon" class="fas fa-sun"></i>
-            </div>
-            <i class="fas fa-bars menu-btn" onclick="openNav()"></i>
-        </div>
-    </header>
+<header>
+<div class="logo">M.<span>Al.Boushi</span></div>
+<i class="fas fa-bars"></i>
+</header>
 
-    <div id="mySidebar" class="sidebar">
-        <button class="close-btn" onclick="closeNav()">&times;</button>
-        <div class="sidebar-header">
-            <img src="https://midomido.neocities.org/mohammadalboushi.png" class="profile-img">
-            <h3 style="margin:5px 0;">Mohammad Al Boushi</h3>
-        </div>
-        <a href="https://wa.me/963938624226" target="_blank"><i class="fab fa-whatsapp"></i> واتساب</a>
-        <a href="https://www.facebook.com/share/1AZTCywPbC/" target="_blank"><i class="fab fa-facebook"></i> فيسبوك</a>
-    </div>
-    <div id="overlay" onclick="closeNav()"></div>
+<section class="hero">
+<h2>متجر التطبيقات</h2>
+<p style="color:var(--muted)">تحميل برامج وملفات بشكل أنيق</p>
 
-    <div class="hero">
-        <h1>متجر التطبيقات</h1>
-        <div class="search-box">
-            <i class="fas fa-search search-icon"></i>
-            <input type="text" id="searchInput" placeholder="ابحث...">
-        </div>
-    </div>
+<div class="search">
+<i class="fas fa-search"></i>
+<input type="text" id="search" placeholder="ابحث...">
+</div>
+</section>
 
-    <div class="grid" id="container"></div>
+<div class="filters">
+<div class="filter active" data-type="all">الكل</div>
+<div class="filter" data-type="app">تطبيقات</div>
+<div class="filter" data-type="pdf">PDF</div>
+<div class="filter" data-type="img">صور</div>
+<div class="filter" data-type="audio">صوت</div>
+</div>
 
-    <script>
-        // دالة تبديل الوضع
-        function toggleTheme() {
-            const body = document.body;
-            const icon = document.getElementById('theme-icon');
-            
-            if (body.getAttribute('data-theme') === 'light') {
-                body.removeAttribute('data-theme');
-                icon.className = 'fas fa-sun';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                body.setAttribute('data-theme', 'light');
-                icon.className = 'fas fa-moon';
-                localStorage.setItem('theme', 'light');
-            }
-        }
+<div class="grid" id="grid"></div>
 
-        // حفظ خيار المستخدم عند التحديث
-        if (localStorage.getItem('theme') === 'light') {
-            document.body.setAttribute('data-theme', 'light');
-            document.getElementById('theme-icon').className = 'fas fa-moon';
-        }
+<div class="modal" id="modal">
+<div class="modal-box">
+<img id="mImg">
+<h3 id="mTitle"></h3>
+<a id="mLink" target="_blank">فتح</a>
+</div>
+</div>
 
-        function openNav() { document.getElementById("mySidebar").style.width = "280px"; document.getElementById("overlay").style.display = "block"; }
-        function closeNav() { document.getElementById("mySidebar").style.width = "0"; document.getElementById("overlay").style.display = "none"; }
+<script>
+const csvUrl="PUT_YOUR_CSV_LINK_HERE";
+const grid=document.getElementById("grid");
+const modal=document.getElementById("modal");
+const favs=JSON.parse(localStorage.getItem("favs")||"[]");
+let apps=[];
 
-        // كود جلب البيانات (استخدم رابطك الجديد هنا)
-        const csvUrl = "https://docs.google.com/spreadsheets/d/1CIJMAArhiP3jlYAs6s4-lCn4CXI6IucLQKwPpJqzRd4/gviz/tq?tqx=out:csv";
-        let allApps = [];
+/* Skeleton */
+for(let i=0;i<6;i++){
+grid.innerHTML+=`
+<div class="card">
+<div class="skeleton" style="width:70px;height:70px;border-radius:14px;margin:0 auto 10px"></div>
+<div class="skeleton" style="height:14px;border-radius:6px"></div>
+</div>`;
+}
 
-        async function loadApps() {
-            try {
-                const response = await fetch(csvUrl);
-                const text = await response.text();
-                const rows = text.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
-                const container = document.getElementById('container');
-                container.innerHTML = '';
-                rows.forEach(col => {
-                    const name = col[0]?.replace(/"/g, '').trim();
-                    const link = col[1]?.replace(/"/g, '').trim();
-                    const img  = col[2]?.replace(/"/g, '').trim();
-                    if (name && link && link.includes('http')) {
-                        const card = document.createElement('a');
-                        card.className = 'card';
-                        card.href = link; card.target = '_blank';
-                        card.innerHTML = `<img src="${img}"><div class="card-title">${name}</div><div class="get-btn">GET</div>`;
-                        container.appendChild(card);
-                        allApps.push({ element: card, name: name.toLowerCase() });
-                    }
-                });
-            } catch (e) { console.log("Error"); }
-        }
-        loadApps();
-    </script>
+fetch(csvUrl)
+.then(r=>r.text())
+.then(t=>{
+grid.innerHTML="";
+t.split("\n").forEach(r=>{
+const c=r.split(",");
+if(!c[0]||!c[1])return;
+
+let type="app";
+if(c[1].includes(".pdf"))type="pdf";
+if(c[1].match(/\.(jpg|png)/))type="img";
+if(c[1].match(/\.(mp3|wav)/))type="audio";
+
+apps.push({
+name:c[0].replace(/"/g,""),
+link:c[1].replace(/"/g,""),
+img:c[2]?.replace(/"/g,""),
+type
+});
+});
+render(apps);
+});
+
+function render(list){
+grid.innerHTML="";
+list.forEach(a=>{
+const fav=favs.includes(a.name);
+grid.innerHTML+=`
+<div class="card" data-type="${a.type}">
+<span class="badge">${a.type.toUpperCase()}</span>
+<img loading="lazy" src="${a.img}">
+<h4>${a.name}</h4>
+<div class="actions">
+<div class="btn" onclick="openModal('${a.name}','${a.img}','${a.link}')">عرض</div>
+<i class="fas fa-heart fav ${fav?"active":""}" onclick="toggleFav('${a.name}',this)"></i>
+</div>
+</div>`;
+});
+}
+
+function toggleFav(name,el){
+if(favs.includes(name)){
+favs.splice(favs.indexOf(name),1);
+el.classList.remove("active");
+}else{
+favs.push(name);
+el.classList.add("active");
+}
+localStorage.setItem("favs",JSON.stringify(favs));
+}
+
+function openModal(t,i,l){
+modal.style.display="flex";
+mTitle.textContent=t;
+mImg.src=i;
+mLink.href=l;
+}
+modal.onclick=()=>modal.style.display="none";
+
+document.getElementById("search").oninput=e=>{
+const v=e.target.value.toLowerCase();
+render(apps.filter(a=>a.name.toLowerCase().includes(v)));
+};
+
+document.querySelectorAll(".filter").forEach(f=>{
+f.onclick=()=>{
+document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));
+f.classList.add("active");
+const t=f.dataset.type;
+render(t=="all"?apps:apps.filter(a=>a.type==t));
+};
+});
+</script>
+
 </body>
 </html>
