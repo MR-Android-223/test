@@ -9,16 +9,23 @@
     <style>
         :root { --bg-body: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --primary: #3b82f6; }
         body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Cairo', sans-serif; margin: 0; padding: 20px; }
-        header { text-align: center; margin-bottom: 30px; }
-        .logo { font-size: 1.8rem; font-weight: 900; color: var(--primary); }
         
-        /* مربع البحث */
-        .search-box { max-width: 500px; margin: 20px auto; position: relative; }
-        .search-box input { width: 100%; padding: 15px 45px 15px 20px; border-radius: 50px; border: none; background: var(--bg-card); color: white; font-family: 'Cairo'; outline: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .search-box i { position: absolute; right: 20px; top: 16px; color: #94a3b8; }
+        /* الرأس */
+        header { text-align: center; margin-bottom: 20px; }
+        .logo { font-size: 1.8rem; font-weight: 900; color: var(--primary); margin-bottom: 10px; }
+        
+        /* التبويبات (الأقسام) */
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .tab-btn { background: #334155; color: #94a3b8; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; font-weight: bold; }
+        .tab-btn.active { background: var(--primary); color: white; transform: scale(1.05); }
+        
+        /* البحث */
+        .search-box { max-width: 500px; margin: 0 auto 30px; position: relative; }
+        .search-box input { width: 100%; padding: 12px 45px 12px 20px; border-radius: 50px; border: none; background: var(--bg-card); color: white; font-family: 'Cairo'; outline: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .search-box i { position: absolute; right: 20px; top: 13px; color: #94a3b8; }
 
         /* الشبكة */
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 1000px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 800px; margin: 0 auto; }
         @media(min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
 
         /* الكرت */
@@ -26,15 +33,23 @@
         .card:hover { transform: translateY(-5px); border-color: var(--primary); }
         .card img { width: 70px; height: 70px; border-radius: 14px; margin-bottom: 10px; object-fit: cover; background: #000; }
         .card-title { font-size: 0.9rem; font-weight: bold; text-align: center; margin-bottom: 10px; height: 40px; overflow: hidden; }
-        .badge { position: absolute; top: 10px; left: 10px; background: rgba(59,130,246,0.1); color: var(--primary); font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; }
+        .badge { position: absolute; top: 10px; left: 10px; background: rgba(59,130,246,0.1); color: var(--primary); font-size: 0.6rem; padding: 2px 8px; border-radius: 4px; }
         .btn { background: var(--primary); color: white; padding: 5px 20px; border-radius: 20px; font-size: 0.8rem; }
-        .loading { grid-column: span 2; text-align: center; color: #94a3b8; margin-top: 50px; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo">M.Al.Boushi</div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="filterCategory('all', this)">الكل</button>
+            <button class="tab-btn" onclick="filterCategory('PROGRAM', this)">تطبيقات</button>
+            <button class="tab-btn" onclick="filterCategory('GAME', this)">ألعاب</button>
+            <button class="tab-btn" onclick="filterCategory('WEBSITE', this)">مواقع</button>
+            <button class="tab-btn" onclick="filterCategory('FILE', this)">ملفات</button>
+        </div>
+
         <div class="search-box">
             <i class="fas fa-search"></i>
             <input type="text" id="searchInput" placeholder="ابحث عن تطبيق...">
@@ -42,7 +57,7 @@
     </header>
 
     <div class="grid" id="container">
-        <div class="loading">جاري جلب التطبيقات...</div>
+        <div style="grid-column:span 2; text-align:center; color:#64748b;">جاري التحميل...</div>
     </div>
 
 <script type="module">
@@ -59,46 +74,77 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const appsRef = ref(db, 'apps');
 
-    // جلب البيانات تلقائياً
-    onValue(appsRef, (snapshot) => {
+    // متغير عام لتخزين البيانات
+    let allApps = [];
+
+    onValue(ref(db, 'apps'), (snapshot) => {
         const container = document.getElementById('container');
         container.innerHTML = '';
         const data = snapshot.val();
 
         if (data) {
-            Object.values(data).forEach(app => {
-                const card = document.createElement('a');
-                card.className = 'card';
-                card.href = app.link;
-                card.target = '_blank';
-                card.innerHTML = `
-                    <span class="badge">${app.type || 'MOD'}</span>
-                    <img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
-                    <div class="card-title">${app.name}</div>
-                    <div class="btn">تحميل</div>
-                `;
-                container.appendChild(card);
-            });
-            // تشغيل البحث
-            setupSearch();
+            // تحويل البيانات لمصفوفة لسهولة الفلترة
+            allApps = Object.values(data).reverse();
+            renderApps(allApps); // عرض الكل مبدئياً
         } else {
-            container.innerHTML = '<div class="loading">لا توجد تطبيقات مضافة حالياً</div>';
+            container.innerHTML = '<div style="grid-column:span 2; text-align:center;">لا يوجد تطبيقات</div>';
         }
     });
 
-    function setupSearch() {
-        const input = document.getElementById('searchInput');
-        const cards = document.querySelectorAll('.card');
-        input.addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            cards.forEach(card => {
-                const text = card.querySelector('.card-title').innerText.toLowerCase();
-                card.style.display = text.includes(val) ? 'flex' : 'none';
-            });
+    // دالة العرض (تأخذ مصفوفة وتعرضها)
+    function renderApps(appsList) {
+        const container = document.getElementById('container');
+        container.innerHTML = '';
+        
+        if(appsList.length === 0) {
+            container.innerHTML = '<div style="grid-column:span 2; text-align:center; color:#64748b;">لا يوجد نتائج في هذا القسم</div>';
+            return;
+        }
+
+        appsList.forEach(app => {
+            const card = document.createElement('a');
+            card.className = 'card';
+            card.href = app.link;
+            card.target = '_blank';
+            
+            // تحديد اسم القسم للعرض
+            let catName = "تطبيق";
+            if(app.type === 'WEBSITE') catName = "موقع";
+            if(app.type === 'GAME') catName = "لعبة";
+            if(app.type === 'FILE') catName = "ملف";
+
+            card.innerHTML = `
+                <span class="badge">${catName}</span>
+                <img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
+                <div class="card-title">${app.name}</div>
+                <div class="btn">فتح</div>
+            `;
+            container.appendChild(card);
         });
     }
+
+    // دالة فلترة الأقسام
+    window.filterCategory = (cat, btn) => {
+        // تغيير لون الزر
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // الفلترة
+        if (cat === 'all') {
+            renderApps(allApps);
+        } else {
+            const filtered = allApps.filter(app => app.type === cat);
+            renderApps(filtered);
+        }
+    };
+
+    // دالة البحث
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const val = e.target.value.toLowerCase();
+        const searched = allApps.filter(app => app.name.toLowerCase().includes(val));
+        renderApps(searched);
+    });
 </script>
 </body>
 </html>
