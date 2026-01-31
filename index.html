@@ -2,134 +2,182 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>M.Al.Boushi Store</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- 1. المتغيرات والألوان --- */
+        /* --- 1. الألوان والمتغيرات (تصميم مودرن) --- */
         :root {
             --bg-body: #0f172a;
-            --bg-card: #1e293b;
+            --bg-gradient: radial-gradient(circle at top left, #1e293b, #0f172a);
+            --card-glass: rgba(30, 41, 59, 0.7);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.3);
             --border: rgba(255,255,255,0.08);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --header-bg: rgba(15, 23, 42, 0.95);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --nav-bg: rgba(15, 23, 42, 0.85);
         }
 
         [data-theme="light"] {
-            --bg-body: #f1f5f9;
-            --bg-card: #ffffff;
+            --bg-body: #f8fafc;
+            --bg-gradient: radial-gradient(circle at top left, #e2e8f0, #f8fafc);
+            --card-glass: rgba(255, 255, 255, 0.8);
             --text-main: #1e293b;
             --text-muted: #64748b;
             --primary: #2563eb;
-            --border: rgba(0,0,0,0.08);
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            --header-bg: rgba(255, 255, 255, 0.95);
+            --primary-glow: rgba(37, 99, 235, 0.2);
+            --border: rgba(0,0,0,0.05);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            --nav-bg: rgba(255, 255, 255, 0.85);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; transition: 0.3s; overflow-x: hidden; }
-
-        /* --- 2. الهيدر والقائمة --- */
-        header {
-            position: sticky; top: 0; z-index: 1000; background: var(--header-bg);
-            backdrop-filter: blur(8px); border-bottom: 1px solid var(--border);
-            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        .logo { font-size: 1.5rem; font-weight: 900; color: var(--text-main); direction: ltr; display: flex; align-items: center; gap: 5px; }
-        .logo .m-letter { color: var(--primary); font-size: 1.6rem; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        .icon-btn { font-size: 1.3rem; cursor: pointer; color: var(--text-main); transition: 0.2s; padding: 5px; }
-        .icon-btn:hover { color: var(--primary); transform: scale(1.1); }
-
-        .sidebar {
-            height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0;
-            background-color: #111827; overflow-x: hidden; transition: 0.3s;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.5); padding-top: 20px;
+        body { 
+            background: var(--bg-body); background-image: var(--bg-gradient);
+            color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; 
+            transition: 0.3s; overflow-x: hidden; padding-bottom: 30px;
         }
-        .sidebar-header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; }
-        .profile-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin-bottom: 10px; background-color: #1f2937; }
-        .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 1rem; color: #cbd5e1; display: flex; align-items: center; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .sidebar a i { width: 35px; font-size: 1.2rem; color: var(--primary); }
-        .sidebar a:hover { background: rgba(59, 130, 246, 0.1); color: white; padding-right: 35px; }
-        .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: #94a3b8; background: none; border: none; cursor: pointer; }
-        #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.6); z-index: 1500; }
 
-        /* --- 3. القسم الرئيسي والبحث --- */
-        .hero { text-align: center; padding: 40px 20px 20px; background: radial-gradient(circle at top, rgba(59, 130, 246, 0.08), transparent 60%); }
-        .hero h1 { margin: 0 0 10px; font-size: 1.8rem; }
-        .hero p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; }
+        /* --- 2. الهيدر الشفاف --- */
+        header {
+            position: sticky; top: 0; z-index: 1000; background: var(--nav-bg);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.4rem; font-weight: 900; color: var(--text-main); display: flex; align-items: center; gap: 2px; }
+        .logo span { color: var(--primary); }
+        .header-left { display: flex; gap: 15px; }
+        .icon-btn { font-size: 1.2rem; cursor: pointer; color: var(--text-main); transition: 0.3s; }
+        .icon-btn:hover { color: var(--primary); transform: rotate(10deg); }
 
-        .stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
-        .stat-item { text-align: center; background: var(--bg-card); padding: 10px 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); }
-        .stat-num { font-weight: 800; color: var(--primary); font-size: 1.2rem; display: block; }
-        .stat-lbl { font-size: 0.8rem; color: var(--text-muted); }
+        /* --- 3. القسم الرئيسي (Hero) --- */
+        .hero { text-align: center; padding: 30px 20px 10px; position: relative; }
+        
+        .hero h1 { 
+            font-size: 1.8rem; margin-bottom: 5px; 
+            background: linear-gradient(to right, var(--primary), #a855f7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
 
-        .search-box { position: relative; max-width: 500px; margin: 0 auto 25px; }
-        .search-box input {
-            width: 100%; background: var(--bg-card); border: 1px solid var(--border);
-            padding: 15px 45px 15px 20px; border-radius: 50px; color: var(--text-main);
+        /* الإحصائيات (Glass Cards) */
+        .stats { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
+        .stat-item { 
+            background: var(--card-glass); backdrop-filter: blur(5px);
+            border: 1px solid var(--border); border-radius: 16px; 
+            padding: 10px 25px; min-width: 90px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .stat-num { font-weight: 800; color: var(--primary); font-size: 1.3rem; display: block; }
+        .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+
+        /* البحث العائم */
+        .search-container { position: relative; max-width: 500px; margin: 0 auto 20px; }
+        .search-box {
+            width: 100%; background: var(--card-glass); border: 1px solid var(--border);
+            padding: 14px 45px 14px 20px; border-radius: 50px; color: var(--text-main);
             font-family: 'Cairo'; font-size: 1rem; outline: none; transition: 0.3s;
-            box-shadow: var(--shadow);
+            backdrop-filter: blur(5px); box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-        .search-box input:focus { border-color: var(--primary); }
+        .search-box:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
         .search-icon { position: absolute; right: 20px; top: 16px; color: var(--text-muted); }
 
-        /* --- 4. التبويبات (الأقسام) --- */
-        .tabs-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .tab-btn {
-            background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border);
-            padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: 0.3s;
-            font-family: 'Cairo'; font-weight: bold; font-size: 0.9rem;
+        /* --- 4. شريط الأقسام (الأفقي - Scrollable) --- */
+        .tabs-wrapper {
+            position: sticky; top: 70px; z-index: 900; /* يلتصق تحت الهيدر عند النزول */
+            padding: 10px 0; margin-bottom: 10px;
+            /* خلفية متدرجة للإيحاء بالاستمرار */
+            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
         }
-        .tab-btn:hover { border-color: var(--primary); color: var(--primary); }
-        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
+        
+        .tabs-container {
+            display: flex; gap: 10px; overflow-x: auto; padding: 5px 20px;
+            scrollbar-width: none; /* اخفاء الشريط لفايرفوكس */
+            justify-content: flex-start; /* يبدأ من اليمين (عربي) */
+        }
+        .tabs-container::-webkit-scrollbar { display: none; } /* اخفاء الشريط لكروم */
+
+        .tab-btn {
+            background: var(--card-glass); color: var(--text-muted); border: 1px solid var(--border);
+            padding: 8px 24px; border-radius: 50px; cursor: pointer; transition: 0.3s;
+            font-family: 'Cairo'; font-weight: 700; font-size: 0.9rem; white-space: nowrap;
+            backdrop-filter: blur(5px); flex-shrink: 0; /* منع الانكماش */
+        }
+        .tab-btn:hover { color: var(--primary); border-color: var(--primary); }
+        .tab-btn.active { 
+            background: var(--primary); color: white; border-color: var(--primary); 
+            box-shadow: 0 4px 15px var(--primary-glow); transform: scale(1.05);
+        }
 
         /* --- 5. الشبكة والكروت --- */
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
         @media(min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
 
         .card {
-            background: var(--bg-card); border-radius: 16px; padding: 15px; text-decoration: none;
-            color: var(--text-main); display: flex; flex-direction: column; align-items: center;
-            border: 1px solid var(--border); position: relative; transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: var(--shadow);
+            background: var(--card-glass); border-radius: 20px; padding: 15px; 
+            text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; 
+            align-items: center; border: 1px solid var(--border); position: relative; 
+            transition: 0.3s; backdrop-filter: blur(10px);
         }
-        .card:active { transform: scale(0.97); }
+        .card:active { transform: scale(0.96); }
+        
         .mod-badge {
-            position: absolute; top: 10px; left: 10px; background: rgba(59, 130, 246, 0.1);
-            color: var(--primary); font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold;
+            position: absolute; top: 12px; left: 12px; 
+            background: rgba(59, 130, 246, 0.15); color: var(--primary);
+            font-size: 0.65rem; padding: 4px 10px; border-radius: 8px; font-weight: 800;
         }
+        
         .heart-btn {
-            position: absolute; top: 10px; right: 10px; font-size: 1.1rem; color: var(--text-muted);
-            cursor: pointer; z-index: 5; transition: 0.2s; background: transparent; border: none;
+            position: absolute; top: 12px; right: 12px; font-size: 1.2rem; color: var(--text-muted);
+            cursor: pointer; z-index: 5; background: none; border: none; transition: 0.2s;
         }
-        .heart-btn.active { color: #ef4444; transform: scale(1.1); }
-        .card img { width: 75px; height: 75px; border-radius: 16px; margin-bottom: 12px; object-fit: cover; background: #0f172a; }
+        .heart-btn.active { color: #ef4444; transform: scale(1.2); }
+
+        .card img { 
+            width: 80px; height: 80px; border-radius: 18px; margin-bottom: 15px; 
+            object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+        }
+
         .card-title {
-            font-size: 0.9rem; font-weight: 600; text-align: center; margin-bottom: 10px;
-            line-height: 1.3; height: 38px; overflow: hidden;
+            font-size: 0.95rem; font-weight: 700; text-align: center; margin-bottom: 12px;
+            line-height: 1.4; height: 40px; overflow: hidden;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         }
+
         .get-btn {
-            background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border);
-            font-size: 0.8rem; font-weight: bold; padding: 6px 25px; border-radius: 50px; transition: 0.3s;
+            background: transparent; color: var(--primary); border: 2px solid var(--primary);
+            font-size: 0.85rem; font-weight: 800; padding: 6px 28px; border-radius: 50px; 
+            transition: 0.3s; width: 100%; text-align: center;
         }
-        .card:hover .get-btn { background: var(--primary); color: white; border-color: var(--primary); }
-        .status { grid-column: span 2; text-align: center; color: var(--text-muted); margin-top: 50px; }
-        footer { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 0.8rem; margin-top: 30px; border-top: 1px solid var(--border); }
+        .card:hover .get-btn { background: var(--primary); color: white; box-shadow: 0 4px 15px var(--primary-glow); }
+
+        /* القائمة الجانبية */
+        .sidebar {
+            height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0;
+            background-color: #0f172a; overflow-x: hidden; transition: 0.3s;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.8); padding-top: 20px;
+        }
+        .sidebar-header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--primary); margin-bottom: 10px; }
+        .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 1rem; color: #cbd5e1; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .sidebar a i { width: 35px; color: var(--primary); }
+        .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: #94a3b8; background: none; border: none; }
+        #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.7); z-index: 1500; backdrop-filter: blur(3px); }
+
+        .status { grid-column: span 2; text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 0.9rem; }
+        footer { text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">
-            <span class="m-letter">M</span><span class="boushi">.Al.Boushi</span>
-        </div>
+        <div class="logo">M<span>.Al.Boushi</span></div>
         <div class="header-left">
             <i class="fas fa-moon icon-btn" id="themeBtn" onclick="toggleTheme()"></i>
             <i class="fas fa-bars icon-btn" onclick="openNav()"></i>
@@ -140,19 +188,21 @@
         <button class="close-btn" onclick="closeNav()">&times;</button>
         <div class="sidebar-header">
             <img src="https://midomido.neocities.org/mohammadalboushi.png" alt="Profile" class="profile-img">
-            <h3 style="margin:5px 0; color:white; font-size:1.1rem;">Mohammad Al Boushi</h3>
-            <span style="color: var(--text-muted); font-size: 0.8rem;">Admin & Developer</span>
+            <h3 style="margin:10px 0; color:white;">Mohammad Al Boushi</h3>
+            <p style="color:#94a3b8; font-size:0.8rem; padding:0 20px; line-height:1.5;">
+                نبني الأفكار، وننظم الفوضى التقنية. متجري هو رؤيتي لعالم تطبيقات أكثر ذكاءً.
+            </p>
         </div>
-        <a href="https://wa.me/963938624226" target="_blank"><i class="fab fa-whatsapp" style="color:#25D366;"></i> واتساب</a>
-        <a href="https://www.facebook.com/share/1AZTCywPbC/" target="_blank"><i class="fab fa-facebook" style="color:#1877F2;"></i> فيسبوك</a>
-        <a href="https://www.instagram.com/m_al_boushi" target="_blank"><i class="fab fa-instagram" style="color:#E4405F;"></i> انستغرام</a>
+        <a href="https://wa.me/963938624226"><i class="fab fa-whatsapp"></i> واتساب</a>
+        <a href="https://www.facebook.com/share/1AZTCywPbC/"><i class="fab fa-facebook"></i> فيسبوك</a>
+        <a href="https://www.instagram.com/m_al_boushi"><i class="fab fa-instagram"></i> انستغرام</a>
         <a href="tel:+963938624226"><i class="fas fa-phone"></i> اتصال هاتفي</a>
     </div>
     <div id="overlay" onclick="closeNav()"></div>
 
     <div class="hero">
         <h1>متجر التطبيقات</h1>
-        <p>التطبيقات المعدلة والمدفوعة بين يديك</p>
+        <p>وجهتك الأولى للتطبيقات المعدلة والحلول الذكية</p>
         
         <div class="stats">
             <div class="stat-item">
@@ -166,22 +216,24 @@
             </div>
         </div>
 
-        <div class="search-box">
+        <div class="search-container">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="searchInput" placeholder="ابحث عن تطبيق أو لعبة...">
+            <input type="text" id="searchInput" class="search-box" placeholder="ابحث عن تطبيق، لعبة، أو ملف...">
         </div>
+    </div>
 
+    <div class="tabs-wrapper">
         <div class="tabs-container">
-            <button class="tab-btn active" id="btn-ALL" onclick="filterApps('ALL', this)">الكل</button>
-            <button class="tab-btn" id="btn-PROGRAM" onclick="filterApps('PROGRAM', this)">تطبيقات</button>
-            <button class="tab-btn" id="btn-GAME" onclick="filterApps('GAME', this)">ألعاب</button>
-            <button class="tab-btn" id="btn-WEBSITE" onclick="filterApps('WEBSITE', this)">مواقع</button>
-            <button class="tab-btn" id="btn-FILE" onclick="filterApps('FILE', this)">ملفات</button>
+            <button class="tab-btn active" id="btn-ALL" onclick="filterApps('ALL', this)">🌟 الكل</button>
+            <button class="tab-btn" id="btn-PROGRAM" onclick="filterApps('PROGRAM', this)">📱 تطبيقات</button>
+            <button class="tab-btn" id="btn-GAME" onclick="filterApps('GAME', this)">🎮 ألعاب</button>
+            <button class="tab-btn" id="btn-WEBSITE" onclick="filterApps('WEBSITE', this)">🌐 مواقع</button>
+            <button class="tab-btn" id="btn-FILE" onclick="filterApps('FILE', this)">📁 ملفات</button>
         </div>
     </div>
 
     <div class="grid" id="container">
-        <div class="status"><i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال...</div>
+        <div class="status"><i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال بالسيرفر...</div>
     </div>
 
     <footer>&copy; 2026 M.Al.Boushi Store - جميع الحقوق محفوظة</footer>
@@ -201,62 +253,61 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // متغيرات النظام
         let allAppsData = [];
         let currentCategory = 'ALL';
-        let hiddenCategories = []; // الأقسام المغلقة
+        let hiddenCategories = [];
 
-        /* --- 1. الاستماع لإعدادات الأقسام (القفل) --- */
+        // 1. القفل (Visibility)
         onValue(ref(db, 'settings/categories'), (snapshot) => {
             const cats = snapshot.val() || {};
             hiddenCategories = [];
-
-            // التحقق من كل زر وإخفاؤه إذا كان مقفلاً
             const types = ['PROGRAM', 'GAME', 'WEBSITE', 'FILE'];
+            
             types.forEach(type => {
                 const btn = document.getElementById(`btn-${type}`);
-                if (cats[type] === false) { // إذا كان false يعني مغلق
+                if (cats[type] === false) {
                     btn.style.display = 'none';
                     hiddenCategories.push(type);
                 } else {
-                    btn.style.display = 'inline-block';
+                    btn.style.display = 'block'; // استخدام block داخل flex
                 }
             });
             
-            // إذا كان القسم الحالي مغلقاً، عد للرئيسية
             if (hiddenCategories.includes(currentCategory)) {
                 filterApps('ALL', document.getElementById('btn-ALL'));
             } else {
-                renderApps(); // تحديث العرض
+                renderApps();
             }
         });
 
-        /* --- 2. الاستماع لبيانات التطبيقات --- */
+        // 2. البيانات والترتيب
         onValue(ref(db, 'apps'), (snapshot) => {
             const container = document.getElementById('container');
             container.innerHTML = '';
             const data = snapshot.val();
 
             if (data) {
-                // تحويل البيانات + الفلترة الأولية (الإخفاء الفردي) + الترتيب
                 allAppsData = Object.values(data)
-                    .filter(app => !app.isHidden) // إخفاء التطبيقات المخفية
-                    .sort((a, b) => (a.order || 0) - (b.order || 0)); // الترتيب حسب السحب
+                    .filter(app => !app.isHidden)
+                    .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-                // تحديث العداد
                 document.getElementById('appCount').innerText = allAppsData.length;
                 renderApps();
             } else {
-                container.innerHTML = "<div class='status'>لا يوجد تطبيقات منشورة</div>";
+                container.innerHTML = "<div class='status'>لا يوجد تطبيقات حالياً</div>";
                 document.getElementById('appCount').innerText = 0;
             }
         });
 
-        /* --- 3. نظام الفلترة والعرض --- */
+        // 3. الفلترة
         window.filterApps = (cat, btn) => {
             currentCategory = cat;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
+            
+            // تحريك الزر النشط للمنتصف (UX جميل)
+            if(btn) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
             renderApps();
         };
 
@@ -266,13 +317,9 @@
             const favs = JSON.parse(localStorage.getItem('favorites')) || [];
 
             const filtered = allAppsData.filter(app => {
-                // شرط 1: القسم الحالي مطابق أو الكل
                 const matchCat = (currentCategory === 'ALL') || (app.type === currentCategory);
-                // شرط 2: القسم ليس مغلقاً من الإعدادات
                 const notHiddenCat = !hiddenCategories.includes(app.type);
-                // شرط 3: البحث
                 const matchSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase());
-
                 return matchCat && notHiddenCat && matchSearch;
             });
 
@@ -307,12 +354,8 @@
             });
         }
 
-        // البحث
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            renderApps(e.target.value);
-        });
+        document.getElementById('searchInput').addEventListener('input', (e) => renderApps(e.target.value));
 
-        /* --- وظائف الواجهة (الوضع الليلي، القائمة، المفضلة) --- */
         window.toggleTheme = () => {
             const btn = document.getElementById('themeBtn');
             if (document.body.hasAttribute('data-theme')) {
@@ -325,7 +368,6 @@
                 localStorage.setItem('theme', 'light');
             }
         };
-        // استعادة الثيم عند التحميل
         if (localStorage.getItem('theme') === 'light') {
             document.body.setAttribute('data-theme', 'light');
             document.getElementById('themeBtn').classList.replace('fa-moon', 'fa-sun');
@@ -333,7 +375,7 @@
 
         window.openNav = () => { document.getElementById("mySidebar").style.width = "280px"; document.getElementById("overlay").style.display = "block"; };
         window.closeNav = () => { document.getElementById("mySidebar").style.width = "0"; document.getElementById("overlay").style.display = "none"; };
-
+        
         window.toggleFavorite = (btn, appName) => {
             event.preventDefault(); event.stopPropagation();
             let favs = JSON.parse(localStorage.getItem('favorites')) || [];
