@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V24 | إصلاح السحب</title>
+    <title>Admin V27 | دقة عالية</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -41,7 +41,7 @@
         .card {
             background: var(--card-glass); border-radius: 18px; padding: 15px; border: 1px solid var(--border);
             display: flex; flex-direction: column; align-items: center; position: relative; transition: transform 0.1s;
-            touch-action: none; /* مهم جداً للسحب */
+            touch-action: none;
         }
         
         /* كلاسات السحب */
@@ -60,7 +60,6 @@
         .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 5px; height: 40px; overflow: hidden; pointer-events: none; }
         .edit-badge { position: absolute; top: 10px; left: 10px; background: #f59e0b; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; }
         
-        /* مقبض السحب - مساحة أكبر للمس */
         .drag-handle { 
             position: absolute; top: 0; right: 0; color: #94a3b8; cursor: grab; 
             padding: 15px; width: 50px; height: 50px; z-index: 10; font-size: 1.4rem; 
@@ -169,7 +168,8 @@
             <input type="text" id="appLink" placeholder="الرابط">
             <button onclick="document.getElementById('fileInput').click()" class="btn-full btn-cancel" style="margin:10px 0;">📸 تغيير الصورة</button>
             <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
-            <img id="previewImg" style="width:60px; height:60px; border-radius:10px; display:none; margin:0 auto;">
+            <img id="previewImg" style="width:100%; max-height:200px; object-fit:contain; border-radius:10px; display:none; margin:10px 0; border:1px solid #334155;">
+            
             <div style="display:flex; justify-content:space-between; margin:15px 0; color:#cbd5e1;">
                 <span>إخفاء التطبيق؟</span>
                 <input type="checkbox" id="appHidden" style="width:20px;">
@@ -296,7 +296,6 @@
             const container = document.getElementById('appsContainer');
             container.innerHTML = '';
             
-            // تدمير النسخة القديمة لمنع التضارب
             if (appSortable) { appSortable.destroy(); appSortable = null; }
 
             const sortedApps = Object.entries(allApps).sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
@@ -312,7 +311,6 @@
                     card.setAttribute('data-key', k);
                     
                     card.onclick = (e) => {
-                        // منع فتح التعديل إذا ضغطنا على مقبض السحب
                         if(e.target.classList.contains('drag-handle') || e.target.parentElement.classList.contains('drag-handle')) return;
                         if(isSelectMode) toggleSelection(k);
                         else openEditModal(k, v);
@@ -330,12 +328,11 @@
                 }
             });
 
-            // تفعيل السحب فقط في وضع الكل + عدم التحديد
             if (currentFilter === 'ALL' && !isSelectMode) {
                 appSortable = new Sortable(container, {
                     handle: '.drag-handle', 
                     animation: 150, 
-                    forceFallback: true, // الحل السحري للموبايل
+                    forceFallback: true,
                     fallbackOnBody: true,
                     ghostClass: 'sortable-ghost',
                     dragClass: 'sortable-drag',
@@ -375,7 +372,6 @@
             if(card) card.classList.toggle('selected');
         };
 
-        // --- إدارة الأقسام ---
         function renderCatList() {
             const list = document.getElementById('catList');
             list.innerHTML = '';
@@ -439,7 +435,7 @@
             closeModal('delCatModal');
         };
 
-        // --- باقي الدوال ---
+        // --- باقي الوظائف ---
         window.bulkDelete = () => {
             if(selectedApps.size === 0) return showAlert("تنبيه", "حدد عناصر أولاً!", "⚠️");
             const updates = {}; selectedApps.forEach(key => updates[`apps/${key}`] = null);
@@ -475,7 +471,40 @@
             closeModal('appModal');
         };
         window.deleteSingleApp = () => { remove(ref(db, 'apps/'+editKey)); closeModal('appModal'); };
-        window.processImage = () => { const f=document.getElementById('fileInput').files[0]; if(f){ const r=new FileReader(); r.readAsDataURL(f); r.onload=(e)=>{ const i=new Image(); i.src=e.target.result; i.onload=()=>{ const c=document.createElement("canvas"); c.width=200; c.height=i.height*(200/i.width); c.getContext("2d").drawImage(i,0,0,c.width,c.height); currentImg=c.toDataURL("image/jpeg",0.7); document.getElementById('previewImg').src=currentImg; document.getElementById('previewImg').style.display='block'; }}}};
+        
+        // --- دالة المعالجة المحسنة (HD Quality) ---
+        window.processImage = () => { 
+            const f=document.getElementById('fileInput').files[0]; 
+            if(f){ 
+                const r=new FileReader(); 
+                r.readAsDataURL(f); 
+                r.onload=(e)=>{ 
+                    const i=new Image(); 
+                    i.src=e.target.result; 
+                    i.onload=()=>{ 
+                        const canvas=document.createElement("canvas"); 
+                        // السماح بعرض يصل إلى 1080 بكسل
+                        const maxWidth = 1080;
+                        let width = i.width;
+                        let height = i.height;
+
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvas.getContext("2d").drawImage(i,0,0,width,height);
+                        
+                        // جودة عالية 95%
+                        currentImg=canvas.toDataURL("image/jpeg",0.95); 
+                        document.getElementById('previewImg').src=currentImg; 
+                        document.getElementById('previewImg').style.display='block'; 
+                    }
+                }
+            }
+        };
         window.openCatModal = () => document.getElementById('catModal').style.display='flex';
         window.closeModal = (id) => document.getElementById(id).style.display='none';
     </script>
