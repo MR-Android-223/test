@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V23 | السريع</title>
+    <title>Admin V24 | إصلاح السحب</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         :root {
             --bg-body: #0f172a; --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b, #0f172a);
-            --card-glass: rgba(30, 41, 59, 0.95); --text-main: #f8fafc; --text-muted: #94a3b8;
+            --card-glass: rgba(30, 41, 59, 0.98); --text-main: #f8fafc; --text-muted: #94a3b8;
             --primary: #3b82f6; --danger: #ef4444; --border: rgba(255,255,255,0.08);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-body); background-image: var(--bg-gradient); color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; padding-bottom: 100px; }
+        body { background: var(--bg-body); background-image: var(--bg-gradient); color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; padding-bottom: 100px; touch-action: pan-y; }
 
         header {
             position: sticky; top: 0; z-index: 1000; background: rgba(15, 23, 42, 0.98);
@@ -40,9 +40,15 @@
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
         .card {
             background: var(--card-glass); border-radius: 18px; padding: 15px; border: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; position: relative; transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; position: relative; transition: transform 0.1s;
+            touch-action: none; /* مهم جداً للسحب */
         }
-        .card.selected { border: 2px solid var(--primary); background: rgba(59, 130, 246, 0.15); transform: scale(0.96); }
+        
+        /* كلاسات السحب */
+        .sortable-ghost { opacity: 0.4; background: var(--primary); }
+        .sortable-drag { cursor: grabbing; opacity: 1; background: #1e293b; transform: scale(1.05); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+
+        .card.selected { border: 2px solid var(--primary); background: rgba(59, 130, 246, 0.15); }
         .check-circle { 
             position: absolute; top: 10px; left: 10px; width: 22px; height: 22px; 
             border-radius: 50%; border: 2px solid #94a3b8; background: transparent; transition: 0.2s;
@@ -54,12 +60,13 @@
         .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 5px; height: 40px; overflow: hidden; pointer-events: none; }
         .edit-badge { position: absolute; top: 10px; left: 10px; background: #f59e0b; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; }
         
-        /* تحسين أيقونة السحب */
+        /* مقبض السحب - مساحة أكبر للمس */
         .drag-handle { 
             position: absolute; top: 0; right: 0; color: #94a3b8; cursor: grab; 
-            padding: 15px; z-index: 10; font-size: 1.3rem; 
-            touch-action: none; /* مهم جداً لمنع سكرول الصفحة أثناء السحب */
+            padding: 15px; width: 50px; height: 50px; z-index: 10; font-size: 1.4rem; 
+            display: flex; align-items: center; justify-content: center;
         }
+        .drag-handle:active { color: var(--primary); }
 
         .fab-btn {
             position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px;
@@ -227,7 +234,6 @@
         let selectedApps = new Set();
         let catToDelete = null;
         
-        // متغيرات التحكم في السحب (لمنع التكرار)
         let appSortable = null;
         let catSortable = null;
 
@@ -290,7 +296,7 @@
             const container = document.getElementById('appsContainer');
             container.innerHTML = '';
             
-            // تنظيف السحب القديم لمنع البطء
+            // تدمير النسخة القديمة لمنع التضارب
             if (appSortable) { appSortable.destroy(); appSortable = null; }
 
             const sortedApps = Object.entries(allApps).sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
@@ -306,7 +312,8 @@
                     card.setAttribute('data-key', k);
                     
                     card.onclick = (e) => {
-                        if(e.target.classList.contains('drag-handle')) return;
+                        // منع فتح التعديل إذا ضغطنا على مقبض السحب
+                        if(e.target.classList.contains('drag-handle') || e.target.parentElement.classList.contains('drag-handle')) return;
                         if(isSelectMode) toggleSelection(k);
                         else openEditModal(k, v);
                     };
@@ -314,7 +321,7 @@
                     card.innerHTML = `
                         <div class="check-circle"></div>
                         ${!isSelectMode ? '<span class="edit-badge">✏️ تعديل</span>' : ''}
-                        ${!isSelectMode && currentFilter === 'ALL' ? '<i class="fas fa-bars drag-handle"></i>' : ''}
+                        ${!isSelectMode && currentFilter === 'ALL' ? '<div class="drag-handle"><i class="fas fa-bars"></i></div>' : ''}
                         <img src="${v.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
                         <div class="card-title">${v.name}</div>
                         <div style="font-size:0.7rem; color:#94a3b8;">${v.type}</div>
@@ -328,9 +335,10 @@
                 appSortable = new Sortable(container, {
                     handle: '.drag-handle', 
                     animation: 150, 
-                    delay: 150, // تأخير لمنع تداخل اللمس
-                    delayOnTouchOnly: true, 
-                    touchStartThreshold: 5,
+                    forceFallback: true, // الحل السحري للموبايل
+                    fallbackOnBody: true,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
                     onEnd: () => {
                         const items = container.querySelectorAll('.card');
                         const updates = {};
@@ -390,7 +398,7 @@
             });
 
             catSortable = new Sortable(list, {
-                handle: '.cat-drag', animation: 150, delay: 100, touchStartThreshold: 5,
+                handle: '.cat-drag', animation: 150, forceFallback: true,
                 onEnd: () => {
                     const items = list.querySelectorAll('.cat-item');
                     const updates = {};
@@ -431,8 +439,7 @@
             closeModal('delCatModal');
         };
 
-        // --- باقي الدوال (Bulk, Add/Edit App) ---
-        // (تم دمج باقي الدوال بنفس المنطق المحسن)
+        // --- باقي الدوال ---
         window.bulkDelete = () => {
             if(selectedApps.size === 0) return showAlert("تنبيه", "حدد عناصر أولاً!", "⚠️");
             const updates = {}; selectedApps.forEach(key => updates[`apps/${key}`] = null);
