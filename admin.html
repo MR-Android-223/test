@@ -3,95 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم V13 | المرونة الكاملة</title>
+    <title>Admin V14 | التحكم الشامل</title>
     <style>
-        :root { --primary: #3b82f6; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); text-align: center; margin: 0; padding: 20px; }
-        .box { background: var(--card); padding: 30px; border-radius: 20px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input, select, button { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; box-sizing: border-box; }
-        input, select { background: #334155; color: white; border: 1px solid transparent; }
-        input:focus { border-color: var(--primary); }
-        .main-btn { background: linear-gradient(45deg, #2563eb, #3b82f6); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        :root { --primary: #3b82f6; --danger: #ef4444; --warning: #f59e0b; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); text-align: center; margin: 0; padding: 20px; padding-bottom: 80px; }
         
-        /* منطقة رفع الصورة */
-        .upload-area { border: 2px dashed #334155; padding: 20px; border-radius: 12px; margin: 10px 0; cursor: pointer; position: relative; }
-        #previewImg { width: 80px; height: 80px; border-radius: 15px; object-fit: cover; display: none; margin: 10px auto; border: 2px solid var(--primary); }
+        .header-tools { display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 0 auto 15px; }
+        .icon-btn { background: var(--card); color: white; border: none; padding: 10px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.2s; }
+        .icon-btn:hover { background: var(--primary); transform: scale(1.1); }
+
+        .box { background: var(--card); padding: 25px; border-radius: 20px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        /* شريط الفلترة (الأزرار السفلية) */
-        .filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px; white-space: nowrap; }
-        .filter-btn { background: #334155; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; flex-shrink: 0; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; box-sizing: border-box; }
+        input, select { background: #334155; color: white; }
+        input:focus { border-color: var(--primary); background: #475569; }
+        
+        .upload-area { border: 2px dashed #334155; padding: 15px; border-radius: 12px; margin: 10px 0; cursor: pointer; }
+        #previewImg { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; display: none; margin: 10px auto; border: 2px solid var(--primary); }
+        
+        /* شريط الفلترة وزر التحديد */
+        .filter-container { display: flex; gap: 10px; align-items: center; overflow-x: auto; padding-bottom: 5px; margin-top: 20px; }
+        .filter-btn { background: #334155; color: #94a3b8; padding: 6px 12px; border-radius: 15px; font-size: 0.85rem; cursor: pointer; white-space: nowrap; border:1px solid transparent; }
         .filter-btn.active { background: var(--primary); color: white; }
+        
+        .select-mode-btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); width: auto; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+        .select-mode-btn.active { background: var(--primary); color: white; }
 
         /* القائمة */
-        .section-title { text-align: right; color: #94a3b8; font-size: 0.9rem; margin-top: 10px; display: flex; justify-content: space-between; }
-        .app-item { display: flex; justify-content: space-between; align-items: center; background: #334155; padding: 12px; margin-top: 10px; border-radius: 12px; transition:0.3s; }
+        .app-item { display: flex; align-items: center; background: #334155; padding: 10px; margin-top: 10px; border-radius: 12px; transition: 0.3s; position: relative; }
+        .app-item.hidden-item { opacity: 0.6; border: 1px dashed #94a3b8; } /* ستايل العنصر المخفي */
+        
+        /* Checkbox للتحديد */
+        .select-check { width: 20px; height: 20px; margin-left: 10px; cursor: pointer; accent-color: var(--primary); display: none; }
+        .show-checks .select-check { display: block; } /* يظهر عند تفعيل وضع التحديد */
+
+        .app-info { flex-grow: 1; text-align: right; }
         .badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); color: #cbd5e1; margin-right: 5px; }
         
-        .btn-group { display: flex; gap: 8px; }
-        .sm-btn { width: auto; padding: 8px 15px; margin: 0; font-size: 0.8rem; cursor: pointer; }
-        
-        /* التنبيهات */
-        #toast { visibility: hidden; min-width: 200px; background: #10b981; color: white; padding: 15px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); border-radius: 50px; z-index: 2000; }
+        /* شريط الإجراءات السفلي (يظهر عند التحديد) */
+        #bulkActionsBar {
+            position: fixed; bottom: -100px; left: 0; width: 100%; background: var(--card);
+            padding: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); z-index: 100;
+            display: flex; justify-content: space-around; transition: 0.3s; border-top: 1px solid #334155;
+        }
+        #bulkActionsBar.visible { bottom: 0; }
+        .bulk-btn { width: auto; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        /* نافذة الإعدادات (Modal) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-box { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; }
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #334155; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        #toast { visibility: hidden; min-width: 200px; background: #10b981; color: white; padding: 15px; position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); border-radius: 50px; z-index: 3000; }
         #toast.show { visibility: visible; animation: fade 0.5s; }
-        @keyframes fade { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fade { from {bottom: 0; opacity: 0;} to {bottom: 80px; opacity: 1;} }
     </style>
 </head>
 <body>
 
-<div id="toast">✅ تم بنجاح</div>
+<div id="toast">✅ تم</div>
+
+<div id="settingsModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>⚙️ إعدادات الأقسام</h3>
+        <p style="color:#94a3b8; font-size:0.8rem; margin-bottom:15px;">القسم المغلق سيختفي تماماً عند المستخدمين</p>
+        
+        <div id="categoriesSettings">
+            </div>
+
+        <button onclick="closeSettings()" style="background:#475569; color:white; margin-top:20px;">إغلاق</button>
+    </div>
+</div>
+
+<div class="header-tools" id="headerTools" style="display:none;">
+    <h2 style="margin:0; font-size:1.2rem;">لوحة المدير</h2>
+    <button class="icon-btn" onclick="openSettings()">⚙️</button>
+</div>
 
 <div class="box">
     <div id="loginArea">
         <h2>🔐 دخول المدير</h2>
-        <button onclick="login()" style="background:#ea4335; color:white;">تسجيل الدخول عبر Google</button>
+        <button onclick="login()" style="background:#ea4335; color:white;">تسجيل الدخول</button>
     </div>
 
     <div id="adminArea" style="display:none;">
-        <h3 id="formTitle">✨ إضافة / تعديل</h3>
         
-        <label style="display:block; text-align:right; font-size:0.8rem; color:#94a3b8;">تصنيف التطبيق:</label>
-        <select id="inputType">
-            <option value="PROGRAM">📱 تطبيق (Program)</option>
-            <option value="GAME">🎮 لعبة (Game)</option>
-            <option value="WEBSITE">🌐 موقع (Website)</option>
-            <option value="FILE">📁 ملف (File)</option>
-        </select>
-
-        <input type="text" id="appName" placeholder="الاسم">
-        <input type="text" id="appLink" placeholder="الرابط">
-        
-        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-            <span id="uploadLabel">📸 صورة (اضغط هنا)</span>
-            <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
-            <img id="previewImg">
+        <div id="inputForm">
+            <h3 id="formTitle" style="margin-top:0;">✨ إضافة جديد</h3>
+            <select id="inputType">
+                <option value="PROGRAM">📱 تطبيق</option>
+                <option value="GAME">🎮 لعبة</option>
+                <option value="WEBSITE">🌐 موقع</option>
+                <option value="FILE">📁 ملف</option>
+            </select>
+            <input type="text" id="appName" placeholder="الاسم">
+            <input type="text" id="appLink" placeholder="الرابط">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <span id="uploadLabel">📸 صورة</span>
+                <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
+                <img id="previewImg">
+            </div>
+            <button id="saveBtn" style="background: linear-gradient(45deg, #2563eb, #3b82f6); color: white; font-weight: bold;" onclick="handleProcess()">🚀 حفظ ونشر</button>
+            <button id="cancelBtn" style="display:none; background:#475569; color:white;" onclick="resetForm()">إلغاء</button>
         </div>
 
-        <button id="saveBtn" class="main-btn" onclick="handleProcess()">🚀 حفظ ونشر</button>
-        <button id="cancelBtn" style="display:none; background:#475569; color:white;" onclick="resetForm()">إلغاء</button>
-
-        <hr style="border-color:#334155; margin:30px 0;">
+        <hr style="border-color:#334155; margin:25px 0;">
         
-        <div class="filter-bar">
-            <button class="filter-btn active" onclick="setFilter('ALL', this)">🌟 الكل</button>
-            <button class="filter-btn" onclick="setFilter('PROGRAM', this)">📱 تطبيقات</button>
-            <button class="filter-btn" onclick="setFilter('GAME', this)">🎮 ألعاب</button>
-            <button class="filter-btn" onclick="setFilter('WEBSITE', this)">🌐 مواقع</button>
-            <button class="filter-btn" onclick="setFilter('FILE', this)">📁 ملفات</button>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span id="listTitle" style="font-weight:bold; font-size:0.9rem;">المحتوى</span>
+            <button id="selectModeBtn" class="select-mode-btn" onclick="toggleSelectionMode()">✅ تحديد</button>
         </div>
 
-        <div class="section-title">
-            <span id="listTitle">عرض الكل</span>
-            <span id="countBadge" style="background:#3b82f6; color:white; padding:0 8px; border-radius:10px; font-size:0.8rem;">0</span>
+        <div class="filter-container">
+            <div class="filter-btn active" onclick="setFilter('ALL', this)">الكل</div>
+            <div class="filter-btn" onclick="setFilter('PROGRAM', this)">تطبيقات</div>
+            <div class="filter-btn" onclick="setFilter('GAME', this)">ألعاب</div>
+            <div class="filter-btn" onclick="setFilter('WEBSITE', this)">مواقع</div>
+            <div class="filter-btn" onclick="setFilter('FILE', this)">ملفات</div>
         </div>
-        
+
         <div id="appsList">جاري التحميل...</div>
     </div>
+</div>
+
+<div id="bulkActionsBar">
+    <button class="bulk-btn" style="background:#ef4444; color:white;" onclick="bulkDelete()">
+        🗑️ حذف (<span id="selectedCountDel">0</span>)
+    </button>
+    <button class="bulk-btn" style="background:#f59e0b; color:white;" onclick="bulkToggleVisibility()">
+        👁️ إخفاء/إظهار
+    </button>
+    <button class="bulk-btn" style="background:#475569; color:white;" onclick="toggleSelectionMode()">
+        ❌ إلغاء
+    </button>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, update, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC_iEb4UhUREVJ2mfj00BounPVaeGQr7wI",
@@ -110,159 +166,236 @@
     let editKey = null;
     let currentImgBase64 = "";
     let allDataCache = {}; 
-    let currentFilter = 'ALL'; // الفلتر الافتراضي
+    let categoriesStatus = {}; // حالة الأقسام (ظاهرة/مخفية)
+    let currentFilter = 'ALL';
+    let isSelectMode = false;
+    let selectedItems = new Set(); // لتخزين العناصر المحددة
 
     onAuthStateChanged(auth, (user) => {
         if (user && user.uid === myUID) {
             document.getElementById('loginArea').style.display = 'none';
             document.getElementById('adminArea').style.display = 'block';
+            document.getElementById('headerTools').style.display = 'flex';
             loadData();
+            loadSettings();
         }
     });
 
     window.login = () => signInWithPopup(auth, provider);
 
-    // معالجة الصورة
+    // --- 1. التعامل مع البيانات الأساسية ---
     window.processImage = () => {
         const file = document.getElementById('fileInput').files[0];
         if (file) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = function (event) {
-                const imgElement = document.createElement("img");
-                imgElement.src = event.target.result;
-                imgElement.onload = function (e) {
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
                     const canvas = document.createElement("canvas");
-                    const MAX_WIDTH = 200;
-                    const scaleSize = MAX_WIDTH / e.target.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = e.target.height * scaleSize;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(e.target, 0, 0, canvas.width, canvas.height);
+                    const scale = 200 / img.width;
+                    canvas.width = 200;
+                    canvas.height = img.height * scale;
+                    canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
                     currentImgBase64 = canvas.toDataURL("image/jpeg", 0.7);
                     document.getElementById('previewImg').src = currentImgBase64;
                     document.getElementById('previewImg').style.display = 'block';
-                    document.getElementById('uploadLabel').innerText = "تم ✅";
+                    document.getElementById('uploadLabel').innerText = "✅";
                 }
             }
         }
     };
 
-    // الحفظ (إضافة أو تعديل ونقل)
     window.handleProcess = async () => {
         const name = document.getElementById('appName').value;
         const link = document.getElementById('appLink').value;
-        const type = document.getElementById('inputType').value; // نأخذ النوع من القائمة العلوية
+        const type = document.getElementById('inputType').value;
         const btn = document.getElementById('saveBtn');
 
-        if (!name || !link) return alert("الاسم والرابط مطلوبين");
-
-        btn.disabled = true;
-        btn.innerText = "⏳ جاري التنفيذ...";
+        if (!name || !link) return alert("البيانات ناقصة");
+        btn.disabled = true; btn.innerText = "⏳...";
 
         try {
-            const finalImg = currentImgBase64 || "https://cdn-icons-png.flaticon.com/512/564/564619.png";
-            const data = { name, link, img: finalImg, type };
+            const data = { 
+                name, link, type, 
+                img: currentImgBase64 || "https://cdn-icons-png.flaticon.com/512/564/564619.png",
+                isHidden: false // افتراضياً ظاهر
+            };
 
             if (editKey) {
-                // هنا يحدث السحر: التحديث سيأخذ النوع الجديد المختار، مما ينقل التطبيق لقسم آخر
                 await update(ref(db, 'apps/' + editKey), data);
-                msg("✅ تم التعديل والنقل");
+                msg("✅ تم التعديل");
             } else {
                 await push(ref(db, 'apps'), data);
                 msg("🚀 تم النشر");
             }
             resetForm();
-        } catch (e) { alert("خطأ: " + e.message); }
-        
-        btn.disabled = false;
-        btn.innerText = "🚀 حفظ ونشر";
+        } catch (e) { alert("خطأ"); }
+        btn.disabled = false; btn.innerText = "🚀 حفظ ونشر";
     };
 
     function loadData() {
         onValue(ref(db, 'apps'), (s) => {
             allDataCache = s.val() || {};
-            renderList(); // تحديث العرض
+            renderList();
         });
     }
 
-    // دالة تغيير الفلتر عند الضغط على الأزرار السفلية
-    window.setFilter = (filterType, btn) => {
-        currentFilter = filterType;
-        // تحديث شكل الأزرار
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    // --- 2. التحديد والإجراءات الجماعية ---
+    window.toggleSelectionMode = () => {
+        isSelectMode = !isSelectMode;
+        selectedItems.clear(); // تصفية التحديد عند التبديل
+        updateSelectionUI();
+        
+        const btn = document.getElementById('selectModeBtn');
+        const list = document.getElementById('appsList');
+        const bar = document.getElementById('bulkActionsBar');
+
+        if (isSelectMode) {
+            btn.classList.add('active');
+            btn.innerText = "إلغاء التحديد";
+            list.classList.add('show-checks');
+            bar.classList.add('visible');
+        } else {
+            btn.classList.remove('active');
+            btn.innerText = "✅ تحديد";
+            list.classList.remove('show-checks');
+            bar.classList.remove('visible');
+            // إعادة تفعيل مربعات الاختيار في الواجهة
+            document.querySelectorAll('.select-check').forEach(c => c.checked = false);
+        }
+    };
+
+    window.toggleItem = (key, checkbox) => {
+        if (checkbox.checked) selectedItems.add(key);
+        else selectedItems.delete(key);
+        updateSelectionUI();
+    };
+
+    function updateSelectionUI() {
+        document.getElementById('selectedCountDel').innerText = selectedItems.size;
+    }
+
+    window.bulkDelete = async () => {
+        if (selectedItems.size === 0) return alert("حدد عناصر أولاً");
+        if (confirm(`هل أنت متأكد من حذف ${selectedItems.size} عنصر؟`)) {
+            const updates = {};
+            selectedItems.forEach(key => updates[key] = null); // null يعني حذف
+            await update(ref(db, 'apps'), updates);
+            msg("🗑️ تم الحذف");
+            toggleSelectionMode(); // الخروج من الوضع
+        }
+    };
+
+    window.bulkToggleVisibility = async () => {
+        if (selectedItems.size === 0) return alert("حدد عناصر أولاً");
+        
+        // جلب الحالة الحالية وعكسها لكل عنصر
+        const updates = {};
+        selectedItems.forEach(key => {
+            const currentStatus = allDataCache[key].isHidden || false;
+            updates[key + '/isHidden'] = !currentStatus;
+        });
+        
+        await update(ref(db, 'apps'), updates);
+        msg("👁️ تم تغيير الظهور");
+        toggleSelectionMode();
+    };
+
+    // --- 3. إعدادات الأقسام (Settings) ---
+    function loadSettings() {
+        onValue(ref(db, 'settings/categories'), (s) => {
+            categoriesStatus = s.val() || { PROGRAM: true, GAME: true, WEBSITE: true, FILE: true };
+            renderSettingsModal();
+        });
+    }
+
+    window.openSettings = () => document.getElementById('settingsModal').style.display = 'flex';
+    window.closeSettings = () => document.getElementById('settingsModal').style.display = 'none';
+
+    function renderSettingsModal() {
+        const container = document.getElementById('categoriesSettings');
+        container.innerHTML = '';
+        const cats = { 'PROGRAM': 'التطبيقات', 'GAME': 'الألعاب', 'WEBSITE': 'المواقع', 'FILE': 'الملفات' };
+
+        for (const [key, label] of Object.entries(cats)) {
+            const isVisible = categoriesStatus[key] !== false; // افتراضياً true إذا لم يوجد
+            container.innerHTML += `
+                <div class="toggle-row">
+                    <span>${label}</span>
+                    <label class="switch">
+                        <input type="checkbox" ${isVisible ? 'checked' : ''} onchange="toggleCategory('${key}', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            `;
+        }
+    }
+
+    window.toggleCategory = (catKey, status) => {
+        set(ref(db, `settings/categories/${catKey}`), status);
+    };
+
+    // --- 4. العرض والقوائم ---
+    window.setFilter = (f, b) => {
+        currentFilter = f;
+        document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
         renderList();
     };
 
-    // دالة العرض بناءً على الفلتر الحالي
     window.renderList = () => {
         const list = document.getElementById('appsList');
-        const title = document.getElementById('listTitle');
-        const badge = document.getElementById('countBadge');
-        
         list.innerHTML = "";
         
-        // تسميات للعرض
-        const typeNames = {
-            'ALL': 'عرض الكل', 'PROGRAM': 'تطبيقات', 'GAME': 'ألعاب', 'WEBSITE': 'مواقع', 'FILE': 'ملفات'
-        };
-        title.innerText = typeNames[currentFilter];
-
-        const entries = Object.entries(allDataCache).reverse();
-        let count = 0;
-
-        entries.forEach(([k, v]) => {
-            // شرط العرض: إما الفلتر "الكل" أو نوع التطبيق يطابق الفلتر
+        Object.entries(allDataCache).reverse().forEach(([k, v]) => {
             if (currentFilter === 'ALL' || v.type === currentFilter) {
-                count++;
                 
-                // تحديد اسم القسم لعرضه كـ Badge صغير بجانب الاسم
-                let catBadge = "";
-                if(v.type === 'PROGRAM') catBadge = "تطبيق";
-                else if(v.type === 'GAME') catBadge = "لعبة";
-                else if(v.type === 'WEBSITE') catBadge = "موقع";
-                else if(v.type === 'FILE') catBadge = "ملف";
+                const isHidden = v.isHidden === true;
+                const hiddenClass = isHidden ? 'hidden-item' : '';
+                const hiddenIcon = isHidden ? '👁️‍🗨️ مخفي' : '';
 
                 const div = document.createElement('div');
-                div.className = 'app-item';
+                div.className = `app-item ${hiddenClass}`;
                 div.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" class="select-check" onchange="toggleItem('${k}', this)">
+                    <div style="display:flex; align-items:center; gap:10px; flex-grow:1;">
                         <img src="${v.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
-                        <div style="text-align:right">
-                            <strong>${v.name}</strong><br>
-                            <span class="badge">${catBadge}</span>
+                        <div class="app-info">
+                            <strong>${v.name}</strong> <small style="color:#f59e0b">${hiddenIcon}</small><br>
+                            <span class="badge">${v.type}</span>
                         </div>
                     </div>
-                    <div class="btn-group">
-                        <button class="sm-btn" style="background:#f59e0b; color:white;" onclick="startEdit('${k}','${v.name}','${v.link}','${v.img}','${v.type}')">✏️</button>
-                        <button class="sm-btn" style="background:#ef4444; color:white;" onclick="del('${k}')">🗑️</button>
+                    <div class="btn-group" style="display:flex; gap:5px;">
+                        <button onclick="startEdit('${k}','${v.name}','${v.link}','${v.img}','${v.type}')" style="background:#3b82f6; color:white; padding:5px 10px; border-radius:8px; width:auto; font-size:0.8rem;">✏️</button>
                     </div>
                 `;
                 list.appendChild(div);
             }
         });
-
-        badge.innerText = count;
-        if (count === 0) list.innerHTML = `<p style="color:#64748b; font-size:0.9rem;">لا يوجد عناصر هنا</p>`;
+        
+        // إعادة حالة مربعات الاختيار إذا كنا في وضع التحديد
+        if (isSelectMode) {
+            list.classList.add('show-checks');
+            document.querySelectorAll('.select-check').forEach(cb => {
+                const key = cb.getAttribute('onchange').match(/'([^']+)'/)[1];
+                if (selectedItems.has(key)) cb.checked = true;
+            });
+        }
     };
 
-    // عند الضغط على تعديل
     window.startEdit = (k, n, l, i, t) => {
         editKey = k; currentImgBase64 = i;
-        
-        // تعبئة البيانات في النموذج العلوي
         document.getElementById('appName').value = n;
         document.getElementById('appLink').value = l;
-        document.getElementById('inputType').value = t; // تحديد القسم الحالي للتطبيق
-        
-        document.getElementById('previewImg').style.display = 'block';
+        document.getElementById('inputType').value = t;
         document.getElementById('previewImg').src = i;
-        document.getElementById('formTitle').innerText = "✏️ تعديل (يمكنك تغيير القسم)";
-        document.getElementById('saveBtn').innerText = "حفظ التعديلات";
+        document.getElementById('previewImg').style.display = 'block';
+        document.getElementById('formTitle').innerText = "✏️ تعديل";
+        document.getElementById('saveBtn').innerText = "حفظ";
         document.getElementById('cancelBtn').style.display = 'inline-block';
-        
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo(0,0);
     };
 
     window.resetForm = () => {
@@ -270,13 +403,12 @@
         document.getElementById('appName').value = '';
         document.getElementById('appLink').value = '';
         document.getElementById('previewImg').style.display = 'none';
-        document.getElementById('formTitle').innerText = "✨ إضافة / تعديل";
+        document.getElementById('formTitle').innerText = "✨ إضافة جديد";
         document.getElementById('saveBtn').innerText = "🚀 حفظ ونشر";
         document.getElementById('cancelBtn').style.display = 'none';
-        document.getElementById('uploadLabel').innerText = "📸 صورة (اضغط هنا)";
+        document.getElementById('uploadLabel').innerText = "📸 صورة";
     };
 
-    window.del = (k) => { if(confirm("حذف؟")) remove(ref(db, 'apps/'+k)); };
     function msg(t) { const x = document.getElementById("toast"); x.innerText = t; x.className = "show"; setTimeout(() => x.className = "", 3000); }
 </script>
 </body>
