@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin V15 | الترتيب الشامل</title>
+    <title>Admin V16 | تحكم كامل</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         :root { --primary: #3b82f6; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
@@ -16,22 +16,22 @@
         .upload-area { border: 2px dashed #334155; padding: 15px; border-radius: 12px; margin: 10px 0; cursor: pointer; }
         #previewImg { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; display: none; margin: 10px auto; border: 2px solid var(--primary); }
         
-        /* تصميم عنصر القائمة */
-        .app-item { 
-            display: flex; align-items: center; background: #334155; padding: 10px; margin-top: 10px; 
-            border-radius: 12px; border: 1px solid transparent; transition: 0.2s;
-        }
-        .app-item.sortable-ghost { opacity: 0.4; background: var(--primary); } /* شكل العنصر أثناء السحب */
+        /* أزرار الفلترة (عادت من جديد) */
+        .filter-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; margin: 15px 0; white-space: nowrap; }
+        .filter-btn { background: #334155; color: #94a3b8; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; border: 1px solid transparent; width: auto; display: inline-block; }
+        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* القائمة */
+        .app-item { display: flex; align-items: center; background: #334155; padding: 10px; margin-top: 10px; border-radius: 12px; transition: 0.2s; }
+        .app-item.hidden-item { opacity: 0.5; border: 1px dashed #94a3b8; }
         
-        /* مقبض السحب (الأيقونة) */
-        .drag-handle { 
-            cursor: grab; padding: 10px; font-size: 1.5rem; color: #94a3b8; 
-            touch-action: none; /* لمنع تحرك الصفحة أثناء السحب */
-        }
+        /* مقبض السحب */
+        .drag-handle { cursor: grab; padding: 10px; font-size: 1.5rem; color: #94a3b8; touch-action: none; }
+        .drag-disabled { opacity: 0.1; cursor: not-allowed; } /* عندما يكون الفلتر مفعل */
+
+        .select-check { width: 20px; height: 20px; margin-left: 10px; display: none; }
+        .show-checks .select-check { display: block; }
         
-        .select-check { width: 20px; height: 20px; margin-left: 10px; }
-        
-        /* شريط الإجراءات */
         #bulkActionsBar { position: fixed; bottom: -100px; left: 0; width: 100%; background: var(--card); padding: 15px; transition: 0.3s; z-index: 100; display: flex; justify-content: space-around; }
         #bulkActionsBar.visible { bottom: 0; }
         
@@ -71,10 +71,18 @@
             <button id="cancelBtn" style="display:none; background:#475569; color:white;" onclick="resetForm()">إلغاء</button>
         </div>
 
-        <hr style="border-color:#334155; margin:25px 0;">
+        <hr style="border-color:#334155; margin:20px 0;">
+
+        <div class="filter-container">
+            <div class="filter-btn active" onclick="setFilter('ALL', this)">الكل</div>
+            <div class="filter-btn" onclick="setFilter('PROGRAM', this)">تطبيقات</div>
+            <div class="filter-btn" onclick="setFilter('GAME', this)">ألعاب</div>
+            <div class="filter-btn" onclick="setFilter('WEBSITE', this)">مواقع</div>
+            <div class="filter-btn" onclick="setFilter('FILE', this)">ملفات</div>
+        </div>
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <span style="font-size:0.8rem; color:#f59e0b;">💡 اسحب من الرمز ☰ للترتيب</span>
+            <span id="dragHint" style="font-size:0.8rem; color:#f59e0b;">💡 اسحب ☰ للترتيب (في قسم الكل فقط)</span>
             <button onclick="toggleSelectionMode()" style="width:auto; padding:5px 15px; font-size:0.8rem;">✅ تحديد</button>
         </div>
 
@@ -84,6 +92,7 @@
 
 <div id="bulkActionsBar">
     <button onclick="bulkDelete()" style="background:#ef4444; color:white; border:none; padding:10px; border-radius:10px;">🗑️ حذف المحدد</button>
+    <button onclick="bulkToggleVisibility()" style="background:#f59e0b; color:white; border:none; padding:10px; border-radius:10px;">👁️ إخفاء/إظهار</button>
     <button onclick="toggleSelectionMode()" style="background:#475569; color:white; border:none; padding:10px; border-radius:10px;">إلغاء</button>
 </div>
 
@@ -111,27 +120,24 @@
     let allDataCache = {};
     let isSelectMode = false;
     let selectedItems = new Set();
+    let currentFilter = 'ALL';
 
-    // إعداد مكتبة السحب (SortableJS)
+    // إعداد مكتبة السحب
     const sortable = new Sortable(document.getElementById('appsList'), {
-        handle: '.drag-handle', // السحب يعمل فقط من الأيقونة
+        handle: '.drag-handle',
         animation: 150,
-        delay: 100, // تأخير بسيط للموبايل لمنع السحب الخطأ
-        delayOnTouchOnly: true,
-        onEnd: function (evt) {
-            saveOrder(); // حفظ الترتيب عند الإفلات
-        }
+        onEnd: function (evt) { saveOrder(); }
     });
 
-    // دالة حفظ الترتيب في قاعدة البيانات
     function saveOrder() {
+        if(currentFilter !== 'ALL') return; // حماية: الترتيب يعمل فقط عند عرض الكل
         const items = document.querySelectorAll('.app-item');
         const updates = {};
         items.forEach((item, index) => {
             const key = item.getAttribute('data-key');
-            updates[`apps/${key}/order`] = index; // حفظ الرقم التسلسلي الجديد
+            updates[`apps/${key}/order`] = index;
         });
-        update(ref(db), updates).then(() => msg("✅ تم حفظ الترتيب الجديد"));
+        update(ref(db), updates).then(() => msg("✅ تم حفظ الترتيب"));
     }
 
     onAuthStateChanged(auth, (user) => {
@@ -143,6 +149,26 @@
     });
 
     window.login = () => signInWithPopup(auth, provider);
+
+    // دالة الفلترة (التي كانت مفقودة)
+    window.setFilter = (filter, btn) => {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // تعطيل السحب إذا لم نكن في "الكل"
+        const sortHint = document.getElementById('dragHint');
+        if (filter === 'ALL') {
+            sortable.option("disabled", false);
+            sortHint.innerText = "💡 اسحب ☰ للترتيب";
+            sortHint.style.color = "#f59e0b";
+        } else {
+            sortable.option("disabled", true);
+            sortHint.innerText = "🚫 الترتيب متاح فقط في قسم (الكل)";
+            sortHint.style.color = "#64748b";
+        }
+        renderList();
+    };
 
     window.processImage = () => {
         const file = document.getElementById('fileInput').files[0];
@@ -160,7 +186,6 @@
                     currentImgBase64 = canvas.toDataURL("image/jpeg", 0.7);
                     document.getElementById('previewImg').src = currentImgBase64;
                     document.getElementById('previewImg').style.display = 'block';
-                    document.getElementById('uploadLabel').innerText = "✅";
                 }
             }
         }
@@ -179,7 +204,8 @@
             const data = { 
                 name, link, type, 
                 img: currentImgBase64 || "https://cdn-icons-png.flaticon.com/512/564/564619.png",
-                order: 0 // الترتيب الافتراضي (سيظهر في الأول)
+                order: 0,
+                isHidden: false
             };
 
             if (editKey) {
@@ -205,30 +231,37 @@
         const list = document.getElementById('appsList');
         list.innerHTML = "";
         
-        // ترتيب العناصر حسب قيمة 'order' المحفوظة
+        // ترتيب العناصر حسب Order
         const sortedArray = Object.entries(allDataCache).sort(([,a], [,b]) => {
             return (a.order || 0) - (b.order || 0);
         });
 
         sortedArray.forEach(([k, v]) => {
-            const div = document.createElement('div');
-            div.className = 'app-item';
-            div.setAttribute('data-key', k);
-            div.innerHTML = `
-                <span class="drag-handle">☰</span>
-                ${isSelectMode ? `<input type="checkbox" class="select-check" onchange="toggleItem('${k}', this)">` : ''}
-                <div style="display:flex; align-items:center; gap:10px; flex-grow:1; margin-right:10px;">
-                    <img src="${v.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
-                    <div style="text-align:right;">
-                        <strong>${v.name}</strong><br>
-                        <span style="font-size:0.7rem; color:#94a3b8;">${v.type}</span>
+            // منطق الفلترة
+            if (currentFilter === 'ALL' || v.type === currentFilter) {
+                const isHidden = v.isHidden === true;
+                const dragClass = currentFilter === 'ALL' ? 'drag-handle' : 'drag-handle drag-disabled';
+                
+                const div = document.createElement('div');
+                div.className = `app-item ${isHidden ? 'hidden-item' : ''}`;
+                div.setAttribute('data-key', k);
+                div.innerHTML = `
+                    <span class="${dragClass}">☰</span>
+                    ${isSelectMode ? `<input type="checkbox" class="select-check" style="display:block" onchange="toggleItem('${k}', this)">` : ''}
+                    <div style="display:flex; align-items:center; gap:10px; flex-grow:1; margin-right:10px;">
+                        <img src="${v.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                        <div style="text-align:right;">
+                            <strong>${v.name}</strong> ${isHidden ? '<small>👁️‍🗨️</small>' : ''}<br>
+                            <span style="font-size:0.7rem; color:#94a3b8;">${v.type}</span>
+                        </div>
                     </div>
-                </div>
-                <button onclick="startEdit('${k}','${v.name}','${v.link}','${v.img}','${v.type}')" style="background:#3b82f6; color:white; border:none; padding:5px 10px; border-radius:8px;">✏️</button>
-            `;
-            list.appendChild(div);
+                    <button onclick="startEdit('${k}','${v.name}','${v.link}','${v.img}','${v.type}')" style="background:#3b82f6; color:white; border:none; padding:5px 10px; border-radius:8px;">✏️</button>
+                `;
+                list.appendChild(div);
+            }
         });
         
+        // استعادة التحديدات السابقة
         if (isSelectMode) {
             document.querySelectorAll('.select-check').forEach(cb => {
                 const key = cb.getAttribute('onchange').match(/'([^']+)'/)[1];
@@ -241,8 +274,7 @@
         isSelectMode = !isSelectMode;
         selectedItems.clear();
         const bar = document.getElementById('bulkActionsBar');
-        if (isSelectMode) bar.classList.add('visible');
-        else bar.classList.remove('visible');
+        if (isSelectMode) bar.classList.add('visible'); else bar.classList.remove('visible');
         renderList();
     };
 
@@ -258,6 +290,16 @@
             msg("🗑️ تم الحذف");
             toggleSelectionMode();
         }
+    };
+
+    window.bulkToggleVisibility = async () => {
+        const updates = {};
+        selectedItems.forEach(k => {
+            updates[`apps/${k}/isHidden`] = !allDataCache[k].isHidden;
+        });
+        await update(ref(db), updates);
+        msg("👁️ تم التغيير");
+        toggleSelectionMode();
     };
 
     window.startEdit = (k, n, l, i, t) => {
