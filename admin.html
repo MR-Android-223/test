@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V29 | إعدادات متقدمة</title>
+    <title>Admin V30 | السرعة والسهولة</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -45,7 +45,6 @@
             touch-action: none;
         }
         
-        /* كلاسات السحب */
         .sortable-ghost { opacity: 0.4; background: var(--primary); }
         .sortable-drag { cursor: grabbing; opacity: 1; background: #1e293b; transform: scale(1.05); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
 
@@ -91,13 +90,19 @@
         .modal-desc { color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; }
         .modal-btns { display: flex; flex-direction: column; gap: 10px; }
         .btn-full { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; font-family: 'Cairo'; margin-bottom: 5px;}
-        .btn-confirm { background: var(--primary); color: white; }
+        .btn-confirm { background: var(--primary); color: white; transition: 0.3s; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-cancel { background: transparent; color: #94a3b8; border: 1px solid #334155; }
 
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; background: #334155; color: white; font-family: 'Cairo'; text-align: center; }
         
-        /* تصميم عناصر القوائم (أقسام وروابط) */
+        /* تصميم قائمة اختيار الأيقونات */
+        .icon-select {
+            background: #334155; color: white; border: 1px solid #475569;
+            padding: 8px; border-radius: 8px; font-size: 0.9rem; width: 35% !important;
+            appearance: none; -webkit-appearance: none; text-align: center;
+        }
+
         .cat-item, .link-item { display: flex; gap: 8px; align-items: center; background: #334155; padding: 10px; margin-bottom: 8px; border-radius: 10px; border: 1px solid transparent;}
         .cat-item.locked { opacity: 0.6; filter: grayscale(1); border-color: #475569; }
         .cat-item.active-cat { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); }
@@ -117,7 +122,6 @@
         }
         .toggle-btn.on::after { left: 26px; }
 
-        /* تصميم قسم الإعدادات */
         .settings-menu-btn {
             display: flex; align-items: center; justify-content: space-between;
             background: #334155; color: white; padding: 15px; border-radius: 12px; margin-bottom: 10px;
@@ -195,7 +199,7 @@
             </div>
 
             <div id="catLockSection" class="settings-section">
-                <div style="margin-bottom:15px; color:#94a3b8; font-size:0.85rem;">الأقسام المقفلة لن تظهر للمستخدمين</div>
+                <div style="margin-bottom:15px; color:#94a3b8; font-size:0.85rem;">اضغط للقفل/الفتح (سيتم الحفظ تلقائياً)</div>
                 <div id="catLockList" style="max-height:300px; overflow-y:auto;"></div>
                 <button onclick="backToSettingsMain()" class="btn-full btn-cancel" style="margin-top:15px;">رجوع</button>
             </div>
@@ -212,7 +216,7 @@
                 <div id="linksList" style="max-height:200px; overflow-y:auto; margin-bottom:10px;"></div>
                 
                 <button onclick="addNewLink()" class="btn-full" style="background:#334155; border:1px dashed #94a3b8; margin-bottom:10px;">+ إضافة رابط جديد</button>
-                <button onclick="saveSidebarSettings()" class="btn-full btn-confirm">حفظ التغييرات</button>
+                <button onclick="saveSidebarSettings()" id="saveSidebarBtn" class="btn-full btn-confirm">حفظ التغييرات</button>
                 <button onclick="backToSettingsMain()" class="btn-full btn-cancel">رجوع</button>
             </div>
         </div>
@@ -309,7 +313,20 @@
         let linksSortable = null;
         let newProfileImg = "";
 
-        // بيانات السايدبار الافتراضية
+        // قائمة الأيقونات المسموح بها لتسهيل الاختيار
+        const ICON_OPTIONS = [
+            { val: "fab fa-whatsapp", label: "واتساب", icon: "💬" },
+            { val: "fas fa-phone", label: "اتصال", icon: "📞" },
+            { val: "fab fa-facebook", label: "فيسبوك", icon: "📘" },
+            { val: "fab fa-instagram", label: "انستغرام", icon: "📸" },
+            { val: "fab fa-telegram", label: "تيليجرام", icon: "✈️" },
+            { val: "fab fa-tiktok", label: "تيك توك", icon: "🎵" },
+            { val: "fab fa-youtube", label: "يوتيوب", icon: "▶️" },
+            { val: "fas fa-globe", label: "موقع ويب", icon: "🌐" },
+            { val: "fas fa-envelope", label: "ايميل", icon: "✉️" },
+            { val: "fas fa-map-marker-alt", label: "موقع خريطة", icon: "📍" }
+        ];
+
         let sidebarData = {
             profileImg: "https://midomido.neocities.org/mohammadalboushi.png",
             links: []
@@ -335,6 +352,10 @@
                     allCats = val;
                     renderTabs();
                     renderCatList();
+                    // إذا كانت نافذة القفل مفتوحة، نحدثها تلقائياً
+                    if(document.getElementById('catLockSection').style.display === 'block') {
+                        renderCatLockList();
+                    }
                 }
             });
 
@@ -419,12 +440,9 @@
 
             if (currentFilter === 'ALL' && !isSelectMode) {
                 appSortable = new Sortable(container, {
-                    handle: '.drag-handle', 
-                    animation: 150, 
-                    forceFallback: true,
-                    fallbackOnBody: true,
-                    ghostClass: 'sortable-ghost',
-                    dragClass: 'sortable-drag',
+                    handle: '.drag-handle', animation: 150, 
+                    forceFallback: true, fallbackOnBody: true,
+                    ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
                     onEnd: () => {
                         const items = container.querySelectorAll('.card');
                         const updates = {};
@@ -524,23 +542,17 @@
             closeModal('delCatModal');
         };
 
-        // --- إصلاح وظائف الإعدادات ---
+        // --- إعدادات سريعة وتفاعلية (Fix UI Responsiveness) ---
 
         window.openSettingsModal = () => {
             document.getElementById('settingsModal').style.display = 'flex';
-            backToSettingsMain(); // إظهار القائمة الرئيسية
+            backToSettingsMain();
         };
 
         window.openSettingsSection = (sectionName) => {
-            // إخفاء القائمة الرئيسية
             document.getElementById('settingsMain').style.display = 'none';
+            document.querySelectorAll('.settings-section').forEach(el => el.style.display = 'none');
             
-            // إخفاء جميع الأقسام الفرعية أولاً
-            document.querySelectorAll('.settings-section').forEach(el => {
-                el.style.display = 'none';
-            });
-            
-            // إظهار القسم المطلوب بالقوة
             if(sectionName === 'catLock') {
                 document.getElementById('catLockSection').style.display = 'block';
                 renderCatLockList();
@@ -551,15 +563,11 @@
         };
 
         window.backToSettingsMain = () => {
-            // إخفاء جميع الأقسام الفرعية
-            document.querySelectorAll('.settings-section').forEach(el => {
-                el.style.display = 'none';
-            });
-            // إظهار القائمة الرئيسية
+            document.querySelectorAll('.settings-section').forEach(el => el.style.display = 'none');
             document.getElementById('settingsMain').style.display = 'block';
         };
 
-        // 1. منطق قفل الأقسام
+        // 1. منطق القفل الفوري (Instant Lock)
         function renderCatLockList() {
             const list = document.getElementById('catLockList');
             list.innerHTML = '';
@@ -579,23 +587,26 @@
                             ${isLocked ? '(مخفي)' : '(ظاهر)'}
                         </span>
                     </div>
-                    <div class="toggle-btn ${!isLocked ? 'on' : ''}" onclick="toggleCatStatus('${key}', ${isLocked})"></div>
+                    <div id="toggle-${key}" class="toggle-btn ${!isLocked ? 'on' : ''}" onclick="toggleCatStatus('${key}', ${isLocked})"></div>
                 `;
                 list.appendChild(div);
             });
         }
 
         window.toggleCatStatus = (key, currentStatus) => {
+            // 1. تغيير الشكل فوراً (خدعة بصرية)
+            const btn = document.getElementById(`toggle-${key}`);
+            if(btn) btn.classList.toggle('on');
+            
+            // 2. إرسال الأمر للسيرفر
             update(ref(db, `categories/${key}`), { isHidden: !currentStatus });
         };
 
-        // 2. منطق تعديل السايدبار
+        // 2. منطق الروابط مع القائمة المنسدلة (Smart Links)
         function renderSidebarEdit() {
-            // صورة البروفايل
             newProfileImg = sidebarData.profileImg || "https://midomido.neocities.org/mohammadalboushi.png";
             document.getElementById('profilePreview').src = newProfileImg;
 
-            // الروابط
             const list = document.getElementById('linksList');
             list.innerHTML = '';
             
@@ -604,12 +615,24 @@
             links.forEach((link, index) => {
                 const div = document.createElement('div');
                 div.className = 'link-item';
+                
+                // بناء خيارات القائمة المنسدلة
+                let optionsHtml = '';
+                ICON_OPTIONS.forEach(opt => {
+                    const isSelected = link.icon === opt.val ? 'selected' : '';
+                    optionsHtml += `<option value="${opt.val}" ${isSelected}>${opt.icon} ${opt.label}</option>`;
+                });
+
                 div.innerHTML = `
                     <span class="cat-drag"><i class="fas fa-bars"></i></span>
-                    <input type="text" class="link-icon" value="${link.icon}" placeholder="ايقونة (fa-brands fa-whatsapp)" style="width:30%; font-size:0.8rem; text-align:left;">
+                    
+                    <select class="icon-select link-icon-select">
+                        ${optionsHtml}
+                    </select>
+
                     <div style="flex-grow:1; display:flex; flex-direction:column; gap:2px;">
                         <input type="text" class="link-name" value="${link.name}" placeholder="الاسم" style="margin:0; padding:5px; font-size:0.9rem;">
-                        <input type="text" class="link-url" value="${link.url}" placeholder="الرابط" style="margin:0; padding:5px; font-size:0.8rem; direction:ltr;">
+                        <input type="text" class="link-url" value="${link.url}" placeholder="الرابط (رقم او موقع)" style="margin:0; padding:5px; font-size:0.8rem; direction:ltr;">
                     </div>
                     <i class="fas fa-trash" style="color:#ef4444; cursor:pointer; padding:5px;" onclick="removeLink(${index})"></i>
                 `;
@@ -617,9 +640,7 @@
             });
 
             if(linksSortable) linksSortable.destroy();
-            linksSortable = new Sortable(list, {
-                handle: '.cat-drag', animation: 150
-            });
+            linksSortable = new Sortable(list, { handle: '.cat-drag', animation: 150 });
         }
 
         window.processProfileImage = () => {
@@ -644,7 +665,7 @@
 
         window.addNewLink = () => {
             if(!sidebarData.links) sidebarData.links = [];
-            sidebarData.links.push({ name: "", url: "", icon: "fas fa-link" });
+            sidebarData.links.push({ name: "", url: "", icon: "fab fa-whatsapp" });
             renderSidebarEdit();
         };
 
@@ -654,13 +675,19 @@
         };
 
         window.saveSidebarSettings = () => {
-            // تجميع البيانات من الحقول بالترتيب الجديد
+            const saveBtn = document.getElementById('saveSidebarBtn');
+            const originalText = saveBtn.innerText;
+            
+            // تغيير شكل الزر ليعرف المستخدم انه يعمل
+            saveBtn.innerText = "جاري الحفظ...";
+            saveBtn.style.opacity = "0.7";
+
             const linkItems = document.querySelectorAll('.link-item');
             const newLinks = [];
             
             linkItems.forEach(item => {
                 newLinks.push({
-                    icon: item.querySelector('.link-icon').value,
+                    icon: item.querySelector('.link-icon-select').value, // نأخذ القيمة من القائمة المنسدلة
                     name: item.querySelector('.link-name').value,
                     url: item.querySelector('.link-url').value
                 });
@@ -672,11 +699,22 @@
             };
 
             set(ref(db, 'settings'), finalData)
-                .then(() => showAlert("تم الحفظ", "تم تحديث السايدبار بنجاح", "✅"))
-                .catch(e => showAlert("خطأ", e.message, "❌"));
+                .then(() => {
+                    saveBtn.innerText = "تم الحفظ ✅";
+                    saveBtn.style.background = "#10b981";
+                    saveBtn.style.opacity = "1";
+                    setTimeout(() => {
+                        saveBtn.innerText = originalText;
+                        saveBtn.style.background = "#3b82f6";
+                    }, 2000);
+                })
+                .catch(e => {
+                    saveBtn.innerText = "خطأ!";
+                    saveBtn.style.background = "#ef4444";
+                    showAlert("خطأ", e.message, "❌");
+                });
         };
 
-        // --- باقي الوظائف ---
         window.bulkDelete = () => {
             if(selectedApps.size === 0) return showAlert("تنبيه", "حدد عناصر أولاً!", "⚠️");
             const updates = {}; selectedApps.forEach(key => updates[`apps/${key}`] = null);
