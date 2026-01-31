@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V23 | إدارة الأيقونات</title>
+    <title>Admin V23 | السريع</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -16,7 +16,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg-body); background-image: var(--bg-gradient); color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; padding-bottom: 100px; }
 
-        /* الهيدر */
         header {
             position: sticky; top: 0; z-index: 1000; background: rgba(15, 23, 42, 0.98);
             border-bottom: 1px solid var(--border); padding: 15px 20px;
@@ -28,7 +27,6 @@
         }
         .header-btn.active { background: var(--primary); border-color: var(--primary); }
 
-        /* شريط الأقسام */
         .tabs-wrapper { position: sticky; top: 68px; z-index: 900; padding: 10px 0; background: linear-gradient(to bottom, rgba(15,23,42,1) 0%, rgba(15,23,42,0) 100%); }
         .tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px; scrollbar-width: none; }
         .tabs-container::-webkit-scrollbar { display: none; }
@@ -39,7 +37,6 @@
         }
         .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
 
-        /* الشبكة */
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
         .card {
             background: var(--card-glass); border-radius: 18px; padding: 15px; border: 1px solid var(--border);
@@ -53,12 +50,17 @@
         .card.selected .check-circle { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
         .card.selected .check-circle::after { content: '✓'; color: white; font-size: 0.8rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-        .card img { width: 60px; height: 60px; border-radius: 14px; margin-bottom: 10px; object-fit: cover; }
-        .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 5px; height: 40px; overflow: hidden; }
+        .card img { width: 60px; height: 60px; border-radius: 14px; margin-bottom: 10px; object-fit: cover; pointer-events: none; }
+        .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 5px; height: 40px; overflow: hidden; pointer-events: none; }
         .edit-badge { position: absolute; top: 10px; left: 10px; background: #f59e0b; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; }
-        .drag-handle { position: absolute; top: 5px; right: 5px; color: #94a3b8; cursor: grab; padding: 10px; z-index: 10; font-size: 1.2rem; }
+        
+        /* تحسين أيقونة السحب */
+        .drag-handle { 
+            position: absolute; top: 0; right: 0; color: #94a3b8; cursor: grab; 
+            padding: 15px; z-index: 10; font-size: 1.3rem; 
+            touch-action: none; /* مهم جداً لمنع سكرول الصفحة أثناء السحب */
+        }
 
-        /* الزر العائم */
         .fab-btn {
             position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px;
             background: var(--primary); color: white; border-radius: 50%;
@@ -67,7 +69,6 @@
             cursor: pointer; z-index: 2000; border: none; transition: 0.3s;
         }
 
-        /* شريط الإجراءات */
         #bulkBar {
             position: fixed; bottom: -120px; left: 0; width: 100%; 
             background: #1e293b; border-top: 1px solid var(--primary);
@@ -77,13 +78,10 @@
         #bulkBar.visible { bottom: 0; }
         .bulk-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; color: white; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 0.8rem; }
 
-        /* Modals */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .modal-box { background: #1e293b; padding: 25px; border-radius: 20px; width: 90%; max-width: 380px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
-        
         .modal-title { font-size: 1.2rem; color: white; margin-bottom: 10px; font-weight: bold; }
         .modal-desc { color: #94a3b8; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; }
-
         .modal-btns { display: flex; flex-direction: column; gap: 10px; }
         .btn-full { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; font-family: 'Cairo'; }
         .btn-confirm { background: var(--primary); color: white; }
@@ -91,18 +89,11 @@
         .btn-cancel { background: transparent; color: #94a3b8; border: 1px solid #334155; }
 
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; background: #334155; color: white; font-family: 'Cairo'; text-align: center; }
-        
-        /* تصميم قائمة الأقسام (المعدل) */
-        .cat-item { display: flex; gap: 5px; align-items: center; background: #334155; padding: 8px; margin-bottom: 8px; border-radius: 10px; }
-        .cat-drag { cursor: grab; font-size: 1.4rem; color: #94a3b8; padding: 0 5px; touch-action: none; }
-        /* حقل الرمز */
+        .cat-item { display: flex; gap: 8px; align-items: center; background: #334155; padding: 10px; margin-bottom: 8px; border-radius: 10px; }
+        .cat-drag { cursor: grab; font-size: 1.4rem; color: #94a3b8; padding: 0 10px; touch-action: none; }
         .cat-icon-input { width: 45px; margin: 0; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px; font-size: 1.2rem; }
-        /* حقل الاسم */
         .cat-name-input { flex-grow: 1; margin: 0; background: transparent; text-align: right; padding: 8px; }
-        /* أيقونات التحكم */
         .cat-action { padding: 8px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
-        .cat-action:hover { transform: scale(1.2); }
-
     </style>
 </head>
 <body>
@@ -172,12 +163,10 @@
             <button onclick="document.getElementById('fileInput').click()" class="btn-full btn-cancel" style="margin:10px 0;">📸 تغيير الصورة</button>
             <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
             <img id="previewImg" style="width:60px; height:60px; border-radius:10px; display:none; margin:0 auto;">
-            
             <div style="display:flex; justify-content:space-between; margin:15px 0; color:#cbd5e1;">
                 <span>إخفاء التطبيق؟</span>
                 <input type="checkbox" id="appHidden" style="width:20px;">
             </div>
-
             <div class="modal-btns">
                 <button onclick="saveApp()" id="saveBtn" class="btn-full btn-confirm">حفظ ونشر</button>
                 <button onclick="deleteSingleApp()" id="delBtn" class="btn-full btn-danger" style="display:none;">حذف</button>
@@ -189,10 +178,7 @@
     <div id="catModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-title">إدارة الأقسام</div>
-            <p style="font-size:0.7rem; color:#94a3b8; margin-bottom:10px;">يمكنك تعديل الاسم والرمز والحفظ فوراً</p>
-            
             <div id="catList" style="max-height:250px; overflow-y:auto; margin-bottom:15px;"></div>
-            
             <div style="border-top:1px solid #334155; padding-top:10px;">
                 <input type="text" id="newCatIcon" placeholder="رمز" style="width:20%; display:inline-block;">
                 <input type="text" id="newCatName" placeholder="اسم القسم" style="width:75%; display:inline-block;">
@@ -240,6 +226,10 @@
         let isSelectMode = false;
         let selectedApps = new Set();
         let catToDelete = null;
+        
+        // متغيرات التحكم في السحب (لمنع التكرار)
+        let appSortable = null;
+        let catSortable = null;
 
         onAuthStateChanged(auth, (user) => {
             if (user && user.uid === myUID) {
@@ -255,9 +245,7 @@
                 if(!val) {
                     update(ref(db, 'categories'), {
                         'PROGRAM': { name: 'تطبيقات', icon: '📱', order: 1 },
-                        'GAME': { name: 'ألعاب', icon: '🎮', order: 2 },
-                        'WEBSITE': { name: 'مواقع', icon: '🌐', order: 3 },
-                        'FILE': { name: 'ملفات', icon: '📁', order: 4 }
+                        'GAME': { name: 'ألعاب', icon: '🎮', order: 2 }
                     });
                 } else {
                     allCats = val;
@@ -279,7 +267,6 @@
             document.getElementById('alertModal').style.display = 'flex';
         }
 
-        // --- العرض والفلترة ---
         window.renderTabs = () => {
             const container = document.getElementById('tabsList');
             const select = document.getElementById('appCat');
@@ -302,6 +289,10 @@
         function renderApps() {
             const container = document.getElementById('appsContainer');
             container.innerHTML = '';
+            
+            // تنظيف السحب القديم لمنع البطء
+            if (appSortable) { appSortable.destroy(); appSortable = null; }
+
             const sortedApps = Object.entries(allApps).sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
 
             sortedApps.forEach(([k, v]) => {
@@ -313,11 +304,13 @@
                     card.className = `card ${isSelected}`;
                     card.style.cssText = isHidden;
                     card.setAttribute('data-key', k);
+                    
                     card.onclick = (e) => {
                         if(e.target.classList.contains('drag-handle')) return;
                         if(isSelectMode) toggleSelection(k);
                         else openEditModal(k, v);
                     };
+                    
                     card.innerHTML = `
                         <div class="check-circle"></div>
                         ${!isSelectMode ? '<span class="edit-badge">✏️ تعديل</span>' : ''}
@@ -330,9 +323,14 @@
                 }
             });
 
+            // تفعيل السحب فقط في وضع الكل + عدم التحديد
             if (currentFilter === 'ALL' && !isSelectMode) {
-                new Sortable(container, {
-                    handle: '.drag-handle', animation: 150, delay: 100, touchStartThreshold: 5,
+                appSortable = new Sortable(container, {
+                    handle: '.drag-handle', 
+                    animation: 150, 
+                    delay: 150, // تأخير لمنع تداخل اللمس
+                    delayOnTouchOnly: true, 
+                    touchStartThreshold: 5,
                     onEnd: () => {
                         const items = container.querySelectorAll('.card');
                         const updates = {};
@@ -343,7 +341,6 @@
             }
         }
 
-        // --- نظام التحديد ---
         window.toggleSelectMode = () => {
             isSelectMode = !isSelectMode;
             selectedApps.clear();
@@ -374,6 +371,8 @@
         function renderCatList() {
             const list = document.getElementById('catList');
             list.innerHTML = '';
+            if (catSortable) { catSortable.destroy(); catSortable = null; }
+
             const sortedCats = Object.entries(allCats).sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
 
             sortedCats.forEach(([key, val]) => {
@@ -390,7 +389,7 @@
                 list.appendChild(div);
             });
 
-            new Sortable(list, {
+            catSortable = new Sortable(list, {
                 handle: '.cat-drag', animation: 150, delay: 100, touchStartThreshold: 5,
                 onEnd: () => {
                     const items = list.querySelectorAll('.cat-item');
@@ -401,6 +400,13 @@
             });
         }
 
+        window.saveCat = (key) => {
+            const name = document.getElementById(`name-${key}`).value;
+            const icon = document.getElementById(`icon-${key}`).value;
+            update(ref(db, `categories/${key}`), { name, icon });
+            showAlert("تم", "تم تحديث القسم", "✅");
+        };
+
         window.addCategory = () => {
             const name = document.getElementById('newCatName').value;
             const icon = document.getElementById('newCatIcon').value;
@@ -410,19 +416,7 @@
             document.getElementById('newCatName').value = '';
         };
 
-        // دالة الحفظ الجديدة (تحفظ الرمز والاسم)
-        window.saveCat = (key) => {
-            const name = document.getElementById(`name-${key}`).value;
-            const icon = document.getElementById(`icon-${key}`).value;
-            update(ref(db, `categories/${key}`), { name, icon });
-            showAlert("تم", "تم تحديث القسم", "✅");
-        };
-
-        window.tryDelCat = (key) => {
-            catToDelete = key;
-            document.getElementById('delCatModal').style.display = 'flex';
-        };
-
+        window.tryDelCat = (key) => { catToDelete = key; document.getElementById('delCatModal').style.display = 'flex'; };
         window.confirmDelCat = (mode) => {
             if(mode === 'ALL') {
                 const updates = {};
@@ -437,35 +431,28 @@
             closeModal('delCatModal');
         };
 
-        // --- المساعدات ---
+        // --- باقي الدوال (Bulk, Add/Edit App) ---
+        // (تم دمج باقي الدوال بنفس المنطق المحسن)
         window.bulkDelete = () => {
             if(selectedApps.size === 0) return showAlert("تنبيه", "حدد عناصر أولاً!", "⚠️");
-            const updates = {};
-            selectedApps.forEach(key => updates[`apps/${key}`] = null);
-            update(ref(db), updates);
-            window.toggleSelectMode();
+            const updates = {}; selectedApps.forEach(key => updates[`apps/${key}`] = null);
+            update(ref(db), updates); window.toggleSelectMode();
         };
         window.bulkHide = () => {
             if(selectedApps.size === 0) return showAlert("تنبيه", "حدد عناصر أولاً!", "⚠️");
-            const updates = {};
-            selectedApps.forEach(key => updates[`apps/${key}/isHidden`] = !allApps[key].isHidden);
-            update(ref(db), updates);
-            window.toggleSelectMode();
+            const updates = {}; selectedApps.forEach(key => updates[`apps/${key}/isHidden`] = !allApps[key].isHidden);
+            update(ref(db), updates); window.toggleSelectMode();
         };
         window.bulkMove = () => {
             if(selectedApps.size === 0) return showAlert("تنبيه", "حدد عناصر أولاً!", "⚠️");
-            const select = document.getElementById('moveTargetCat');
-            select.innerHTML = '';
+            const select = document.getElementById('moveTargetCat'); select.innerHTML = '';
             Object.entries(allCats).forEach(([k, v]) => select.innerHTML += `<option value="${k}">${v.name}</option>`);
             document.getElementById('moveModal').style.display = 'flex';
         };
         window.confirmBulkMove = () => {
             const target = document.getElementById('moveTargetCat').value;
-            const updates = {};
-            selectedApps.forEach(key => updates[`apps/${key}/type`] = target);
-            update(ref(db), updates);
-            closeModal('moveModal');
-            window.toggleSelectMode();
+            const updates = {}; selectedApps.forEach(key => updates[`apps/${key}/type`] = target);
+            update(ref(db), updates); closeModal('moveModal'); window.toggleSelectMode();
             showAlert("تم النقل", "تم نقل التطبيقات بنجاح", "🚚");
         };
         window.openEditModal = (key, data) => {
