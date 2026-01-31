@@ -7,13 +7,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- الألوان (ثابتة وسريعة) --- */
         :root {
-            --bg-body: #0f172a; /* لون ثابت بدلاً من المتحرك */
+            --bg-body: #0f172a; 
             --bg-gradient: radial-gradient(circle at top, #1e293b, #0f172a);
             --text-main: #f8fafc; --text-muted: #94a3b8;
             --primary: #3b82f6; 
-            --card-bg: rgba(30, 41, 59, 0.95); /* تقليل الشفافية لزيادة السرعة */
+            --card-bg: rgba(30, 41, 59, 0.95);
             --border: rgba(255,255,255,0.08);
             --nav-bg: #0f172a;
         }
@@ -32,40 +31,29 @@
         body { 
             background: var(--bg-body); background-image: var(--bg-gradient);
             color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; 
-            padding-bottom: 30px; overflow-x: hidden;
-            background-attachment: fixed; /* تثبيت الخلفية للأداء */
+            padding-bottom: 30px; overflow-x: hidden; background-attachment: fixed;
         }
         body.no-scroll { overflow: hidden; }
 
-        /* --- الهيدر --- */
         header {
             position: sticky; top: 0; z-index: 1000; background: var(--nav-bg);
             border-bottom: 1px solid var(--border); padding: 15px 20px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1); /* ظل خفيف بدل الـ Blur الثقيل */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
         .logo { font-size: 1.3rem; font-weight: 900; letter-spacing: 1px; }
         .logo span { color: var(--primary); }
-        
-        /* إصلاح تلاصق الأزرار */
         .header-left { display: flex; gap: 25px; align-items: center; } 
         .icon-btn { font-size: 1.4rem; cursor: pointer; transition: 0.2s; color: var(--text-main); }
-        .icon-btn:active { transform: scale(0.9); color: var(--primary); }
 
-        /* --- القسم الرئيسي --- */
         .hero { text-align: center; padding: 25px 20px 5px; }
-        .hero h1 { 
-            font-size: 1.8rem; margin-bottom: 5px; 
-            color: var(--primary);
-        }
+        .hero h1 { font-size: 1.8rem; margin-bottom: 5px; color: var(--primary); }
         .hero p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
 
         .stats { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
         .stat-item { 
-            background: var(--card-bg); 
-            border: 1px solid var(--border); border-radius: 16px; 
-            padding: 10px 20px; min-width: 90px;
-            cursor: pointer; user-select: none;
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; 
+            padding: 10px 20px; min-width: 90px; cursor: pointer; user-select: none;
         }
         .stat-item:active { transform: scale(0.95); border-color: var(--primary); }
         .stat-num { font-weight: 800; color: var(--primary); font-size: 1.2rem; display: block; }
@@ -73,15 +61,13 @@
 
         .search-container { position: relative; max-width: 500px; margin: 0 auto 20px; }
         .search-box {
-            width: 100%; background: var(--card-bg); 
-            border: 1px solid var(--border);
+            width: 100%; background: var(--card-bg); border: 1px solid var(--border);
             padding: 14px 45px 14px 20px; border-radius: 50px; color: var(--text-main);
             font-family: 'Cairo'; font-size: 1rem; outline: none; 
         }
         .search-box:focus { border-color: var(--primary); }
         .search-icon { position: absolute; right: 20px; top: 16px; color: var(--text-muted); }
 
-        /* --- شريط الأقسام --- */
         .tabs-wrapper { position: sticky; top: 73px; z-index: 900; padding: 5px 0; margin-bottom: 15px; background: transparent; }
         .tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 5px 20px; scrollbar-width: none; }
         .tabs-container::-webkit-scrollbar { display: none; }
@@ -92,17 +78,16 @@
         }
         .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* --- الشبكة والكروت --- */
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
-        @media(min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
-
+        
+        /* --- البطاقة (قابلة للنقر بالكامل) --- */
         .card {
             background: var(--card-bg); border-radius: 18px; padding: 15px; 
             text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; 
             align-items: center; border: 1px solid var(--border); position: relative; 
-            transition: transform 0.1s;
+            transition: transform 0.1s; cursor: pointer; /* مؤشر اليد */
         }
-        .card:active { transform: scale(0.97); }
+        .card:active { transform: scale(0.97); background: rgba(59, 130, 246, 0.05); }
         
         .mod-badge {
             position: absolute; top: 10px; left: 10px; 
@@ -112,27 +97,22 @@
         
         .heart-btn {
             position: absolute; top: 10px; right: 10px; font-size: 1.1rem; color: var(--text-muted);
-            cursor: pointer; z-index: 5; background: none; border: none;
+            cursor: pointer; z-index: 5; background: none; border: none; padding: 5px;
         }
         .heart-btn.active { color: #ef4444; }
 
         .card img { width: 75px; height: 75px; border-radius: 16px; margin-bottom: 12px; object-fit: cover; background: #334155; }
         .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 10px; line-height: 1.3; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-        /* أزرار التحميل */
-        .btn-group { display: flex; gap: 8px; width: 100%; }
+        /* الزر الوهمي (للزينة فقط لأن البطاقة كلها زر) */
         .get-btn {
             background: transparent; color: var(--primary); border: 1.5px solid var(--primary);
             font-size: 0.8rem; font-weight: 700; padding: 6px 0; border-radius: 50px; 
-            width: 100%; text-align: center; text-decoration: none; display: block;
+            width: 100%; text-align: center; display: block;
         }
         .card:hover .get-btn { background: var(--primary); color: white; }
-        
-        /* أزرار الملفات الخاصة */
-        .btn-view { flex: 1; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); border-radius: 50px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none;}
-        .btn-down { flex: 1; background: var(--primary); color: white; border-radius: 50px; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; text-decoration: none; border: none;}
+        .get-btn.secondary { border-color: #94a3b8; color: #94a3b8; } 
 
-        /* القائمة الجانبية (سريعة) */
         .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0; background-color: var(--nav-bg); overflow-x: hidden; transition: 0.3s; padding-top: 20px; border-left: 1px solid var(--border); box-shadow: -5px 0 20px rgba(0,0,0,0.5); }
         .sidebar-header { text-align: center; padding-bottom: 20px; margin-bottom: 10px; }
         .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 10px; }
@@ -236,7 +216,6 @@
         let currentCategory = 'ALL';
         let allCats = {};
 
-        // جلب الأقسام
         onValue(ref(db, 'categories'), (snapshot) => {
             const val = snapshot.val();
             if(val) { allCats = val; renderTabs(); }
@@ -252,7 +231,6 @@
             container.innerHTML = html;
         }
 
-        // جلب التطبيقات
         onValue(ref(db, 'apps'), (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -296,28 +274,23 @@
                 const isFav = favs.includes(app.name);
                 const heartClass = isFav ? "fa-solid active" : "fa-regular";
 
-                // --- الذكاء في الأزرار (الحل لمشكلة التحميل) ---
-                let buttonsHTML = '';
+                // النصوص والأفعال
+                let actionText = "تحميل";
+                let clickAction = `window.open('${app.link}', '_blank')`;
                 
                 if (app.type === 'WEBSITE') {
-                    buttonsHTML = `<a href="${app.link}" target="_blank" class="get-btn">زيارة</a>`;
+                    actionText = "زيارة";
                 } else if (app.type === 'FILE') {
-                    // للملفات: زرين
-                    // ملاحظة: نستخدم app.img كمصدر للصورة في العرض والتحميل لأنك ترفع صورة كأيقونة
-                    const contentUrl = app.img; 
-                    buttonsHTML = `
-                        <div class="btn-group">
-                            <button onclick="viewImage('${contentUrl}')" class="btn-view">👁️ مشاهدة</button>
-                            <a href="${contentUrl}" download="${app.name}.jpg" class="btn-down">⬇️ تحميل</a>
-                        </div>
-                    `;
-                } else {
-                    // تطبيقات وألعاب
-                    buttonsHTML = `<a href="${app.link}" target="_blank" class="get-btn">تحميل</a>`;
+                    actionText = "👁️ مشاهدة";
+                    // للملفات: نفتح الصورة داخل الموقع
+                    clickAction = `viewImage('${app.img}')`; 
                 }
 
+                // إنشاء البطاقة كعنصر Div مع حدث Onclick
                 const card = document.createElement('div');
                 card.className = 'card';
+                card.setAttribute('onclick', clickAction);
+                
                 card.innerHTML = `
                     <span class="mod-badge">${badgeTxt}</span>
                     <button class="heart-btn" onclick="toggleFavorite(this, '${app.name}')">
@@ -325,7 +298,7 @@
                     </button>
                     <img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'" loading="lazy">
                     <div class="card-title">${app.name}</div>
-                    ${buttonsHTML}
+                    <div class="get-btn ${app.type === 'FILE' ? 'secondary' : ''}">${actionText}</div>
                 `;
                 container.appendChild(card);
             });
@@ -333,17 +306,19 @@
 
         document.getElementById('searchInput').addEventListener('input', (e) => renderApps(e.target.value));
 
-        // عارض الصور
         window.viewImage = (url) => {
+            // منع انتشار الحدث (في حال وجود تداخل)
+            if(window.event) window.event.stopPropagation();
+            
             document.getElementById('fullImage').src = url;
             document.getElementById('downloadBtn').href = url;
             document.getElementById('imgViewer').style.display = 'flex';
         }
+        
         window.closeViewer = () => {
             document.getElementById('imgViewer').style.display = 'none';
         }
 
-        // الوظائف الأساسية
         window.toggleTheme = () => {
             const btn = document.getElementById('themeBtn');
             if (document.body.hasAttribute('data-theme')) {
@@ -365,6 +340,9 @@
         window.closeNav = () => { document.getElementById("mySidebar").style.width = "0"; document.getElementById("overlay").style.display = "none"; document.body.classList.remove("no-scroll"); };
         
         window.toggleFavorite = (btn, appName) => {
+            // أهم سطر: منع البطاقة من الفتح عند ضغط القلب
+            event.stopPropagation(); 
+            
             let favs = JSON.parse(localStorage.getItem('favorites')) || [];
             if (favs.includes(appName)) {
                 favs = favs.filter(i => i !== appName);
