@@ -7,31 +7,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- 1. الألوان والمتغيرات (تصميم مودرن) --- */
+        /* --- 1. الألوان والمتغيرات (تحسين الأداء) --- */
         :root {
             --bg-body: #0f172a;
-            --bg-gradient: radial-gradient(circle at top left, #1e293b, #0f172a);
-            --card-glass: rgba(30, 41, 59, 0.7);
+            --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b, #0f172a);
+            --card-glass: rgba(30, 41, 59, 0.85); /* تقليل الشفافية للأداء */
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --primary: #3b82f6;
-            --primary-glow: rgba(59, 130, 246, 0.3);
-            --border: rgba(255,255,255,0.08);
-            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            --nav-bg: rgba(15, 23, 42, 0.85);
+            --border: rgba(255,255,255,0.06);
+            --nav-bg: rgba(15, 23, 42, 0.95);
         }
 
         [data-theme="light"] {
             --bg-body: #f8fafc;
-            --bg-gradient: radial-gradient(circle at top left, #e2e8f0, #f8fafc);
-            --card-glass: rgba(255, 255, 255, 0.8);
+            --bg-gradient: radial-gradient(circle at 50% 0%, #e2e8f0, #f8fafc);
+            --card-glass: rgba(255, 255, 255, 0.9);
             --text-main: #1e293b;
             --text-muted: #64748b;
             --primary: #2563eb;
-            --primary-glow: rgba(37, 99, 235, 0.2);
             --border: rgba(0,0,0,0.05);
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-            --nav-bg: rgba(255, 255, 255, 0.85);
+            --nav-bg: rgba(255, 255, 255, 0.95);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -39,136 +35,150 @@
         body { 
             background: var(--bg-body); background-image: var(--bg-gradient);
             color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; 
-            transition: 0.3s; overflow-x: hidden; padding-bottom: 30px;
+            transition: background 0.3s; overflow-x: hidden; padding-bottom: 30px;
+            -webkit-overflow-scrolling: touch; /* نعومة التمرير */
         }
 
-        /* --- 2. الهيدر الشفاف --- */
+        /* منع التمرير عند فتح القائمة */
+        body.no-scroll { overflow: hidden; }
+
+        /* --- 2. الهيدر --- */
         header {
             position: sticky; top: 0; z-index: 1000; background: var(--nav-bg);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border); padding: 15px 20px;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .logo { font-size: 1.4rem; font-weight: 900; color: var(--text-main); display: flex; align-items: center; gap: 2px; }
+        /* تعديل الشعار كما طلبت */
+        .logo { font-size: 1.3rem; font-weight: 900; color: var(--text-main); letter-spacing: 1px; }
         .logo span { color: var(--primary); }
+        
         .header-left { display: flex; gap: 15px; }
         .icon-btn { font-size: 1.2rem; cursor: pointer; color: var(--text-main); transition: 0.3s; }
-        .icon-btn:hover { color: var(--primary); transform: rotate(10deg); }
 
-        /* --- 3. القسم الرئيسي (Hero) --- */
-        .hero { text-align: center; padding: 30px 20px 10px; position: relative; }
+        /* --- 3. القسم الرئيسي --- */
+        .hero { text-align: center; padding: 25px 20px 5px; }
         
         .hero h1 { 
             font-size: 1.8rem; margin-bottom: 5px; 
-            background: linear-gradient(to right, var(--primary), #a855f7);
+            background: linear-gradient(to right, var(--primary), #60a5fa);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         .hero p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
 
-        /* الإحصائيات (Glass Cards) */
-        .stats { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
+        /* الإحصائيات (تفاعلية الآن) */
+        .stats { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
         .stat-item { 
-            background: var(--card-glass); backdrop-filter: blur(5px);
+            background: var(--card-glass); 
             border: 1px solid var(--border); border-radius: 16px; 
-            padding: 10px 25px; min-width: 90px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 10px 20px; min-width: 90px;
+            transition: 0.2s; cursor: default;
+            user-select: none;
         }
-        .stat-num { font-weight: 800; color: var(--primary); font-size: 1.3rem; display: block; }
+        /* تأثير الضغط */
+        .stat-item:active { transform: scale(0.95); background: rgba(59, 130, 246, 0.1); border-color: var(--primary); }
+        
+        .stat-num { font-weight: 800; color: var(--primary); font-size: 1.2rem; display: block; }
         .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
 
-        /* البحث العائم */
+        /* البحث */
         .search-container { position: relative; max-width: 500px; margin: 0 auto 20px; }
         .search-box {
             width: 100%; background: var(--card-glass); border: 1px solid var(--border);
             padding: 14px 45px 14px 20px; border-radius: 50px; color: var(--text-main);
             font-family: 'Cairo'; font-size: 1rem; outline: none; transition: 0.3s;
-            backdrop-filter: blur(5px); box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-        .search-box:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+        .search-box:focus { border-color: var(--primary); }
         .search-icon { position: absolute; right: 20px; top: 16px; color: var(--text-muted); }
 
-        /* --- 4. شريط الأقسام (الأفقي - Scrollable) --- */
+        /* --- 4. شريط الأقسام (الترتيب الجديد) --- */
         .tabs-wrapper {
-            position: sticky; top: 70px; z-index: 900; /* يلتصق تحت الهيدر عند النزول */
-            padding: 10px 0; margin-bottom: 10px;
-            /* خلفية متدرجة للإيحاء بالاستمرار */
-            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            position: sticky; top: 68px; z-index: 900;
+            padding: 5px 0; margin-bottom: 15px;
+            background: linear-gradient(to bottom, rgba(15,23,42,0) 0%, var(--bg-body) 100%); /* خدعة بصرية */
         }
-        
         .tabs-container {
-            display: flex; gap: 10px; overflow-x: auto; padding: 5px 20px;
-            scrollbar-width: none; /* اخفاء الشريط لفايرفوكس */
-            justify-content: flex-start; /* يبدأ من اليمين (عربي) */
+            display: flex; gap: 8px; overflow-x: auto; padding: 5px 20px;
+            scrollbar-width: none;
         }
-        .tabs-container::-webkit-scrollbar { display: none; } /* اخفاء الشريط لكروم */
+        .tabs-container::-webkit-scrollbar { display: none; }
 
         .tab-btn {
             background: var(--card-glass); color: var(--text-muted); border: 1px solid var(--border);
-            padding: 8px 24px; border-radius: 50px; cursor: pointer; transition: 0.3s;
-            font-family: 'Cairo'; font-weight: 700; font-size: 0.9rem; white-space: nowrap;
-            backdrop-filter: blur(5px); flex-shrink: 0; /* منع الانكماش */
+            padding: 8px 20px; border-radius: 50px; cursor: pointer; transition: 0.3s;
+            font-family: 'Cairo'; font-weight: 700; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0;
         }
-        .tab-btn:hover { color: var(--primary); border-color: var(--primary); }
         .tab-btn.active { 
             background: var(--primary); color: white; border-color: var(--primary); 
-            box-shadow: 0 4px 15px var(--primary-glow); transform: scale(1.05);
+            transform: scale(1.05);
         }
 
         /* --- 5. الشبكة والكروت --- */
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
         @media(min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
 
         .card {
-            background: var(--card-glass); border-radius: 20px; padding: 15px; 
+            background: var(--card-glass); border-radius: 18px; padding: 15px; 
             text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; 
             align-items: center; border: 1px solid var(--border); position: relative; 
-            transition: 0.3s; backdrop-filter: blur(10px);
+            transition: transform 0.2s; 
+            /* إزالة الـ Blur الثقيل من الكروت لتسريع التمرير */
         }
-        .card:active { transform: scale(0.96); }
+        .card:active { transform: scale(0.97); }
         
         .mod-badge {
-            position: absolute; top: 12px; left: 12px; 
-            background: rgba(59, 130, 246, 0.15); color: var(--primary);
-            font-size: 0.65rem; padding: 4px 10px; border-radius: 8px; font-weight: 800;
+            position: absolute; top: 10px; left: 10px; 
+            background: rgba(59, 130, 246, 0.1); color: var(--primary);
+            font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold;
         }
         
         .heart-btn {
-            position: absolute; top: 12px; right: 12px; font-size: 1.2rem; color: var(--text-muted);
-            cursor: pointer; z-index: 5; background: none; border: none; transition: 0.2s;
+            position: absolute; top: 10px; right: 10px; font-size: 1.1rem; color: var(--text-muted);
+            cursor: pointer; z-index: 5; background: none; border: none;
         }
-        .heart-btn.active { color: #ef4444; transform: scale(1.2); }
+        .heart-btn.active { color: #ef4444; }
 
         .card img { 
-            width: 80px; height: 80px; border-radius: 18px; margin-bottom: 15px; 
-            object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+            width: 75px; height: 75px; border-radius: 16px; margin-bottom: 12px; 
+            object-fit: cover; background: #1e293b;
         }
 
         .card-title {
-            font-size: 0.95rem; font-weight: 700; text-align: center; margin-bottom: 12px;
-            line-height: 1.4; height: 40px; overflow: hidden;
+            font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 10px;
+            line-height: 1.3; height: 38px; overflow: hidden;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         }
 
         .get-btn {
-            background: transparent; color: var(--primary); border: 2px solid var(--primary);
-            font-size: 0.85rem; font-weight: 800; padding: 6px 28px; border-radius: 50px; 
-            transition: 0.3s; width: 100%; text-align: center;
+            background: transparent; color: var(--primary); border: 1.5px solid var(--primary);
+            font-size: 0.8rem; font-weight: 700; padding: 5px 20px; border-radius: 50px; 
+            width: 100%; text-align: center;
         }
-        .card:hover .get-btn { background: var(--primary); color: white; box-shadow: 0 4px 15px var(--primary-glow); }
+        .card:hover .get-btn { background: var(--primary); color: white; }
 
-        /* القائمة الجانبية */
+        /* --- 6. القائمة الجانبية (مع الزجاج للأيقونات) --- */
         .sidebar {
             height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0;
             background-color: #0f172a; overflow-x: hidden; transition: 0.3s;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.8); padding-top: 20px;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.5); padding-top: 20px;
+            border-left: 1px solid var(--border);
         }
-        .sidebar-header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
-        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--primary); margin-bottom: 10px; }
-        .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 1rem; color: #cbd5e1; display: flex; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .sidebar a i { width: 35px; color: var(--primary); }
+        .sidebar-header { text-align: center; padding-bottom: 20px; margin-bottom: 10px; }
+        .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 10px; }
+        
+        /* الأيقونات الزجاجية في القائمة */
+        .sidebar-link { 
+            margin: 10px 20px; padding: 12px 15px; 
+            background: rgba(255, 255, 255, 0.03); /* زجاج خفيف */
+            border-radius: 12px; text-decoration: none; font-size: 0.95rem; color: #cbd5e1; 
+            display: flex; align-items: center; border: 1px solid var(--border);
+            transition: 0.2s;
+        }
+        .sidebar-link:active { transform: scale(0.98); background: rgba(59, 130, 246, 0.1); border-color: var(--primary); }
+        .sidebar-link i { width: 30px; color: var(--primary); font-size: 1.1rem; }
+
         .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: #94a3b8; background: none; border: none; }
-        #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.7); z-index: 1500; backdrop-filter: blur(3px); }
+        #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.6); z-index: 1500; backdrop-filter: blur(4px); }
 
         .status { grid-column: span 2; text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 0.9rem; }
         footer { text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; border-top: 1px solid var(--border); }
@@ -188,15 +198,15 @@
         <button class="close-btn" onclick="closeNav()">&times;</button>
         <div class="sidebar-header">
             <img src="https://midomido.neocities.org/mohammadalboushi.png" alt="Profile" class="profile-img">
-            <h3 style="margin:10px 0; color:white;">Mohammad Al Boushi</h3>
-            <p style="color:#94a3b8; font-size:0.8rem; padding:0 20px; line-height:1.5;">
-                نبني الأفكار، وننظم الفوضى التقنية. متجري هو رؤيتي لعالم تطبيقات أكثر ذكاءً.
+            <h3 style="margin:10px 0; color:white; font-size:1.1rem;">Mohammad Al Boushi</h3>
+            <p style="color:#94a3b8; font-size:0.8rem; padding:0 10px; line-height:1.4;">
+                نبني الأفكار، وننظم الفوضى التقنية.
             </p>
         </div>
-        <a href="https://wa.me/963938624226"><i class="fab fa-whatsapp"></i> واتساب</a>
-        <a href="https://www.facebook.com/share/1AZTCywPbC/"><i class="fab fa-facebook"></i> فيسبوك</a>
-        <a href="https://www.instagram.com/m_al_boushi"><i class="fab fa-instagram"></i> انستغرام</a>
-        <a href="tel:+963938624226"><i class="fas fa-phone"></i> اتصال هاتفي</a>
+        <a href="https://wa.me/963938624226" class="sidebar-link"><i class="fab fa-whatsapp"></i> واتساب</a>
+        <a href="https://www.facebook.com/share/1AZTCywPbC/" class="sidebar-link"><i class="fab fa-facebook"></i> فيسبوك</a>
+        <a href="https://www.instagram.com/m_al_boushi" class="sidebar-link"><i class="fab fa-instagram"></i> انستغرام</a>
+        <a href="tel:+963938624226" class="sidebar-link"><i class="fas fa-phone"></i> اتصال هاتفي</a>
     </div>
     <div id="overlay" onclick="closeNav()"></div>
 
@@ -225,9 +235,9 @@
     <div class="tabs-wrapper">
         <div class="tabs-container">
             <button class="tab-btn active" id="btn-ALL" onclick="filterApps('ALL', this)">🌟 الكل</button>
+            <button class="tab-btn" id="btn-WEBSITE" onclick="filterApps('WEBSITE', this)">🌐 مواقع</button>
             <button class="tab-btn" id="btn-PROGRAM" onclick="filterApps('PROGRAM', this)">📱 تطبيقات</button>
             <button class="tab-btn" id="btn-GAME" onclick="filterApps('GAME', this)">🎮 ألعاب</button>
-            <button class="tab-btn" id="btn-WEBSITE" onclick="filterApps('WEBSITE', this)">🌐 مواقع</button>
             <button class="tab-btn" id="btn-FILE" onclick="filterApps('FILE', this)">📁 ملفات</button>
         </div>
     </div>
@@ -257,7 +267,6 @@
         let currentCategory = 'ALL';
         let hiddenCategories = [];
 
-        // 1. القفل (Visibility)
         onValue(ref(db, 'settings/categories'), (snapshot) => {
             const cats = snapshot.val() || {};
             hiddenCategories = [];
@@ -269,7 +278,7 @@
                     btn.style.display = 'none';
                     hiddenCategories.push(type);
                 } else {
-                    btn.style.display = 'block'; // استخدام block داخل flex
+                    btn.style.display = 'block';
                 }
             });
             
@@ -280,7 +289,6 @@
             }
         });
 
-        // 2. البيانات والترتيب
         onValue(ref(db, 'apps'), (snapshot) => {
             const container = document.getElementById('container');
             container.innerHTML = '';
@@ -299,15 +307,11 @@
             }
         });
 
-        // 3. الفلترة
         window.filterApps = (cat, btn) => {
             currentCategory = cat;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
-            
-            // تحريك الزر النشط للمنتصف (UX جميل)
             if(btn) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-
             renderApps();
         };
 
@@ -373,8 +377,17 @@
             document.getElementById('themeBtn').classList.replace('fa-moon', 'fa-sun');
         }
 
-        window.openNav = () => { document.getElementById("mySidebar").style.width = "280px"; document.getElementById("overlay").style.display = "block"; };
-        window.closeNav = () => { document.getElementById("mySidebar").style.width = "0"; document.getElementById("overlay").style.display = "none"; };
+        // حل مشكلة القائمة الجانبية (منع سكرول الصفحة الخلفية)
+        window.openNav = () => { 
+            document.getElementById("mySidebar").style.width = "280px"; 
+            document.getElementById("overlay").style.display = "block";
+            document.body.classList.add("no-scroll"); // قفل الخلفية
+        };
+        window.closeNav = () => { 
+            document.getElementById("mySidebar").style.width = "0"; 
+            document.getElementById("overlay").style.display = "none";
+            document.body.classList.remove("no-scroll"); // فتح الخلفية
+        };
         
         window.toggleFavorite = (btn, appName) => {
             event.preventDefault(); event.stopPropagation();
