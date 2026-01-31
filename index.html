@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* تعريف المتغيرات للألوان (الوضع الليلي افتراضي) */
+        /* --- 1. المتغيرات والألوان --- */
         :root {
             --bg-body: #0f172a;
             --bg-card: #1e293b;
@@ -19,7 +19,6 @@
             --header-bg: rgba(15, 23, 42, 0.95);
         }
 
-        /* متغيرات الوضع النهاري */
         [data-theme="light"] {
             --bg-body: #f1f5f9;
             --bg-card: #ffffff;
@@ -32,106 +31,44 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; transition: 0.3s; overflow-x: hidden; }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            font-family: 'Cairo', sans-serif;
-            min-height: 100vh;
-            transition: background-color 0.3s, color 0.3s;
-            overflow-x: hidden;
-        }
-
-        /* الهيدر */
+        /* --- 2. الهيدر والقائمة --- */
         header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: var(--header-bg);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid var(--border);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            position: sticky; top: 0; z-index: 1000; background: var(--header-bg);
+            backdrop-filter: blur(8px); border-bottom: 1px solid var(--border);
+            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
         }
-
         .header-left { display: flex; align-items: center; gap: 15px; }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: var(--text-main);
-            direction: ltr;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+        .logo { font-size: 1.5rem; font-weight: 900; color: var(--text-main); direction: ltr; display: flex; align-items: center; gap: 5px; }
         .logo .m-letter { color: var(--primary); font-size: 1.6rem; }
-        .logo .boushi { color: var(--text-main); }
-
-        .icon-btn {
-            font-size: 1.3rem;
-            cursor: pointer;
-            color: var(--text-main);
-            transition: 0.2s;
-            padding: 5px;
-        }
+        
+        .icon-btn { font-size: 1.3rem; cursor: pointer; color: var(--text-main); transition: 0.2s; padding: 5px; }
         .icon-btn:hover { color: var(--primary); transform: scale(1.1); }
 
-        /* القائمة الجانبية */
         .sidebar {
             height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0;
             background-color: #111827; overflow-x: hidden; transition: 0.3s;
             box-shadow: -5px 0 20px rgba(0,0,0,0.5); padding-top: 20px;
         }
-
-        .sidebar-header {
-            text-align: center; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;
-        }
-
-        .profile-img {
-            width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
-            border: 3px solid var(--primary); margin-bottom: 10px; background-color: #1f2937;
-        }
-
-        .sidebar a {
-            padding: 15px 25px; text-decoration: none; font-size: 1rem; color: #cbd5e1;
-            display: flex; align-items: center; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.03);
-        }
-
+        .sidebar-header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; }
+        .profile-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin-bottom: 10px; background-color: #1f2937; }
+        .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 1rem; color: #cbd5e1; display: flex; align-items: center; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.03); }
         .sidebar a i { width: 35px; font-size: 1.2rem; color: var(--primary); }
         .sidebar a:hover { background: rgba(59, 130, 246, 0.1); color: white; padding-right: 35px; }
+        .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: #94a3b8; background: none; border: none; cursor: pointer; }
+        #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.6); z-index: 1500; }
 
-        .close-btn {
-            position: absolute; top: 15px; left: 20px; font-size: 25px; color: #94a3b8;
-            background: none; border: none; cursor: pointer;
-        }
-
-        #overlay {
-            position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0;
-            background: rgba(0,0,0,0.6); z-index: 1500;
-        }
-
-        /* القسم الرئيسي */
-        .hero {
-            text-align: center; padding: 40px 20px 20px;
-            background: radial-gradient(circle at top, rgba(59, 130, 246, 0.08), transparent 60%);
-        }
-
+        /* --- 3. القسم الرئيسي والبحث --- */
+        .hero { text-align: center; padding: 40px 20px 20px; background: radial-gradient(circle at top, rgba(59, 130, 246, 0.08), transparent 60%); }
         .hero h1 { margin: 0 0 10px; font-size: 1.8rem; }
         .hero p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; }
 
-        /* الإحصائيات */
         .stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
-        .stat-item {
-            text-align: center; background: var(--bg-card); padding: 10px 20px;
-            border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow);
-        }
+        .stat-item { text-align: center; background: var(--bg-card); padding: 10px 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); }
         .stat-num { font-weight: 800; color: var(--primary); font-size: 1.2rem; display: block; }
         .stat-lbl { font-size: 0.8rem; color: var(--text-muted); }
 
-        /* البحث */
         .search-box { position: relative; max-width: 500px; margin: 0 auto 25px; }
         .search-box input {
             width: 100%; background: var(--bg-card); border: 1px solid var(--border);
@@ -142,10 +79,8 @@
         .search-box input:focus { border-color: var(--primary); }
         .search-icon { position: absolute; right: 20px; top: 16px; color: var(--text-muted); }
 
-        /* --- تصميم التبويبات الجديد (مدمج بستايلك) --- */
-        .tabs-container {
-            display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
-        }
+        /* --- 4. التبويبات (الأقسام) --- */
+        .tabs-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .tab-btn {
             background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border);
             padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: 0.3s;
@@ -154,69 +89,47 @@
         .tab-btn:hover { border-color: var(--primary); color: var(--primary); }
         .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
 
-        /* الشبكة */
-        .grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
-            padding: 10px 20px; max-width: 1000px; margin: 0 auto;
-        }
+        /* --- 5. الشبكة والكروت --- */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
         @media(min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
 
-        /* الكرت */
         .card {
-            background: var(--bg-card); border-radius: 16px; padding: 15px;
-            text-decoration: none; color: var(--text-main); display: flex;
-            flex-direction: column; align-items: center; border: 1px solid var(--border);
-            position: relative; transition: transform 0.2s, box-shadow 0.2s;
+            background: var(--bg-card); border-radius: 16px; padding: 15px; text-decoration: none;
+            color: var(--text-main); display: flex; flex-direction: column; align-items: center;
+            border: 1px solid var(--border); position: relative; transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: var(--shadow);
         }
         .card:active { transform: scale(0.97); }
-
         .mod-badge {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(59, 130, 246, 0.1); color: var(--primary);
-            font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold;
+            position: absolute; top: 10px; left: 10px; background: rgba(59, 130, 246, 0.1);
+            color: var(--primary); font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold;
         }
-
         .heart-btn {
-            position: absolute; top: 10px; right: 10px; font-size: 1.1rem;
-            color: var(--text-muted); cursor: pointer; z-index: 5;
-            transition: 0.2s; background: transparent; border: none;
+            position: absolute; top: 10px; right: 10px; font-size: 1.1rem; color: var(--text-muted);
+            cursor: pointer; z-index: 5; transition: 0.2s; background: transparent; border: none;
         }
         .heart-btn.active { color: #ef4444; transform: scale(1.1); }
-
-        .card img {
-            width: 75px; height: 75px; border-radius: 16px; margin-bottom: 12px;
-            object-fit: cover; background: #0f172a;
-        }
-
+        .card img { width: 75px; height: 75px; border-radius: 16px; margin-bottom: 12px; object-fit: cover; background: #0f172a; }
         .card-title {
             font-size: 0.9rem; font-weight: 600; text-align: center; margin-bottom: 10px;
             line-height: 1.3; height: 38px; overflow: hidden;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         }
-
         .get-btn {
             background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border);
             font-size: 0.8rem; font-weight: bold; padding: 6px 25px; border-radius: 50px; transition: 0.3s;
         }
         .card:hover .get-btn { background: var(--primary); color: white; border-color: var(--primary); }
-
         .status { grid-column: span 2; text-align: center; color: var(--text-muted); margin-top: 50px; }
-        
-        footer {
-            text-align: center; padding: 30px 20px; color: var(--text-muted);
-            font-size: 0.8rem; margin-top: 30px; border-top: 1px solid var(--border);
-        }
+        footer { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 0.8rem; margin-top: 30px; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo">
-            <span class="m-letter">M</span>
-            <span class="boushi">.Al.Boushi</span>
+            <span class="m-letter">M</span><span class="boushi">.Al.Boushi</span>
         </div>
-
         <div class="header-left">
             <i class="fas fa-moon icon-btn" id="themeBtn" onclick="toggleTheme()"></i>
             <i class="fas fa-bars icon-btn" onclick="openNav()"></i>
@@ -226,7 +139,7 @@
     <div id="mySidebar" class="sidebar">
         <button class="close-btn" onclick="closeNav()">&times;</button>
         <div class="sidebar-header">
-            <img src="https://midomido.neocities.org/mohammadalboushi.png" alt="Mohammad Al Boushi" class="profile-img">
+            <img src="https://midomido.neocities.org/mohammadalboushi.png" alt="Profile" class="profile-img">
             <h3 style="margin:5px 0; color:white; font-size:1.1rem;">Mohammad Al Boushi</h3>
             <span style="color: var(--text-muted); font-size: 0.8rem;">Admin & Developer</span>
         </div>
@@ -234,9 +147,6 @@
         <a href="https://www.facebook.com/share/1AZTCywPbC/" target="_blank"><i class="fab fa-facebook" style="color:#1877F2;"></i> فيسبوك</a>
         <a href="https://www.instagram.com/m_al_boushi" target="_blank"><i class="fab fa-instagram" style="color:#E4405F;"></i> انستغرام</a>
         <a href="tel:+963938624226"><i class="fas fa-phone"></i> اتصال هاتفي</a>
-        <a href="https://wa.me/963938624226?text=مرحباً، أريد طلب تطبيق..." target="_blank" style="margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); color:#fbbf24;">
-            <i class="fas fa-crown"></i> اطلب تطبيق خاص
-        </a>
     </div>
     <div id="overlay" onclick="closeNav()"></div>
 
@@ -246,16 +156,13 @@
         
         <div class="stats">
             <div class="stat-item">
-                <span class="stat-num" id="appCount">0</span>
-                <span class="stat-lbl">تطبيق</span>
+                <span class="stat-num" id="appCount">0</span><span class="stat-lbl">تطبيق</span>
             </div>
             <div class="stat-item">
-                <span class="stat-num">5K+</span>
-                <span class="stat-lbl">تنزيل</span>
+                <span class="stat-num">5K+</span><span class="stat-lbl">تنزيل</span>
             </div>
             <div class="stat-item">
-                <span class="stat-num">4.9</span>
-                <span class="stat-lbl">تقييم</span>
+                <span class="stat-num">4.9</span><span class="stat-lbl">تقييم</span>
             </div>
         </div>
 
@@ -265,23 +172,19 @@
         </div>
 
         <div class="tabs-container">
-            <button class="tab-btn active" onclick="filterApps('ALL', this)">الكل</button>
-            <button class="tab-btn" onclick="filterApps('PROGRAM', this)">تطبيقات</button>
-            <button class="tab-btn" onclick="filterApps('GAME', this)">ألعاب</button>
-            <button class="tab-btn" onclick="filterApps('WEBSITE', this)">مواقع</button>
-            <button class="tab-btn" onclick="filterApps('FILE', this)">ملفات</button>
+            <button class="tab-btn active" id="btn-ALL" onclick="filterApps('ALL', this)">الكل</button>
+            <button class="tab-btn" id="btn-PROGRAM" onclick="filterApps('PROGRAM', this)">تطبيقات</button>
+            <button class="tab-btn" id="btn-GAME" onclick="filterApps('GAME', this)">ألعاب</button>
+            <button class="tab-btn" id="btn-WEBSITE" onclick="filterApps('WEBSITE', this)">مواقع</button>
+            <button class="tab-btn" id="btn-FILE" onclick="filterApps('FILE', this)">ملفات</button>
         </div>
     </div>
 
     <div class="grid" id="container">
-        <div class="status">
-            <i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال بالسيرفر...
-        </div>
+        <div class="status"><i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال...</div>
     </div>
 
-    <footer>
-        &copy; 2026 M.Al.Boushi Store - جميع الحقوق محفوظة
-    </footer>
+    <footer>&copy; 2026 M.Al.Boushi Store - جميع الحقوق محفوظة</footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -298,82 +201,62 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // متغيرات عامة
+        // متغيرات النظام
         let allAppsData = [];
         let currentCategory = 'ALL';
+        let hiddenCategories = []; // الأقسام المغلقة
 
-        /* --- 1. الوضع الليلي --- */
-        window.toggleTheme = () => {
-            const btn = document.getElementById('themeBtn');
-            if (document.body.hasAttribute('data-theme')) {
-                document.body.removeAttribute('data-theme');
-                btn.classList.replace('fa-sun', 'fa-moon');
-                localStorage.setItem('theme', 'dark');
+        /* --- 1. الاستماع لإعدادات الأقسام (القفل) --- */
+        onValue(ref(db, 'settings/categories'), (snapshot) => {
+            const cats = snapshot.val() || {};
+            hiddenCategories = [];
+
+            // التحقق من كل زر وإخفاؤه إذا كان مقفلاً
+            const types = ['PROGRAM', 'GAME', 'WEBSITE', 'FILE'];
+            types.forEach(type => {
+                const btn = document.getElementById(`btn-${type}`);
+                if (cats[type] === false) { // إذا كان false يعني مغلق
+                    btn.style.display = 'none';
+                    hiddenCategories.push(type);
+                } else {
+                    btn.style.display = 'inline-block';
+                }
+            });
+            
+            // إذا كان القسم الحالي مغلقاً، عد للرئيسية
+            if (hiddenCategories.includes(currentCategory)) {
+                filterApps('ALL', document.getElementById('btn-ALL'));
             } else {
-                document.body.setAttribute('data-theme', 'light');
-                btn.classList.replace('fa-moon', 'fa-sun');
-                localStorage.setItem('theme', 'light');
+                renderApps(); // تحديث العرض
             }
-        };
+        });
 
-        // استرجاع الوضع عند التحميل
-        if (localStorage.getItem('theme') === 'light') {
-            document.body.setAttribute('data-theme', 'light');
-            document.getElementById('themeBtn').classList.replace('fa-moon', 'fa-sun');
-        }
-
-        /* --- 2. القائمة الجانبية --- */
-        window.openNav = () => {
-            document.getElementById("mySidebar").style.width = "280px";
-            document.getElementById("overlay").style.display = "block";
-        };
-        window.closeNav = () => {
-            document.getElementById("mySidebar").style.width = "0";
-            document.getElementById("overlay").style.display = "none";
-        };
-
-        /* --- 3. المفضلة --- */
-        window.toggleFavorite = (btn, appName) => {
-            event.preventDefault(); event.stopPropagation();
-            let favs = JSON.parse(localStorage.getItem('favorites')) || [];
-            if (favs.includes(appName)) {
-                favs = favs.filter(i => i !== appName);
-                btn.classList.remove('active');
-                btn.classList.replace('fa-solid', 'fa-regular');
-            } else {
-                favs.push(appName);
-                btn.classList.add('active');
-                btn.classList.replace('fa-regular', 'fa-solid');
-            }
-            localStorage.setItem('favorites', JSON.stringify(favs));
-        };
-
-        /* --- 4. جلب البيانات من Firebase --- */
-        const appsRef = ref(db, 'apps');
-        onValue(appsRef, (snapshot) => {
+        /* --- 2. الاستماع لبيانات التطبيقات --- */
+        onValue(ref(db, 'apps'), (snapshot) => {
             const container = document.getElementById('container');
             container.innerHTML = '';
             const data = snapshot.val();
 
             if (data) {
-                // تحويل البيانات لمصفوفة
-                allAppsData = Object.values(data).reverse();
+                // تحويل البيانات + الفلترة الأولية (الإخفاء الفردي) + الترتيب
+                allAppsData = Object.values(data)
+                    .filter(app => !app.isHidden) // إخفاء التطبيقات المخفية
+                    .sort((a, b) => (a.order || 0) - (b.order || 0)); // الترتيب حسب السحب
+
                 // تحديث العداد
                 document.getElementById('appCount').innerText = allAppsData.length;
-                // عرض البيانات
                 renderApps();
             } else {
-                container.innerHTML = "<div class='status'>لا يوجد تطبيقات بعد</div>";
+                container.innerHTML = "<div class='status'>لا يوجد تطبيقات منشورة</div>";
+                document.getElementById('appCount').innerText = 0;
             }
         });
 
-        /* --- 5. دالة العرض والفلترة --- */
-        window.filterApps = (category, btn) => {
-            currentCategory = category;
-            // تحديث الأزرار
+        /* --- 3. نظام الفلترة والعرض --- */
+        window.filterApps = (cat, btn) => {
+            currentCategory = cat;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
-            
             renderApps();
         };
 
@@ -382,27 +265,27 @@
             container.innerHTML = '';
             const favs = JSON.parse(localStorage.getItem('favorites')) || [];
 
-            // فلترة حسب القسم وحسب البحث
             const filtered = allAppsData.filter(app => {
+                // شرط 1: القسم الحالي مطابق أو الكل
                 const matchCat = (currentCategory === 'ALL') || (app.type === currentCategory);
+                // شرط 2: القسم ليس مغلقاً من الإعدادات
+                const notHiddenCat = !hiddenCategories.includes(app.type);
+                // شرط 3: البحث
                 const matchSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase());
-                return matchCat && matchSearch;
+
+                return matchCat && notHiddenCat && matchSearch;
             });
 
-            if(filtered.length === 0) {
+            if (filtered.length === 0) {
                 container.innerHTML = "<div class='status'>لا توجد نتائج</div>";
                 return;
             }
 
             filtered.forEach(app => {
-                // تحديد النص والبادج بناء على النوع
-                let badgeTxt = "APP";
-                let btnTxt = "تحميل";
-                
+                let badgeTxt = "MOD"; let btnTxt = "تحميل";
                 if(app.type === 'WEBSITE') { badgeTxt = "WEB"; btnTxt = "زيارة"; }
                 else if(app.type === 'GAME') { badgeTxt = "GAME"; btnTxt = "لعب"; }
                 else if(app.type === 'FILE') { badgeTxt = "FILE"; btnTxt = "تنزيل"; }
-                else if(app.type === 'PROGRAM') { badgeTxt = "MOD"; }
 
                 const isFav = favs.includes(app.name);
                 const heartClass = isFav ? "fa-solid active" : "fa-regular";
@@ -424,11 +307,47 @@
             });
         }
 
-        // تفعيل البحث
+        // البحث
         document.getElementById('searchInput').addEventListener('input', (e) => {
             renderApps(e.target.value);
         });
 
+        /* --- وظائف الواجهة (الوضع الليلي، القائمة، المفضلة) --- */
+        window.toggleTheme = () => {
+            const btn = document.getElementById('themeBtn');
+            if (document.body.hasAttribute('data-theme')) {
+                document.body.removeAttribute('data-theme');
+                btn.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.setAttribute('data-theme', 'light');
+                btn.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'light');
+            }
+        };
+        // استعادة الثيم عند التحميل
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('themeBtn').classList.replace('fa-moon', 'fa-sun');
+        }
+
+        window.openNav = () => { document.getElementById("mySidebar").style.width = "280px"; document.getElementById("overlay").style.display = "block"; };
+        window.closeNav = () => { document.getElementById("mySidebar").style.width = "0"; document.getElementById("overlay").style.display = "none"; };
+
+        window.toggleFavorite = (btn, appName) => {
+            event.preventDefault(); event.stopPropagation();
+            let favs = JSON.parse(localStorage.getItem('favorites')) || [];
+            if (favs.includes(appName)) {
+                favs = favs.filter(i => i !== appName);
+                btn.classList.remove('active');
+                btn.classList.replace('fa-solid', 'fa-regular');
+            } else {
+                favs.push(appName);
+                btn.classList.add('active');
+                btn.classList.replace('fa-regular', 'fa-solid');
+            }
+            localStorage.setItem('favorites', JSON.stringify(favs));
+        };
     </script>
 </body>
 </html>
