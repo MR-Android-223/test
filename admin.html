@@ -2,328 +2,400 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin V16 | تحكم كامل</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin V19 | التحكم الكامل</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
-        :root { --primary: #3b82f6; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); text-align: center; margin: 0; padding: 20px; padding-bottom: 100px; }
+        /* نفس ستايل المتجر V18 تماماً */
+        :root {
+            --bg-body: #0f172a; --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b, #0f172a);
+            --card-glass: rgba(30, 41, 59, 0.9); --text-main: #f8fafc; --text-muted: #94a3b8;
+            --primary: #3b82f6; --border: rgba(255,255,255,0.08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-body); background-image: var(--bg-gradient); color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; padding-bottom: 80px; }
+
+        header {
+            position: sticky; top: 0; z-index: 1000; background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.3rem; font-weight: 900; color: #f8fafc; }
+        .logo span { color: var(--primary); }
+
+        /* شريط الأقسام */
+        .tabs-wrapper { position: sticky; top: 68px; z-index: 900; padding: 10px 0; background: linear-gradient(to bottom, rgba(15,23,42,0) 0%, var(--bg-body) 100%); }
+        .tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px; scrollbar-width: none; }
+        .tabs-container::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            background: var(--card-glass); color: var(--text-muted); border: 1px solid var(--border);
+            padding: 8px 20px; border-radius: 50px; cursor: pointer; transition: 0.3s;
+            font-family: 'Cairo'; font-weight: 700; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0;
+        }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
+
+        /* الشبكة */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
+        .card {
+            background: var(--card-glass); border-radius: 18px; padding: 15px; border: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; position: relative;
+        }
+        .card img { width: 60px; height: 60px; border-radius: 14px; margin-bottom: 10px; object-fit: cover; }
+        .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 5px; height: 40px; overflow: hidden; }
         
-        .box { background: var(--card); padding: 25px; border-radius: 20px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; box-sizing: border-box; }
+        /* أدوات الأدمن */
+        .edit-badge { position: absolute; top: 10px; left: 10px; background: #f59e0b; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; }
+        .drag-handle { position: absolute; top: 10px; right: 10px; color: #94a3b8; cursor: grab; padding: 5px; }
+
+        /* الزر العائم للإضافة */
+        .fab-btn {
+            position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px;
+            background: var(--primary); color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+            cursor: pointer; z-index: 2000; border: none; transition: 0.3s;
+        }
+        .fab-btn:active { transform: scale(0.9); }
+
+        /* Modals (النوافذ المنبثقة) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-box { background: #1e293b; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+        
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; box-sizing: border-box; font-family: 'Cairo'; }
         input, select { background: #334155; color: white; }
+        .btn-primary { background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
+        .btn-danger { background: #ef4444; color: white; font-weight: bold; cursor: pointer; }
+        .upload-area { border: 2px dashed #334155; padding: 15px; border-radius: 12px; margin: 10px 0; cursor: pointer; text-align: center; }
+        #previewImg { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; display: none; margin: 10px auto; }
         
-        .upload-area { border: 2px dashed #334155; padding: 15px; border-radius: 12px; margin: 10px 0; cursor: pointer; }
-        #previewImg { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; display: none; margin: 10px auto; border: 2px solid var(--primary); }
-        
-        /* أزرار الفلترة (عادت من جديد) */
-        .filter-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; margin: 15px 0; white-space: nowrap; }
-        .filter-btn { background: #334155; color: #94a3b8; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; border: 1px solid transparent; width: auto; display: inline-block; }
-        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        /* القائمة */
-        .app-item { display: flex; align-items: center; background: #334155; padding: 10px; margin-top: 10px; border-radius: 12px; transition: 0.2s; }
-        .app-item.hidden-item { opacity: 0.5; border: 1px dashed #94a3b8; }
-        
-        /* مقبض السحب */
-        .drag-handle { cursor: grab; padding: 10px; font-size: 1.5rem; color: #94a3b8; touch-action: none; }
-        .drag-disabled { opacity: 0.1; cursor: not-allowed; } /* عندما يكون الفلتر مفعل */
-
-        .select-check { width: 20px; height: 20px; margin-left: 10px; display: none; }
-        .show-checks .select-check { display: block; }
-        
-        #bulkActionsBar { position: fixed; bottom: -100px; left: 0; width: 100%; background: var(--card); padding: 15px; transition: 0.3s; z-index: 100; display: flex; justify-content: space-around; }
-        #bulkActionsBar.visible { bottom: 0; }
-        
-        #toast { visibility: hidden; min-width: 200px; background: #10b981; color: white; padding: 15px; position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); border-radius: 50px; z-index: 3000; }
-        #toast.show { visibility: visible; animation: fade 0.5s; }
-        @keyframes fade { from {bottom: 0; opacity: 0;} to {bottom: 80px; opacity: 1;} }
+        .cat-item { display: flex; justify-content: space-between; align-items: center; background: #334155; padding: 10px; margin-bottom: 5px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div id="toast">✅ تم</div>
+    <header>
+        <div class="logo">Admin <span>Panel</span></div>
+        <div style="display:flex; gap:10px;">
+            <button onclick="openCatModal()" style="background:#334155; color:white; border:none; padding:8px 12px; border-radius:10px; font-size:0.9rem;">📂 الأقسام</button>
+            <button onclick="login()" id="loginBtn" style="background:#ea4335; color:white; border:none; padding:8px 12px; border-radius:10px;">Login</button>
+        </div>
+    </header>
 
-<div class="box">
-    <div id="loginArea">
-        <h2>🔐 دخول المدير</h2>
-        <button onclick="login()" style="background:#ea4335; color:white;">دخول Google</button>
+    <div class="tabs-wrapper">
+        <div class="tabs-container" id="tabsList">
+            </div>
     </div>
 
-    <div id="adminArea" style="display:none;">
-        <h3>✨ لوحة التحكم</h3>
-        
-        <div id="inputForm">
-            <select id="inputType">
-                <option value="PROGRAM">📱 تطبيق</option>
-                <option value="GAME">🎮 لعبة</option>
-                <option value="WEBSITE">🌐 موقع</option>
-                <option value="FILE">📁 ملف</option>
-            </select>
-            <input type="text" id="appName" placeholder="الاسم">
+    <div class="grid" id="appsContainer">
+        <div style="grid-column: span 2; text-align: center; color: #94a3b8; margin-top: 50px;">جاري التحميل...</div>
+    </div>
+
+    <button class="fab-btn" onclick="openEditModal()">+</button>
+
+
+    <div id="appModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modalTitle" style="color:white; margin-bottom:15px; text-align:center;">إضافة تطبيق</h3>
+            
+            <select id="appCat"></select>
+            <input type="text" id="appName" placeholder="اسم التطبيق">
             <input type="text" id="appLink" placeholder="الرابط">
+            
             <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                <span id="uploadLabel">📸 صورة</span>
+                <span id="uploadLabel">📸 اختر صورة</span>
                 <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
                 <img id="previewImg">
             </div>
-            <button id="saveBtn" style="background: linear-gradient(45deg, #2563eb, #3b82f6); color: white;" onclick="handleProcess()">🚀 حفظ ونشر</button>
-            <button id="cancelBtn" style="display:none; background:#475569; color:white;" onclick="resetForm()">إلغاء</button>
-        </div>
 
-        <hr style="border-color:#334155; margin:20px 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0;">
+                <label style="color:#cbd5e1; font-size:0.9rem;">إخفاء التطبيق؟</label>
+                <input type="checkbox" id="appHidden" style="width:20px; height:20px;">
+            </div>
 
-        <div class="filter-container">
-            <div class="filter-btn active" onclick="setFilter('ALL', this)">الكل</div>
-            <div class="filter-btn" onclick="setFilter('PROGRAM', this)">تطبيقات</div>
-            <div class="filter-btn" onclick="setFilter('GAME', this)">ألعاب</div>
-            <div class="filter-btn" onclick="setFilter('WEBSITE', this)">مواقع</div>
-            <div class="filter-btn" onclick="setFilter('FILE', this)">ملفات</div>
+            <button onclick="saveApp()" id="saveBtn" class="btn-primary">حفظ ونشر</button>
+            <button onclick="deleteApp()" id="delBtn" class="btn-danger" style="display:none; margin-top:10px;">حذف التطبيق</button>
+            <button onclick="closeModal('appModal')" style="background:transparent; color:#94a3b8; margin-top:10px;">إغلاق</button>
         </div>
-        
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <span id="dragHint" style="font-size:0.8rem; color:#f59e0b;">💡 اسحب ☰ للترتيب (في قسم الكل فقط)</span>
-            <button onclick="toggleSelectionMode()" style="width:auto; padding:5px 15px; font-size:0.8rem;">✅ تحديد</button>
-        </div>
-
-        <div id="appsList">جاري التحميل...</div>
     </div>
-</div>
 
-<div id="bulkActionsBar">
-    <button onclick="bulkDelete()" style="background:#ef4444; color:white; border:none; padding:10px; border-radius:10px;">🗑️ حذف المحدد</button>
-    <button onclick="bulkToggleVisibility()" style="background:#f59e0b; color:white; border:none; padding:10px; border-radius:10px;">👁️ إخفاء/إظهار</button>
-    <button onclick="toggleSelectionMode()" style="background:#475569; color:white; border:none; padding:10px; border-radius:10px;">إلغاء</button>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    <div id="catModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="color:white; margin-bottom:15px; text-align:center;">إدارة الأقسام</h3>
+            
+            <div style="background:#0f172a; padding:10px; border-radius:12px; margin-bottom:15px;">
+                <input type="text" id="newCatName" placeholder="اسم القسم (مثلاً: شروحات)">
+                <input type="text" id="newCatIcon" placeholder="الرمز (مثلاً: 📚)">
+                <input type="text" id="newCatID" placeholder="ID بالانجليزي (مثلاً: COURSES)">
+                <button onclick="addCategory()" class="btn-primary" style="padding:8px;">+ إضافة القسم</button>
+            </div>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyC_iEb4UhUREVJ2mfj00BounPVaeGQr7wI",
-        authDomain: "mohammadalboushi-e9231.firebaseapp.com",
-        projectId: "mohammadalboushi-e9231",
-        databaseURL: "https://mohammadalboushi-e9231-default-rtdb.firebaseio.com/",
-        appId: "1:236925802081:web:2e26094ab5ecdf988f3c20"
-    };
+            <div id="catList" style="max-height:200px; overflow-y:auto;">
+                </div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const provider = new GoogleAuthProvider();
-    const myUID = "eBOYmcmDI5S6l4NQd36bEa5kEcZ2";
+            <button onclick="closeModal('catModal')" style="background:transparent; color:#94a3b8; margin-top:10px;">إغلاق</button>
+        </div>
+    </div>
 
-    let editKey = null;
-    let currentImgBase64 = "";
-    let allDataCache = {};
-    let isSelectMode = false;
-    let selectedItems = new Set();
-    let currentFilter = 'ALL';
 
-    // إعداد مكتبة السحب
-    const sortable = new Sortable(document.getElementById('appsList'), {
-        handle: '.drag-handle',
-        animation: 150,
-        onEnd: function (evt) { saveOrder(); }
-    });
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, push, update, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    function saveOrder() {
-        if(currentFilter !== 'ALL') return; // حماية: الترتيب يعمل فقط عند عرض الكل
-        const items = document.querySelectorAll('.app-item');
-        const updates = {};
-        items.forEach((item, index) => {
-            const key = item.getAttribute('data-key');
-            updates[`apps/${key}/order`] = index;
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_iEb4UhUREVJ2mfj00BounPVaeGQr7wI",
+            authDomain: "mohammadalboushi-e9231.firebaseapp.com",
+            projectId: "mohammadalboushi-e9231",
+            databaseURL: "https://mohammadalboushi-e9231-default-rtdb.firebaseio.com/",
+            appId: "1:236925802081:web:2e26094ab5ecdf988f3c20"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const provider = new GoogleAuthProvider();
+        const myUID = "eBOYmcmDI5S6l4NQd36bEa5kEcZ2";
+
+        let allApps = {};
+        let allCats = {};
+        let currentImg = "";
+        let editKey = null;
+        let currentFilter = 'ALL';
+
+        // --- 1. المصادقة والتهيئة ---
+        onAuthStateChanged(auth, (user) => {
+            if (user && user.uid === myUID) {
+                document.getElementById('loginBtn').style.display = 'none';
+                initSystem();
+            }
         });
-        update(ref(db), updates).then(() => msg("✅ تم حفظ الترتيب"));
-    }
+        window.login = () => signInWithPopup(auth, provider);
 
-    onAuthStateChanged(auth, (user) => {
-        if (user && user.uid === myUID) {
-            document.getElementById('loginArea').style.display = 'none';
-            document.getElementById('adminArea').style.display = 'block';
-            loadData();
-        }
-    });
-
-    window.login = () => signInWithPopup(auth, provider);
-
-    // دالة الفلترة (التي كانت مفقودة)
-    window.setFilter = (filter, btn) => {
-        currentFilter = filter;
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        // تعطيل السحب إذا لم نكن في "الكل"
-        const sortHint = document.getElementById('dragHint');
-        if (filter === 'ALL') {
-            sortable.option("disabled", false);
-            sortHint.innerText = "💡 اسحب ☰ للترتيب";
-            sortHint.style.color = "#f59e0b";
-        } else {
-            sortable.option("disabled", true);
-            sortHint.innerText = "🚫 الترتيب متاح فقط في قسم (الكل)";
-            sortHint.style.color = "#64748b";
-        }
-        renderList();
-    };
-
-    window.processImage = () => {
-        const file = document.getElementById('fileInput').files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement("canvas");
-                    const scale = 200 / img.width;
-                    canvas.width = 200; canvas.height = img.height * scale;
-                    canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-                    currentImgBase64 = canvas.toDataURL("image/jpeg", 0.7);
-                    document.getElementById('previewImg').src = currentImgBase64;
-                    document.getElementById('previewImg').style.display = 'block';
+        function initSystem() {
+            // جلب الأقسام
+            onValue(ref(db, 'categories'), (snapshot) => {
+                const val = snapshot.val();
+                if (!val) {
+                    // إذا القاعدة فارغة، ننشئ الأقسام الافتراضية
+                    const defaults = {
+                        'PROGRAM': { name: 'تطبيقات', icon: '📱', order: 1 },
+                        'GAME': { name: 'ألعاب', icon: '🎮', order: 2 },
+                        'WEBSITE': { name: 'مواقع', icon: '🌐', order: 3 },
+                        'FILE': { name: 'ملفات', icon: '📁', order: 4 }
+                    };
+                    update(ref(db, 'categories'), defaults);
+                } else {
+                    allCats = val;
+                    renderTabs();
+                    renderCatList();
                 }
+            });
+
+            // جلب التطبيقات
+            onValue(ref(db, 'apps'), (snapshot) => {
+                allApps = snapshot.val() || {};
+                renderApps();
+            });
+        }
+
+        // --- 2. إدارة الأقسام (الديناميكية) ---
+        function renderTabs() {
+            const container = document.getElementById('tabsList');
+            const select = document.getElementById('appCat');
+            
+            // ترتيب الأقسام
+            const sortedCats = Object.entries(allCats).sort(([,a], [,b]) => a.order - b.order);
+
+            // تعبئة التبويبات
+            let tabsHTML = `<button class="tab-btn ${currentFilter === 'ALL' ? 'active' : ''}" onclick="setFilter('ALL')">🌟 الكل</button>`;
+            
+            // تعبئة قائمة الاختيار في المودال
+            let selectHTML = '';
+
+            sortedCats.forEach(([key, val]) => {
+                tabsHTML += `<button class="tab-btn ${currentFilter === key ? 'active' : ''}" onclick="setFilter('${key}')">${val.icon} ${val.name}</button>`;
+                selectHTML += `<option value="${key}">${val.name}</option>`;
+            });
+
+            container.innerHTML = tabsHTML;
+            select.innerHTML = selectHTML;
+        }
+
+        function renderCatList() {
+            const list = document.getElementById('catList');
+            list.innerHTML = '';
+            Object.entries(allCats).forEach(([key, val]) => {
+                list.innerHTML += `
+                    <div class="cat-item">
+                        <span>${val.icon} ${val.name}</span>
+                        <button onclick="delCat('${key}')" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:5px; width:auto;">حذف</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.addCategory = () => {
+            const name = document.getElementById('newCatName').value;
+            const icon = document.getElementById('newCatIcon').value;
+            const id = document.getElementById('newCatID').value.toUpperCase().replace(/\s/g, '_');
+            
+            if(!name || !id) return alert("الاسم وال ID مطلوبين");
+            
+            update(ref(db, `categories/${id}`), {
+                name: name,
+                icon: icon || '📂',
+                order: 99
+            });
+            alert("تمت الإضافة! ستظهر فوراً.");
+            document.getElementById('newCatName').value = '';
+        };
+
+        window.delCat = (key) => {
+            if(confirm("حذف القسم؟ (لن تحذف التطبيقات بداخله لكنها ستختفي من الفلتر)")) {
+                remove(ref(db, `categories/${key}`));
+            }
+        };
+
+        // --- 3. إدارة التطبيقات ---
+        window.setFilter = (filter) => {
+            currentFilter = filter;
+            renderTabs();
+            renderApps();
+        };
+
+        function renderApps() {
+            const container = document.getElementById('appsContainer');
+            container.innerHTML = '';
+            
+            // الترتيب والفلترة
+            const sortedApps = Object.entries(allApps)
+                .sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
+
+            sortedApps.forEach(([k, v]) => {
+                if (currentFilter === 'ALL' || v.type === currentFilter) {
+                    const isHidden = v.isHidden ? 'opacity:0.5;' : '';
+                    
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.style.cssText = isHidden;
+                    card.onclick = () => openEditModal(k, v); // عند الضغط نفتح التعديل
+                    
+                    card.innerHTML = `
+                        <span class="edit-badge">✏️ تعديل</span>
+                        ${currentFilter === 'ALL' ? '<i class="fas fa-bars drag-handle"></i>' : ''}
+                        <img src="${v.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
+                        <div class="card-title">${v.name}</div>
+                        <div style="font-size:0.7rem; color:#94a3b8;">${v.type}</div>
+                    `;
+                    // إضافة ميزة السحب للكارد
+                    card.setAttribute('data-key', k);
+                    container.appendChild(card);
+                }
+            });
+
+            // تفعيل السحب فقط في وضع "الكل"
+            if (currentFilter === 'ALL') {
+                new Sortable(container, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    onEnd: () => {
+                        const items = container.querySelectorAll('.card');
+                        const updates = {};
+                        items.forEach((item, index) => {
+                            updates[`apps/${item.getAttribute('data-key')}/order`] = index;
+                        });
+                        update(ref(db), updates);
+                    }
+                });
             }
         }
-    };
 
-    window.handleProcess = async () => {
-        const name = document.getElementById('appName').value;
-        const link = document.getElementById('appLink').value;
-        const type = document.getElementById('inputType').value;
-        const btn = document.getElementById('saveBtn');
+        // --- 4. وظائف المودال (إضافة/تعديل) ---
+        window.openEditModal = (key = null, data = null) => {
+            const modal = document.getElementById('appModal');
+            modal.style.display = 'flex';
+            
+            if (key) {
+                // وضع التعديل
+                editKey = key;
+                currentImg = data.img;
+                document.getElementById('modalTitle').innerText = "تعديل التطبيق";
+                document.getElementById('appCat').value = data.type;
+                document.getElementById('appName').value = data.name;
+                document.getElementById('appLink').value = data.link;
+                document.getElementById('appHidden').checked = data.isHidden || false;
+                document.getElementById('previewImg').src = data.img;
+                document.getElementById('previewImg').style.display = 'block';
+                document.getElementById('delBtn').style.display = 'block';
+                document.getElementById('saveBtn').innerText = "حفظ التعديلات";
+            } else {
+                // وضع الإضافة
+                editKey = null;
+                currentImg = "";
+                document.getElementById('modalTitle').innerText = "إضافة جديد";
+                document.getElementById('appName').value = "";
+                document.getElementById('appLink').value = "";
+                document.getElementById('previewImg').style.display = 'none';
+                document.getElementById('delBtn').style.display = 'none';
+                document.getElementById('saveBtn').innerText = "نشر";
+            }
+        };
 
-        if (!name || !link) return alert("البيانات ناقصة");
-        btn.disabled = true; btn.innerText = "⏳...";
+        window.saveApp = () => {
+            const name = document.getElementById('appName').value;
+            const link = document.getElementById('appLink').value;
+            const type = document.getElementById('appCat').value;
+            const isHidden = document.getElementById('appHidden').checked;
 
-        try {
-            const data = { 
-                name, link, type, 
-                img: currentImgBase64 || "https://cdn-icons-png.flaticon.com/512/564/564619.png",
-                order: 0,
-                isHidden: false
+            if (!name || !link) return alert("البيانات ناقصة");
+
+            const data = {
+                name, link, type, isHidden,
+                img: currentImg || "https://cdn-icons-png.flaticon.com/512/564/564619.png",
+                order: editKey ? allApps[editKey].order : 0
             };
 
             if (editKey) {
-                await update(ref(db, 'apps/' + editKey), data);
-                msg("✅ تم التعديل");
+                update(ref(db, 'apps/' + editKey), data);
             } else {
-                await push(ref(db, 'apps'), data);
-                msg("🚀 تم النشر");
+                push(ref(db, 'apps'), data);
             }
-            resetForm();
-        } catch (e) { alert("خطأ: " + e.message); }
-        btn.disabled = false; btn.innerText = "🚀 حفظ ونشر";
-    };
+            closeModal('appModal');
+        };
 
-    function loadData() {
-        onValue(ref(db, 'apps'), (s) => {
-            allDataCache = s.val() || {};
-            renderList();
-        });
-    }
-
-    function renderList() {
-        const list = document.getElementById('appsList');
-        list.innerHTML = "";
-        
-        // ترتيب العناصر حسب Order
-        const sortedArray = Object.entries(allDataCache).sort(([,a], [,b]) => {
-            return (a.order || 0) - (b.order || 0);
-        });
-
-        sortedArray.forEach(([k, v]) => {
-            // منطق الفلترة
-            if (currentFilter === 'ALL' || v.type === currentFilter) {
-                const isHidden = v.isHidden === true;
-                const dragClass = currentFilter === 'ALL' ? 'drag-handle' : 'drag-handle drag-disabled';
-                
-                const div = document.createElement('div');
-                div.className = `app-item ${isHidden ? 'hidden-item' : ''}`;
-                div.setAttribute('data-key', k);
-                div.innerHTML = `
-                    <span class="${dragClass}">☰</span>
-                    ${isSelectMode ? `<input type="checkbox" class="select-check" style="display:block" onchange="toggleItem('${k}', this)">` : ''}
-                    <div style="display:flex; align-items:center; gap:10px; flex-grow:1; margin-right:10px;">
-                        <img src="${v.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
-                        <div style="text-align:right;">
-                            <strong>${v.name}</strong> ${isHidden ? '<small>👁️‍🗨️</small>' : ''}<br>
-                            <span style="font-size:0.7rem; color:#94a3b8;">${v.type}</span>
-                        </div>
-                    </div>
-                    <button onclick="startEdit('${k}','${v.name}','${v.link}','${v.img}','${v.type}')" style="background:#3b82f6; color:white; border:none; padding:5px 10px; border-radius:8px;">✏️</button>
-                `;
-                list.appendChild(div);
+        window.deleteApp = () => {
+            if(confirm("حذف التطبيق نهائياً؟")) {
+                remove(ref(db, 'apps/' + editKey));
+                closeModal('appModal');
             }
-        });
-        
-        // استعادة التحديدات السابقة
-        if (isSelectMode) {
-            document.querySelectorAll('.select-check').forEach(cb => {
-                const key = cb.getAttribute('onchange').match(/'([^']+)'/)[1];
-                if (selectedItems.has(key)) cb.checked = true;
-            });
-        }
-    }
+        };
 
-    window.toggleSelectionMode = () => {
-        isSelectMode = !isSelectMode;
-        selectedItems.clear();
-        const bar = document.getElementById('bulkActionsBar');
-        if (isSelectMode) bar.classList.add('visible'); else bar.classList.remove('visible');
-        renderList();
-    };
+        window.processImage = () => {
+            const file = document.getElementById('fileInput').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement("canvas");
+                        const scale = 200 / img.width;
+                        canvas.width = 200; canvas.height = img.height * scale;
+                        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+                        currentImg = canvas.toDataURL("image/jpeg", 0.7);
+                        document.getElementById('previewImg').src = currentImg;
+                        document.getElementById('previewImg').style.display = 'block';
+                    }
+                }
+            }
+        };
 
-    window.toggleItem = (k, cb) => {
-        if(cb.checked) selectedItems.add(k); else selectedItems.delete(k);
-    };
-
-    window.bulkDelete = async () => {
-        if(confirm(`حذف ${selectedItems.size} عنصر؟`)) {
-            const updates = {};
-            selectedItems.forEach(k => updates[`apps/${k}`] = null);
-            await update(ref(db), updates);
-            msg("🗑️ تم الحذف");
-            toggleSelectionMode();
-        }
-    };
-
-    window.bulkToggleVisibility = async () => {
-        const updates = {};
-        selectedItems.forEach(k => {
-            updates[`apps/${k}/isHidden`] = !allDataCache[k].isHidden;
-        });
-        await update(ref(db), updates);
-        msg("👁️ تم التغيير");
-        toggleSelectionMode();
-    };
-
-    window.startEdit = (k, n, l, i, t) => {
-        editKey = k; currentImgBase64 = i;
-        document.getElementById('appName').value = n;
-        document.getElementById('appLink').value = l;
-        document.getElementById('inputType').value = t;
-        document.getElementById('previewImg').src = i;
-        document.getElementById('previewImg').style.display = 'block';
-        document.getElementById('saveBtn').innerText = "حفظ";
-        document.getElementById('cancelBtn').style.display = 'inline-block';
-        window.scrollTo(0,0);
-    };
-
-    window.resetForm = () => {
-        editKey = null; currentImgBase64 = "";
-        document.getElementById('appName').value = '';
-        document.getElementById('appLink').value = '';
-        document.getElementById('previewImg').style.display = 'none';
-        document.getElementById('saveBtn').innerText = "🚀 حفظ ونشر";
-        document.getElementById('cancelBtn').style.display = 'none';
-    };
-
-    function msg(t) { const x = document.getElementById("toast"); x.innerText = t; x.className = "show"; setTimeout(() => x.className = "", 3000); }
-</script>
+        window.openCatModal = () => document.getElementById('catModal').style.display = 'flex';
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+    </script>
 </body>
 </html>
