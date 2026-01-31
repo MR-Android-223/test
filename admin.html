@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V30 | السرعة والسهولة</title>
+    <title>Admin V31 | تحكم كامل</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -96,13 +96,6 @@
 
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; background: #334155; color: white; font-family: 'Cairo'; text-align: center; }
         
-        /* تصميم قائمة اختيار الأيقونات */
-        .icon-select {
-            background: #334155; color: white; border: 1px solid #475569;
-            padding: 8px; border-radius: 8px; font-size: 0.9rem; width: 35% !important;
-            appearance: none; -webkit-appearance: none; text-align: center;
-        }
-
         .cat-item, .link-item { display: flex; gap: 8px; align-items: center; background: #334155; padding: 10px; margin-bottom: 8px; border-radius: 10px; border: 1px solid transparent;}
         .cat-item.locked { opacity: 0.6; filter: grayscale(1); border-color: #475569; }
         .cat-item.active-cat { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); }
@@ -352,7 +345,7 @@
                     allCats = val;
                     renderTabs();
                     renderCatList();
-                    // إذا كانت نافذة القفل مفتوحة، نحدثها تلقائياً
+                    // تحديث قائمة القفل إذا كانت مفتوحة
                     if(document.getElementById('catLockSection').style.display === 'block') {
                         renderCatLockList();
                     }
@@ -389,6 +382,7 @@
             let selectHTML = '';
 
             sortedCats.forEach(([key, val]) => {
+                // ملاحظة: الأقسام المقفلة تظهر للأدمن فقط مع علامة قفل
                 const hiddenStyle = val.isHidden ? 'opacity:0.6;' : '';
                 const hiddenIcon = val.isHidden ? '🔒' : '';
                 
@@ -542,7 +536,7 @@
             closeModal('delCatModal');
         };
 
-        // --- إعدادات سريعة وتفاعلية (Fix UI Responsiveness) ---
+        // --- إصلاحات الإعدادات ولوحة السايدبار ---
 
         window.openSettingsModal = () => {
             document.getElementById('settingsModal').style.display = 'flex';
@@ -567,7 +561,7 @@
             document.getElementById('settingsMain').style.display = 'block';
         };
 
-        // 1. منطق القفل الفوري (Instant Lock)
+        // 1. منطق القفل (تم تحسينه ليعمل بشكل فوري وصحيح)
         function renderCatLockList() {
             const list = document.getElementById('catLockList');
             list.innerHTML = '';
@@ -575,7 +569,7 @@
             const sortedCats = Object.entries(allCats).sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
             
             sortedCats.forEach(([key, val]) => {
-                const isLocked = val.isHidden === true;
+                const isLocked = val.isHidden === true; // التأكد أن القيمة منطقية
                 const div = document.createElement('div');
                 div.className = `cat-item ${isLocked ? 'locked' : 'active-cat'}`;
                 
@@ -594,15 +588,16 @@
         }
 
         window.toggleCatStatus = (key, currentStatus) => {
-            // 1. تغيير الشكل فوراً (خدعة بصرية)
+            // تحديث الواجهة فوراً
             const btn = document.getElementById(`toggle-${key}`);
             if(btn) btn.classList.toggle('on');
             
-            // 2. إرسال الأمر للسيرفر
+            // تحديث الداتا بيس: نعكس القيمة الحالية
+            // إذا كان true (مخفي) نرسل false (ظاهر) والعكس
             update(ref(db, `categories/${key}`), { isHidden: !currentStatus });
         };
 
-        // 2. منطق الروابط مع القائمة المنسدلة (Smart Links)
+        // 2. منطق الروابط: حقل حر + قائمة اختيار سريعة
         function renderSidebarEdit() {
             newProfileImg = sidebarData.profileImg || "https://midomido.neocities.org/mohammadalboushi.png";
             document.getElementById('profilePreview').src = newProfileImg;
@@ -617,22 +612,24 @@
                 div.className = 'link-item';
                 
                 // بناء خيارات القائمة المنسدلة
-                let optionsHtml = '';
+                let optionsHtml = '<option value="">اختيار سريع...</option>';
                 ICON_OPTIONS.forEach(opt => {
-                    const isSelected = link.icon === opt.val ? 'selected' : '';
-                    optionsHtml += `<option value="${opt.val}" ${isSelected}>${opt.icon} ${opt.label}</option>`;
+                    optionsHtml += `<option value="${opt.val}">${opt.icon} ${opt.label}</option>`;
                 });
 
                 div.innerHTML = `
                     <span class="cat-drag"><i class="fas fa-bars"></i></span>
                     
-                    <select class="icon-select link-icon-select">
-                        ${optionsHtml}
-                    </select>
+                    <div style="width:35%; display:flex; flex-direction:column; gap:5px;">
+                        <input type="text" class="link-icon-input" id="icon-input-${index}" value="${link.icon}" placeholder="كود الايقونة" style="width:100%; margin:0; padding:5px; font-size:0.8rem; text-align:left;">
+                        <select class="icon-select" onchange="document.getElementById('icon-input-${index}').value = this.value" style="width:100% !important; margin:0; padding:2px; font-size:0.8rem; height:25px;">
+                            ${optionsHtml}
+                        </select>
+                    </div>
 
                     <div style="flex-grow:1; display:flex; flex-direction:column; gap:2px;">
                         <input type="text" class="link-name" value="${link.name}" placeholder="الاسم" style="margin:0; padding:5px; font-size:0.9rem;">
-                        <input type="text" class="link-url" value="${link.url}" placeholder="الرابط (رقم او موقع)" style="margin:0; padding:5px; font-size:0.8rem; direction:ltr;">
+                        <input type="text" class="link-url" value="${link.url}" placeholder="الرابط" style="margin:0; padding:5px; font-size:0.8rem; direction:ltr;">
                     </div>
                     <i class="fas fa-trash" style="color:#ef4444; cursor:pointer; padding:5px;" onclick="removeLink(${index})"></i>
                 `;
@@ -678,7 +675,6 @@
             const saveBtn = document.getElementById('saveSidebarBtn');
             const originalText = saveBtn.innerText;
             
-            // تغيير شكل الزر ليعرف المستخدم انه يعمل
             saveBtn.innerText = "جاري الحفظ...";
             saveBtn.style.opacity = "0.7";
 
@@ -687,7 +683,7 @@
             
             linkItems.forEach(item => {
                 newLinks.push({
-                    icon: item.querySelector('.link-icon-select').value, // نأخذ القيمة من القائمة المنسدلة
+                    icon: item.querySelector('.link-icon-input').value, // نأخذ القيمة من حقل الكتابة (الحرية الكاملة)
                     name: item.querySelector('.link-name').value,
                     url: item.querySelector('.link-url').value
                 });
