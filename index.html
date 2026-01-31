@@ -7,69 +7,150 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* نفس الستايل السابق V18 */
+        /* --- الألوان والخلفية المتحركة --- */
         :root {
-            --bg-body: #0f172a; --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b, #0f172a);
-            --card-glass: rgba(30, 41, 59, 0.85); --text-main: #f8fafc; --text-muted: #94a3b8;
-            --primary: #3b82f6; --border: rgba(255,255,255,0.06); --nav-bg: rgba(15, 23, 42, 0.95);
+            --bg-body: #0f172a;
+            --text-main: #f8fafc; --text-muted: #94a3b8;
+            --primary: #3b82f6; --primary-glow: rgba(59, 130, 246, 0.4);
+            --card-glass: rgba(30, 41, 59, 0.7);
+            --border: rgba(255,255,255,0.08);
+            --nav-bg: rgba(15, 23, 42, 0.85);
         }
-        [data-theme="light"] {
-            --bg-body: #f8fafc; --bg-gradient: radial-gradient(circle at 50% 0%, #e2e8f0, #f8fafc);
-            --card-glass: rgba(255, 255, 255, 0.9); --text-main: #1e293b; --text-muted: #64748b;
-            --primary: #2563eb; --border: rgba(0,0,0,0.05); --nav-bg: rgba(255, 255, 255, 0.95);
+        
+        /* أنيميشن الخلفية */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
+
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-body); background-image: var(--bg-gradient); color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; padding-bottom: 30px; }
+        
+        body { 
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #1e1b4b);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite; /* حركة الخلفية */
+            color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; 
+            padding-bottom: 30px; overflow-x: hidden;
+        }
         body.no-scroll { overflow: hidden; }
 
+        /* --- الهيدر الزجاجي --- */
         header {
             position: sticky; top: 0; z-index: 1000; background: var(--nav-bg);
-            backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 15px 20px;
+            backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 15px 20px;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .logo { font-size: 1.3rem; font-weight: 900; color: var(--text-main); letter-spacing: 1px; }
+        .logo { font-size: 1.3rem; font-weight: 900; letter-spacing: 1px; }
         .logo span { color: var(--primary); }
-        .header-left { display: flex; gap: 15px; }
-        .icon-btn { font-size: 1.2rem; cursor: pointer; color: var(--text-main); transition: 0.3s; }
+        .icon-btn { font-size: 1.2rem; cursor: pointer; transition: 0.3s; }
 
+        /* --- القسم الرئيسي --- */
         .hero { text-align: center; padding: 25px 20px 5px; }
-        .hero h1 { font-size: 1.8rem; margin-bottom: 5px; background: linear-gradient(to right, var(--primary), #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero h1 { 
+            font-size: 1.8rem; margin-bottom: 5px; 
+            background: linear-gradient(to right, var(--primary), #60a5fa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
         .hero p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
 
+        /* الإحصائيات التفاعلية */
         .stats { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
-        .stat-item { background: var(--card-glass); border: 1px solid var(--border); border-radius: 16px; padding: 10px 20px; min-width: 90px; }
+        .stat-item { 
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border); border-radius: 16px; 
+            padding: 10px 20px; min-width: 90px;
+            transition: 0.1s; cursor: pointer; user-select: none;
+        }
+        .stat-item:active { 
+            transform: scale(0.95); 
+            background: var(--primary-glow); 
+            border-color: var(--primary); 
+        }
         .stat-num { font-weight: 800; color: var(--primary); font-size: 1.2rem; display: block; }
         .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
 
+        /* البحث الزجاجي */
         .search-container { position: relative; max-width: 500px; margin: 0 auto 20px; }
-        .search-box { width: 100%; background: var(--card-glass); border: 1px solid var(--border); padding: 14px 45px 14px 20px; border-radius: 50px; color: var(--text-main); font-family: 'Cairo'; font-size: 1rem; outline: none; transition: 0.3s; }
-        .search-box:focus { border-color: var(--primary); }
+        .search-box {
+            width: 100%; background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid var(--border);
+            padding: 14px 45px 14px 20px; border-radius: 50px; color: white;
+            font-family: 'Cairo'; font-size: 1rem; outline: none; transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        .search-box:focus { border-color: var(--primary); background: rgba(255, 255, 255, 0.1); }
         .search-icon { position: absolute; right: 20px; top: 16px; color: var(--text-muted); }
 
-        .tabs-wrapper { position: sticky; top: 68px; z-index: 900; padding: 5px 0; margin-bottom: 15px; background: linear-gradient(to bottom, rgba(15,23,42,0) 0%, var(--bg-body) 100%); }
+        /* --- شريط الأقسام --- */
+        .tabs-wrapper { position: sticky; top: 68px; z-index: 900; padding: 5px 0; margin-bottom: 15px; }
         .tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 5px 20px; scrollbar-width: none; }
         .tabs-container::-webkit-scrollbar { display: none; }
-        .tab-btn { background: var(--card-glass); color: var(--text-muted); border: 1px solid var(--border); padding: 8px 20px; border-radius: 50px; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; font-weight: 700; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0; }
+        .tab-btn {
+            background: var(--card-glass); color: var(--text-muted); border: 1px solid var(--border);
+            padding: 8px 20px; border-radius: 50px; cursor: pointer; transition: 0.3s;
+            font-family: 'Cairo'; font-weight: 700; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0;
+            backdrop-filter: blur(5px);
+        }
         .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
 
+        /* --- الشبكة والكروت --- */
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
         @media(min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
-        .card { background: var(--card-glass); border-radius: 18px; padding: 15px; text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; align-items: center; border: 1px solid var(--border); position: relative; transition: transform 0.2s; }
+
+        .card {
+            background: var(--card-glass); border-radius: 18px; padding: 15px; 
+            text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; 
+            align-items: center; border: 1px solid var(--border); position: relative; 
+            transition: transform 0.2s; backdrop-filter: blur(8px);
+        }
         .card:active { transform: scale(0.97); }
-        .mod-badge { position: absolute; top: 10px; left: 10px; background: rgba(59, 130, 246, 0.1); color: var(--primary); font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
-        .heart-btn { position: absolute; top: 10px; right: 10px; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; z-index: 5; background: none; border: none; }
+        
+        .mod-badge {
+            position: absolute; top: 10px; left: 10px; 
+            background: rgba(59, 130, 246, 0.15); color: var(--primary);
+            font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold;
+        }
+        
+        .heart-btn {
+            position: absolute; top: 10px; right: 10px; font-size: 1.1rem; color: var(--text-muted);
+            cursor: pointer; z-index: 5; background: none; border: none;
+        }
         .heart-btn.active { color: #ef4444; }
+
         .card img { width: 75px; height: 75px; border-radius: 16px; margin-bottom: 12px; object-fit: cover; background: #1e293b; }
         .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 10px; line-height: 1.3; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .get-btn { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); font-size: 0.8rem; font-weight: 700; padding: 5px 20px; border-radius: 50px; width: 100%; text-align: center; }
-        .card:hover .get-btn { background: var(--primary); color: white; }
 
-        .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0; background-color: #0f172a; overflow-x: hidden; transition: 0.3s; box-shadow: -5px 0 20px rgba(0,0,0,0.5); padding-top: 20px; border-left: 1px solid var(--border); }
+        /* أزرار التحميل الديناميكية */
+        .btn-group { display: flex; gap: 5px; width: 100%; }
+        .get-btn {
+            background: transparent; color: var(--primary); border: 1.5px solid var(--primary);
+            font-size: 0.8rem; font-weight: 700; padding: 6px 0; border-radius: 50px; 
+            width: 100%; text-align: center; text-decoration: none; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .card:hover .get-btn { background: var(--primary); color: white; }
+        .get-btn.secondary { border-color: #94a3b8; color: #94a3b8; } /* زر المشاهدة */
+        .get-btn.secondary:hover { background: #94a3b8; color: white; }
+
+        /* القائمة الجانبية */
+        .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0; background-color: #0f172a; overflow-x: hidden; transition: 0.3s; padding-top: 20px; border-left: 1px solid var(--border); box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
         .sidebar-header { text-align: center; padding-bottom: 20px; margin-bottom: 10px; }
         .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 10px; }
-        .sidebar-link { margin: 10px 20px; padding: 12px 15px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; text-decoration: none; font-size: 0.95rem; color: #cbd5e1; display: flex; align-items: center; border: 1px solid var(--border); transition: 0.2s; }
+        .sidebar-link { margin: 10px 20px; padding: 12px 15px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; text-decoration: none; font-size: 0.95rem; color: #cbd5e1; display: flex; align-items: center; border: 1px solid var(--border); transition: 0.2s; }
         .sidebar-link i { width: 30px; color: var(--primary); font-size: 1.1rem; }
         .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: #94a3b8; background: none; border: none; }
+        
+        /* عارض الصور (Lightbox) */
+        #imgViewer {
+            display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        #imgViewer img { max-width: 90%; max-height: 80%; border-radius: 10px; box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+        .close-viewer { position: absolute; top: 20px; right: 30px; color: white; font-size: 35px; cursor: pointer; }
+        
         #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.6); z-index: 1500; backdrop-filter: blur(4px); }
         .status { grid-column: span 2; text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 0.9rem; }
         footer { text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; border-top: 1px solid var(--border); }
@@ -101,6 +182,12 @@
     </div>
     <div id="overlay" onclick="closeNav()"></div>
 
+    <div id="imgViewer" onclick="closeViewer()">
+        <span class="close-viewer">&times;</span>
+        <img id="fullImage">
+        <a id="downloadBtn" href="#" download class="get-btn" style="width: auto; padding: 10px 30px; margin-top: 20px; background: var(--primary); color: white;">⬇️ تحميل للصورة</a>
+    </div>
+
     <div class="hero">
         <h1>متجر التطبيقات</h1>
         <p>وجهتك الأولى للتطبيقات المعدلة والحلول الذكية</p>
@@ -124,8 +211,7 @@
     </div>
 
     <div class="tabs-wrapper">
-        <div class="tabs-container" id="tabsList">
-            </div>
+        <div class="tabs-container" id="tabsList"></div>
     </div>
 
     <div class="grid" id="container">
@@ -153,53 +239,41 @@
         let currentCategory = 'ALL';
         let allCats = {};
 
-        // 1. جلب الأقسام الديناميكية
+        // جلب الأقسام
         onValue(ref(db, 'categories'), (snapshot) => {
             const val = snapshot.val();
-            if(val) {
-                allCats = val;
-                renderTabs();
-            }
+            if(val) { allCats = val; renderTabs(); }
         });
 
         function renderTabs() {
             const container = document.getElementById('tabsList');
             const sortedCats = Object.entries(allCats).sort(([,a], [,b]) => a.order - b.order);
-
             let html = `<button class="tab-btn ${currentCategory === 'ALL' ? 'active' : ''}" onclick="filterApps('ALL', this)">🌟 الكل</button>`;
-            
             sortedCats.forEach(([key, val]) => {
                 html += `<button class="tab-btn ${currentCategory === key ? 'active' : ''}" onclick="filterApps('${key}', this)">${val.icon} ${val.name}</button>`;
             });
-
             container.innerHTML = html;
         }
 
-        // 2. جلب التطبيقات
+        // جلب التطبيقات
         onValue(ref(db, 'apps'), (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 allAppsData = Object.values(data)
                     .filter(app => !app.isHidden)
                     .sort((a, b) => (a.order || 0) - (b.order || 0));
-
                 document.getElementById('appCount').innerText = allAppsData.length;
                 renderApps();
             }
         });
 
-        // 3. الفلترة
         window.filterApps = (cat, btn) => {
             currentCategory = cat;
-            
-            // تحديث ستايل الأزرار
             renderTabs(); 
-            // التمرير للزر النشط
             setTimeout(() => {
                 const activeBtn = document.querySelector('.tab-btn.active');
                 if(activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             }, 100);
-
             renderApps();
         };
 
@@ -220,17 +294,32 @@
             }
 
             filtered.forEach(app => {
-                // اسم البادج يعتمد على القسم
                 let badgeTxt = "APP"; 
                 if(allCats[app.type]) badgeTxt = allCats[app.type].name;
 
                 const isFav = favs.includes(app.name);
                 const heartClass = isFav ? "fa-solid active" : "fa-regular";
 
-                const card = document.createElement('a');
+                // المنطق الذكي للأزرار
+                let buttonsHTML = '';
+                
+                if (app.type === 'WEBSITE') {
+                    buttonsHTML = `<a href="${app.link}" target="_blank" class="get-btn">زيارة</a>`;
+                } else if (app.type === 'FILE') {
+                    // للملفات: زرين (مشاهدة وتحميل)
+                    buttonsHTML = `
+                        <div class="btn-group">
+                            <button onclick="viewImage('${app.link}')" class="get-btn secondary" style="font-size:0.7rem;">👁️ مشاهدة</button>
+                            <a href="${app.link}" download class="get-btn" style="font-size:0.7rem;">⬇️ تحميل</a>
+                        </div>
+                    `;
+                } else {
+                    // تطبيقات وألعاب
+                    buttonsHTML = `<a href="${app.link}" target="_blank" class="get-btn">تحميل</a>`;
+                }
+
+                const card = document.createElement('div');
                 card.className = 'card';
-                card.href = app.link;
-                card.target = '_blank';
                 card.innerHTML = `
                     <span class="mod-badge">${badgeTxt}</span>
                     <button class="heart-btn" onclick="toggleFavorite(this, '${app.name}')">
@@ -238,7 +327,7 @@
                     </button>
                     <img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'" loading="lazy">
                     <div class="card-title">${app.name}</div>
-                    <div class="get-btn">تحميل</div>
+                    ${buttonsHTML}
                 `;
                 container.appendChild(card);
             });
@@ -246,7 +335,18 @@
 
         document.getElementById('searchInput').addEventListener('input', (e) => renderApps(e.target.value));
 
-        // باقي الوظائف (Theme, Sidebar, Fav)
+        // عارض الصور
+        window.viewImage = (url) => {
+            const viewer = document.getElementById('imgViewer');
+            document.getElementById('fullImage').src = url;
+            document.getElementById('downloadBtn').href = url;
+            viewer.style.display = 'flex';
+        }
+        window.closeViewer = () => {
+            document.getElementById('imgViewer').style.display = 'none';
+        }
+
+        // الوظائف الأساسية
         window.toggleTheme = () => {
             const btn = document.getElementById('themeBtn');
             if (document.body.hasAttribute('data-theme')) {
@@ -268,7 +368,6 @@
         window.closeNav = () => { document.getElementById("mySidebar").style.width = "0"; document.getElementById("overlay").style.display = "none"; document.body.classList.remove("no-scroll"); };
         
         window.toggleFavorite = (btn, appName) => {
-            event.preventDefault(); event.stopPropagation();
             let favs = JSON.parse(localStorage.getItem('favorites')) || [];
             if (favs.includes(appName)) {
                 favs = favs.filter(i => i !== appName);
