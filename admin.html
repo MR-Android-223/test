@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم V10 | الاحترافية الكاملة</title>
+    <title>لوحة التحكم V11 | التخزين المباشر</title>
     <style>
         :root { --primary: #3b82f6; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); text-align: center; margin: 0; padding: 20px; }
@@ -12,13 +12,11 @@
         input, select { background: #334155; color: white; border: 1px solid transparent; }
         input:focus { border-color: var(--primary); }
         .main-btn { background: linear-gradient(45deg, #2563eb, #3b82f6); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .main-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .main-btn:disabled { opacity: 0.6; cursor: wait; }
         
-        /* قسم الصورة */
-        .upload-area { border: 2px dashed #334155; padding: 20px; border-radius: 12px; margin: 10px 0; cursor: pointer; position: relative; }
-        #previewImg { width: 80px; height: 80px; border-radius: 15px; object-fit: cover; display: none; margin: 10px auto; border: 2px solid var(--primary); }
+        .upload-area { border: 2px dashed #334155; padding: 20px; border-radius: 12px; margin: 10px 0; cursor: pointer; }
+        #previewImg { width: 100px; height: 100px; border-radius: 15px; object-fit: cover; display: none; margin: 10px auto; border: 2px solid var(--primary); }
         
-        /* البحث والقائمة */
         #searchBar { background: var(--bg); border: 1px solid #334155; margin-bottom: 20px; }
         .app-item { display: flex; justify-content: space-between; align-items: center; background: #334155; padding: 12px; margin-top: 10px; border-radius: 12px; }
         .btn-group { display: flex; gap: 8px; }
@@ -26,7 +24,6 @@
         .edit-btn { background: #f59e0b; color: white; }
         .del-btn { background: #ef4444; color: white; }
 
-        /* التنبيهات */
         #toast { visibility: hidden; min-width: 200px; background: #10b981; color: white; padding: 15px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); border-radius: 50px; z-index: 2000; }
         #toast.show { visibility: visible; animation: fade 0.5s; }
         @keyframes fade { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
@@ -50,7 +47,7 @@
         
         <div class="upload-area" onclick="document.getElementById('fileInput').click()">
             <span id="uploadLabel">📸 اضغط لاختيار صورة</span>
-            <input type="file" id="fileInput" hidden accept="image/*" onchange="previewImage()">
+            <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
             <img id="previewImg">
         </div>
 
@@ -60,12 +57,12 @@
             <option value="PDF">كتاب (PDF)</option>
         </select>
         
-        <button id="saveBtn" class="main-btn" onclick="handleProcess()">🚀 نشر الآن</button>
+        <button id="saveBtn" class="main-btn" onclick="handleProcess()">🚀 نشر التطبيق</button>
         <button id="cancelBtn" style="display:none; background:#475569; color:white;" onclick="resetForm()">إلغاء</button>
 
         <hr style="border-color:#334155; margin:30px 0;">
         
-        <input type="text" id="searchBar" placeholder="🔍 ابحث في تطبيقاتك..." onkeyup="filterApps()">
+        <input type="text" id="searchBar" placeholder="🔍 ابحث..." onkeyup="filterApps()">
         <div id="appsList">جاري التحميل...</div>
     </div>
 </div>
@@ -90,7 +87,7 @@
     const myUID = "eBOYmcmDI5S6l4NQd36bEa5kEcZ2";
 
     let editKey = null;
-    let currentImgUrl = "";
+    let currentImgBase64 = "";
 
     onAuthStateChanged(auth, (user) => {
         if (user && user.uid === myUID) {
@@ -102,48 +99,53 @@
 
     window.login = () => signInWithPopup(auth, provider);
 
-    window.previewImage = () => {
+    // دالة جديدة: ضغط الصورة وتحويلها لنص لتخزينها مباشرة
+    window.processImage = () => {
         const file = document.getElementById('fileInput').files[0];
         if (file) {
-            document.getElementById('previewImg').style.display = 'block';
-            document.getElementById('previewImg').src = URL.createObjectURL(file);
-            document.getElementById('uploadLabel').innerText = "تم اختيار الصورة ✅";
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function (event) {
+                const imgElement = document.createElement("img");
+                imgElement.src = event.target.result;
+                imgElement.onload = function (e) {
+                    // إنشاء كانفاس لتصغير الصورة
+                    const canvas = document.createElement("canvas");
+                    const MAX_WIDTH = 200; // تصغير الحجم لكي لا يثقل القاعدة
+                    const scaleSize = MAX_WIDTH / e.target.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = e.target.height * scaleSize;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(e.target, 0, 0, canvas.width, canvas.height);
+                    
+                    // الحفظ ككود نصي
+                    currentImgBase64 = canvas.toDataURL("image/jpeg", 0.7);
+                    
+                    // العرض
+                    document.getElementById('previewImg').src = currentImgBase64;
+                    document.getElementById('previewImg').style.display = 'block';
+                    document.getElementById('uploadLabel').innerText = "تمت المعالجة ✅";
+                }
+            }
         }
     };
-
-    // دالة الرفع الذكية (تستخدم خدمة رفع مجانية وسريعة)
-    async function uploadToCloud(file) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', 'ml_default'); // بريست افتراضي للرفع السريع
-        
-        const res = await fetch('https://api.cloudinary.com/v1_1/demo/image/upload', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await res.json();
-        return data.secure_url;
-    }
 
     window.handleProcess = async () => {
         const name = document.getElementById('appName').value;
         const link = document.getElementById('appLink').value;
         const type = document.getElementById('appType').value;
-        const file = document.getElementById('fileInput').files[0];
         const btn = document.getElementById('saveBtn');
 
-        if (!name || !link) return alert("املأ البيانات!");
+        if (!name || !link) return alert("الرجاء كتابة الاسم والرابط");
 
         btn.disabled = true;
-        btn.innerText = "⏳ جاري الرفع والنشر...";
+        btn.innerText = "⏳ جاري الحفظ...";
 
         try {
-            let imgUrl = currentImgUrl || "https://cdn-icons-png.flaticon.com/512/564/564619.png";
-            if (file) {
-                imgUrl = await uploadToCloud(file);
-            }
+            // استخدام الصورة الجديدة أو القديمة أو الافتراضية
+            const finalImg = currentImgBase64 || "https://cdn-icons-png.flaticon.com/512/564/564619.png";
 
-            const data = { name, link, img: imgUrl, type };
+            const data = { name, link, img: finalImg, type };
 
             if (editKey) {
                 await update(ref(db, 'apps/' + editKey), data);
@@ -153,9 +155,11 @@
                 msg("🚀 تم النشر");
             }
             resetForm();
-        } catch (e) { alert("حدث خطأ!"); }
+        } catch (e) { 
+            alert("حدث خطأ: " + e.message); 
+        }
         btn.disabled = false;
-        btn.innerText = "🚀 نشر الآن";
+        btn.innerText = "🚀 نشر التطبيق";
     };
 
     function loadData() {
@@ -169,8 +173,11 @@
                     div.className = 'app-item';
                     div.setAttribute('data-name', v.name.toLowerCase());
                     div.innerHTML = `
-                        <div style="text-align:right">
-                            <strong>${v.name}</strong><br><small>${v.type}</small>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="${v.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                            <div style="text-align:right">
+                                <strong>${v.name}</strong><br><small style="color:#94a3b8">${v.type}</small>
+                            </div>
                         </div>
                         <div class="btn-group">
                             <button class="sm-btn edit-btn" onclick="startEdit('${k}','${v.name}','${v.link}','${v.img}','${v.type}')">✏️</button>
@@ -184,27 +191,31 @@
     }
 
     window.startEdit = (k, n, l, i, t) => {
-        editKey = k; currentImgUrl = i;
+        editKey = k; currentImgBase64 = i;
         document.getElementById('appName').value = n;
         document.getElementById('appLink').value = l;
         document.getElementById('appType').value = t;
         document.getElementById('previewImg').style.display = 'block';
         document.getElementById('previewImg').src = i;
         document.getElementById('formTitle').innerText = "✏️ تعديل التطبيق";
+        document.getElementById('saveBtn').innerText = "حفظ التعديلات";
+        document.getElementById('saveBtn').style.background = "#f59e0b";
         document.getElementById('cancelBtn').style.display = 'block';
         window.scrollTo(0,0);
     };
 
     window.resetForm = () => {
-        editKey = null; currentImgUrl = "";
+        editKey = null; currentImgBase64 = "";
         document.querySelectorAll('input').forEach(i => i.value = '');
         document.getElementById('previewImg').style.display = 'none';
         document.getElementById('formTitle').innerText = "✨ إضافة تطبيق جديد";
         document.getElementById('uploadLabel').innerText = "📸 اضغط لاختيار صورة";
+        document.getElementById('saveBtn').innerText = "🚀 نشر التطبيق";
+        document.getElementById('saveBtn').style.background = "linear-gradient(45deg, #2563eb, #3b82f6)";
         document.getElementById('cancelBtn').style.display = 'none';
     };
 
-    window.del = (k) => { if(confirm("حذف؟")) remove(ref(db, 'apps/'+k)); };
+    window.del = (k) => { if(confirm("هل تريد حذف هذا التطبيق؟")) remove(ref(db, 'apps/'+k)); };
     
     window.filterApps = () => {
         const q = document.getElementById('searchBar').value.toLowerCase();
