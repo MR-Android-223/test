@@ -3,15 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة متجر البوشي</title>
+    <title>لوحة التحكم المطورة</title>
     <style>
         body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 20px; }
-        .box { background: #1e293b; padding: 30px; border-radius: 15px; max-width: 400px; margin: 0 auto; }
+        .box { background: #1e293b; padding: 30px; border-radius: 15px; max-width: 500px; margin: 0 auto; }
         input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; box-sizing: border-box; }
         input { background: #334155; color: white; }
-        button { cursor: pointer; font-weight: bold; }
-        .login-btn { background: #ea4335; color: white; }
+        button { cursor: pointer; font-weight: bold; transition: 0.2s; }
         .add-btn { background: #3b82f6; color: white; }
+        .add-btn:hover { background: #2563eb; }
+        
+        /* تصميم قائمة التطبيقات */
+        .app-item { display: flex; justify-content: space-between; align-items: center; background: #334155; padding: 10px; margin-top: 10px; border-radius: 8px; text-align: right; }
+        .app-info { font-size: 0.9rem; }
+        .delete-btn { background: #ef4444; color: white; width: auto; padding: 5px 15px; margin: 0; font-size: 0.8rem; }
+        .delete-btn:hover { background: #dc2626; }
     </style>
 </head>
 <body>
@@ -19,35 +25,42 @@
 <div class="box">
     <div id="loginArea">
         <h2>تسجيل دخول المدير</h2>
-        <button class="login-btn" onclick="login()">دخول بحساب Google</button>
+        <button onclick="login()" style="background:#ea4335; color:white;">دخول بحساب Google</button>
     </div>
 
     <div id="adminArea" style="display:none;">
         <h3>أهلاً بك يا مدير!</h3>
         <input type="text" id="appName" placeholder="اسم التطبيق">
         <input type="text" id="appLink" placeholder="رابط التحميل">
-        <input type="text" id="appImg" placeholder="رابط الصورة (اختياري)">
+        <input type="text" id="appImg" placeholder="رابط الصورة">
         <select id="appType">
             <option value="MOD">تطبيق معدل (MOD)</option>
             <option value="PDF">كتاب (PDF)</option>
             <option value="GAME">لعبة (GAME)</option>
         </select>
         <button class="add-btn" onclick="addApp()">نشر التطبيق</button>
-        <p id="msg" style="margin-top:10px;"></p>
-        <button onclick="logout()" style="background:transparent; color:gray; font-size:12px;">تسجيل خروج</button>
+        <p id="msg"></p>
+
+        <hr style="border-color: #334155; margin: 20px 0;">
+
+        <h4 style="text-align: right;">التطبيقات المنشورة حالياً:</h4>
+        <div id="appsList">
+            <p style="color:gray; font-size:0.8rem;">جاري التحميل...</p>
+        </div>
+        
+        <button onclick="logout()" style="background:transparent; color:gray; font-size:12px; margin-top:20px;">تسجيل خروج</button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC_iEb4UhUREVJ2mfj00BounPVaeGQr7wI",
         authDomain: "mohammadalboushi-e9231.firebaseapp.com",
         projectId: "mohammadalboushi-e9231",
-        storageBucket: "mohammadalboushi-e9231.firebasestorage.app",
         databaseURL: "https://mohammadalboushi-e9231-default-rtdb.firebaseio.com/",
         appId: "1:236925802081:web:2e26094ab5ecdf988f3c20"
     };
@@ -57,13 +70,14 @@
     const db = getDatabase(app);
     const provider = new GoogleAuthProvider();
 
-    // هذا هو الرمز الخاص بك الذي استخرجناه من الصور
+    // رمزك الصحيح
     const myUID = "eBOYmcmDI5S6l4NQd36bEa5kEcZ2";
 
     onAuthStateChanged(auth, (user) => {
         if (user && user.uid === myUID) {
             document.getElementById('loginArea').style.display = 'none';
             document.getElementById('adminArea').style.display = 'block';
+            loadApps(); // تحميل القائمة عند الدخول
         } else {
             document.getElementById('loginArea').style.display = 'block';
             document.getElementById('adminArea').style.display = 'none';
@@ -81,19 +95,51 @@
         
         if(name && link) {
             push(ref(db, 'apps'), { 
-                name: name, 
-                link: link, 
-                img: img || 'https://cdn-icons-png.flaticon.com/512/564/564619.png',
-                type: type 
+                name, link, img: img || 'https://cdn-icons-png.flaticon.com/512/564/564619.png', type 
             })
             .then(() => { 
-                document.getElementById('msg').innerText = "✅ تم النشر بنجاح!";
+                document.getElementById('msg').innerText = "✅ تم النشر!";
                 document.getElementById('msg').style.color = "#4ade80";
-                setTimeout(() => document.getElementById('msg').innerText = "", 3000);
-            })
-            .catch((error) => { alert("خطأ: " + error.message); });
-        } else {
-            alert("اكتب الاسم والرابط أولاً!");
+                setTimeout(()=>document.getElementById('msg').innerText="", 2000);
+            });
+        }
+    };
+
+    // دالة جديدة: تحميل التطبيقات وعرضها مع زر الحذف
+    function loadApps() {
+        const appsRef = ref(db, 'apps');
+        onValue(appsRef, (snapshot) => {
+            const list = document.getElementById('appsList');
+            list.innerHTML = ""; // تنظيف القائمة
+            const data = snapshot.val();
+
+            if (data) {
+                // تحويل البيانات لمصفوفة وعكس ترتيبها (الأحدث أولاً)
+                const entries = Object.entries(data).reverse();
+                
+                entries.forEach(([key, val]) => {
+                    const item = document.createElement('div');
+                    item.className = 'app-item';
+                    item.innerHTML = `
+                        <div class="app-info">
+                            <strong>${val.name}</strong><br>
+                            <span style="font-size:0.7rem; color:#94a3b8;">${val.type}</span>
+                        </div>
+                        <button class="delete-btn" onclick="deleteApp('${key}')">حذف</button>
+                    `;
+                    list.appendChild(item);
+                });
+            } else {
+                list.innerHTML = "<p>لا يوجد تطبيقات</p>";
+            }
+        });
+    }
+
+    // دالة جديدة: الحذف
+    window.deleteApp = (key) => {
+        if(confirm("هل أنت متأكد من حذف هذا التطبيق؟")) {
+            remove(ref(db, 'apps/' + key))
+            .then(() => alert("تم الحذف بنجاح"));
         }
     };
 </script>
