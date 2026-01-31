@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة متجر البوشي</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 20px; }
+        .box { background: #1e293b; padding: 30px; border-radius: 15px; max-width: 400px; margin: 0 auto; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; box-sizing: border-box; }
+        input { background: #334155; color: white; }
+        button { cursor: pointer; font-weight: bold; }
+        .login-btn { background: #ea4335; color: white; }
+        .add-btn { background: #3b82f6; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <div id="loginArea">
+        <h2>تسجيل دخول المدير</h2>
+        <button class="login-btn" onclick="login()">دخول بحساب Google</button>
+    </div>
+
+    <div id="adminArea" style="display:none;">
+        <h3>أهلاً بك يا مدير!</h3>
+        <input type="text" id="appName" placeholder="اسم التطبيق">
+        <input type="text" id="appLink" placeholder="رابط التحميل">
+        <input type="text" id="appImg" placeholder="رابط الصورة (اختياري)">
+        <select id="appType">
+            <option value="MOD">تطبيق معدل (MOD)</option>
+            <option value="PDF">كتاب (PDF)</option>
+            <option value="GAME">لعبة (GAME)</option>
+        </select>
+        <button class="add-btn" onclick="addApp()">نشر التطبيق</button>
+        <p id="msg" style="margin-top:10px;"></p>
+        <button onclick="logout()" style="background:transparent; color:gray; font-size:12px;">تسجيل خروج</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC_iEb4UhUREVJ2mfj00BounPVaeGQr7wI",
+        authDomain: "mohammadalboushi-e9231.firebaseapp.com",
+        projectId: "mohammadalboushi-e9231",
+        storageBucket: "mohammadalboushi-e9231.firebasestorage.app",
+        databaseURL: "https://mohammadalboushi-e9231-default-rtdb.firebaseio.com/",
+        appId: "1:236925802081:web:2e26094ab5ecdf988f3c20"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
+
+    // هذا هو الرمز الخاص بك الذي استخرجناه من الصور
+    const myUID = "EBOYmcmDI5S6l4NQd36bEa5kEcZ2";
+
+    onAuthStateChanged(auth, (user) => {
+        if (user && user.uid === myUID) {
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('adminArea').style.display = 'block';
+        } else {
+            document.getElementById('loginArea').style.display = 'block';
+            document.getElementById('adminArea').style.display = 'none';
+        }
+    });
+
+    window.login = () => signInWithPopup(auth, provider);
+    window.logout = () => signOut(auth);
+
+    window.addApp = () => {
+        const name = document.getElementById('appName').value;
+        const link = document.getElementById('appLink').value;
+        const img = document.getElementById('appImg').value;
+        const type = document.getElementById('appType').value;
+        
+        if(name && link) {
+            push(ref(db, 'apps'), { 
+                name: name, 
+                link: link, 
+                img: img || 'https://cdn-icons-png.flaticon.com/512/564/564619.png',
+                type: type 
+            })
+            .then(() => { 
+                document.getElementById('msg').innerText = "✅ تم النشر بنجاح!";
+                document.getElementById('msg').style.color = "#4ade80";
+                setTimeout(() => document.getElementById('msg').innerText = "", 3000);
+            })
+            .catch((error) => { alert("خطأ: " + error.message); });
+        } else {
+            alert("اكتب الاسم والرابط أولاً!");
+        }
+    };
+</script>
+</body>
+</html>
