@@ -3,65 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم الاحترافية</title>
+    <title>لوحة التحكم الشاملة</title>
     <style>
         body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 20px; margin: 0; }
         .box { background: #1e293b; padding: 30px; border-radius: 15px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         
-        /* عناصر النموذج */
+        /* الحقول */
         input, select, button { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; border: none; box-sizing: border-box; outline: none; font-size: 1rem; }
-        input, select { background: #334155; color: white; border: 1px solid transparent; transition: 0.3s; }
+        input, select { background: #334155; color: white; transition: 0.3s; }
         input:focus { border-color: #3b82f6; background: #475569; }
         
-        /* الأزرار */
-        .add-btn { background: linear-gradient(45deg, #2563eb, #3b82f6); color: white; font-weight: bold; cursor: pointer; }
-        .add-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4); }
+        /* الأزرار الرئيسية */
+        .action-btn { background: linear-gradient(45deg, #2563eb, #3b82f6); color: white; font-weight: bold; cursor: pointer; }
+        .cancel-btn { background: #64748b; color: white; display: none; cursor: pointer; }
         
+        /* شريط البحث */
+        #searchBar { background: #0f172a; border: 1px solid #334155; padding: 10px; margin-bottom: 15px; text-align: center; }
+
         /* القائمة */
         .app-item { display: flex; justify-content: space-between; align-items: center; background: #334155; padding: 12px; margin-top: 10px; border-radius: 10px; text-align: right; border: 1px solid rgba(255,255,255,0.05); }
-        .delete-btn { background: #ef4444; color: white; width: auto; padding: 8px 15px; margin: 0; font-size: 0.85rem; cursor: pointer; }
-        .delete-btn:hover { background: #dc2626; }
+        .btn-group { display: flex; gap: 5px; }
+        
+        /* أزرار القائمة الصغيرة */
+        .small-btn { width: auto; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; margin: 0; }
+        .edit-btn { background: #f59e0b; color: white; } /* أصفر للتعديل */
+        .delete-btn { background: #ef4444; color: white; } /* أحمر للحذف */
 
-        /* --- تصميم النافذة المنبثقة (Modal) --- */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7); z-index: 1000; align-items: center; justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-        .modal-box {
-            background: #1e293b; padding: 25px; border-radius: 15px; width: 90%; max-width: 350px;
-            text-align: center; border: 1px solid #334155; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-            animation: popIn 0.3s ease;
-        }
+        /* النوافذ والاشعارات (نفس التصميم السابق) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-box { background: #1e293b; padding: 25px; border-radius: 15px; width: 90%; max-width: 350px; }
         .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-yes { background: #ef4444; color: white; }
-        .btn-no { background: #475569; color: white; }
-
-        /* --- تصميم الإشعار (Toast) --- */
-        #toast {
-            visibility: hidden; min-width: 250px; background-color: #10b981; color: #fff;
-            text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1;
-            left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold;
-            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
-        }
+        #toast { visibility: hidden; min-width: 250px; background-color: #10b981; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: bold; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body>
 
-<div id="toast">✅ تم تنفيذ العملية بنجاح</div>
-
+<div id="toast">✅ تم</div>
 <div id="confirmModal" class="modal-overlay">
     <div class="modal-box">
-        <h3 style="margin-top:0">تأكيد الحذف</h3>
-        <p style="color:#cbd5e1;">هل أنت متأكد أنك تريد حذف هذا التطبيق نهائياً؟</p>
+        <h3>تأكيد الحذف</h3>
+        <p style="color:#cbd5e1;">حذف نهائي؟</p>
         <div class="modal-buttons">
-            <button class="btn-yes" onclick="confirmDelete()">نعم، احذف</button>
-            <button class="btn-no" onclick="closeModal()">إلغاء</button>
+            <button class="delete-btn" style="width:100%" onclick="confirmDelete()">نعم</button>
+            <button class="cancel-btn" style="width:100%; display:block; background:#475569;" onclick="closeModal()">لا</button>
         </div>
     </div>
 </div>
@@ -69,11 +56,11 @@
 <div class="box">
     <div id="loginArea">
         <h2>🔐 دخول المدير</h2>
-        <button onclick="login()" style="background:#ea4335; color:white;">تسجيل الدخول عبر Google</button>
+        <button onclick="login()" style="background:#ea4335; color:white;">تسجيل الدخول</button>
     </div>
 
     <div id="adminArea" style="display:none;">
-        <h3>👋 أهلاً بك يا مدير!</h3>
+        <h3 id="formTitle">✨ إضافة تطبيق جديد</h3>
         
         <input type="text" id="appName" placeholder="اسم التطبيق">
         <input type="text" id="appLink" placeholder="رابط التحميل">
@@ -83,23 +70,25 @@
             <option value="PDF">كتاب (PDF)</option>
             <option value="GAME">لعبة (GAME)</option>
         </select>
-        <button class="add-btn" onclick="addApp()">🚀 نشر التطبيق</button>
+        
+        <button id="mainBtn" class="action-btn" onclick="handleApp()">🚀 نشر التطبيق</button>
+        <button id="cancelBtn" class="cancel-btn" onclick="resetForm()">إلغاء التعديل</button>
 
         <hr style="border-color: #334155; margin: 25px 0;">
 
-        <h4 style="text-align: right; margin-bottom:10px;">📦 التطبيقات المنشورة:</h4>
+        <input type="text" id="searchBar" placeholder="🔍 ابحث عن تطبيق..." onkeyup="filterApps()">
+
+        <h4 style="text-align: right; margin-bottom:10px;">📦 التطبيقات:</h4>
         <div id="appsList">
-            <p style="color:gray; font-size:0.8rem;">جاري جلب البيانات...</p>
+            <p style="color:gray;">جاري التحميل...</p>
         </div>
-        
-        <button onclick="logout()" style="background:transparent; color:#64748b; font-size:12px; margin-top:20px;">تسجيل خروج</button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC_iEb4UhUREVJ2mfj00BounPVaeGQr7wI",
@@ -113,11 +102,9 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
     const provider = new GoogleAuthProvider();
-
-    // UID الخاص بك
     const myUID = "eBOYmcmDI5S6l4NQd36bEa5kEcZ2";
 
-    // متغير لتخزين معرف التطبيق المراد حذفه مؤقتاً
+    let currentEditKey = null; // لتخزين معرف التطبيق الذي نعدله
     let targetDeleteKey = null;
 
     onAuthStateChanged(auth, (user) => {
@@ -132,90 +119,117 @@
     });
 
     window.login = () => signInWithPopup(auth, provider);
-    window.logout = () => signOut(auth);
+    window.logout = () => signOut(auth); // زر الخروج موجود لكن مخفي لتوفير المساحة، يمكن إضافته
 
-    // إضافة تطبيق
-    window.addApp = () => {
+    // الدالة الذكية: تعمل إضافة أو تعديل حسب الوضع
+    window.handleApp = () => {
         const name = document.getElementById('appName').value;
         const link = document.getElementById('appLink').value;
         const img = document.getElementById('appImg').value;
         const type = document.getElementById('appType').value;
         
-        if(name && link) {
-            push(ref(db, 'apps'), { 
-                name, link, img: img || 'https://cdn-icons-png.flaticon.com/512/564/564619.png', type 
-            })
-            .then(() => { 
-                showToast("✅ تم نشر التطبيق بنجاح!");
-                document.querySelectorAll('input').forEach(i => i.value = '');
+        if(!name || !link) { showToast("⚠️ اكتب الاسم والرابط", "#ef4444"); return; }
+
+        const appData = { name, link, img: img || 'https://cdn-icons-png.flaticon.com/512/564/564619.png', type };
+
+        if (currentEditKey) {
+            // حالة التعديل
+            update(ref(db, 'apps/' + currentEditKey), appData)
+            .then(() => {
+                showToast("✅ تم تعديل التطبيق!");
+                resetForm();
             });
         } else {
-            showToast("⚠️ يرجى كتابة الاسم والرابط", "#ef4444");
+            // حالة الإضافة الجديدة
+            push(ref(db, 'apps'), appData)
+            .then(() => {
+                showToast("🚀 تم النشر!");
+                resetForm();
+            });
         }
+    };
+
+    // تعبئة الحقول عند ضغط زر التعديل
+    window.startEdit = (key, name, link, img, type) => {
+        currentEditKey = key;
+        document.getElementById('appName').value = name;
+        document.getElementById('appLink').value = link;
+        document.getElementById('appImg').value = img;
+        document.getElementById('appType').value = type;
+
+        // تغيير شكل الواجهة لوضع التعديل
+        document.getElementById('formTitle').innerText = "✏️ تعديل: " + name;
+        document.getElementById('mainBtn').innerText = "حفظ التعديلات";
+        document.getElementById('mainBtn').style.background = "#f59e0b"; // برتقالي
+        document.getElementById('cancelBtn').style.display = 'block';
+        
+        // الصعود للأعلى
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // إلغاء وضع التعديل
+    window.resetForm = () => {
+        currentEditKey = null;
+        document.querySelectorAll('input').forEach(i => i.value = '');
+        document.getElementById('formTitle').innerText = "✨ إضافة تطبيق جديد";
+        document.getElementById('mainBtn').innerText = "🚀 نشر التطبيق";
+        document.getElementById('mainBtn').style.background = "linear-gradient(45deg, #2563eb, #3b82f6)";
+        document.getElementById('cancelBtn').style.display = 'none';
     };
 
     // تحميل القائمة
     function loadApps() {
-        const appsRef = ref(db, 'apps');
-        onValue(appsRef, (snapshot) => {
+        onValue(ref(db, 'apps'), (snapshot) => {
             const list = document.getElementById('appsList');
             list.innerHTML = "";
             const data = snapshot.val();
-
             if (data) {
-                const entries = Object.entries(data).reverse();
-                entries.forEach(([key, val]) => {
+                Object.entries(data).reverse().forEach(([key, val]) => {
                     const item = document.createElement('div');
                     item.className = 'app-item';
+                    // تخزين الاسم للبحث
+                    item.setAttribute('data-name', val.name.toLowerCase());
+                    
                     item.innerHTML = `
-                        <div class="app-info">
-                            <strong style="color:#f8fafc">${val.name}</strong><br>
+                        <div style="flex-grow:1;">
+                            <strong>${val.name}</strong><br>
                             <span style="font-size:0.7rem; color:#94a3b8;">${val.type}</span>
                         </div>
-                        <button class="delete-btn" onclick="askDelete('${key}')">🗑️ حذف</button>
+                        <div class="btn-group">
+                            <button class="small-btn edit-btn" onclick="startEdit('${key}', '${val.name}', '${val.link}', '${val.img}', '${val.type}')">✏️</button>
+                            <button class="small-btn delete-btn" onclick="askDelete('${key}')">🗑️</button>
+                        </div>
                     `;
                     list.appendChild(item);
                 });
-            } else {
-                list.innerHTML = "<p style='color:#64748b'>لا توجد تطبيقات</p>";
-            }
+            } else { list.innerHTML = "<p>لا يوجد تطبيقات</p>"; }
         });
     }
 
-    // --- منطق النافذة المنبثقة ---
-    
-    // 1. فتح النافذة عند الضغط على زر الحذف
-    window.askDelete = (key) => {
-        targetDeleteKey = key; // حفظ المعرف
-        document.getElementById('confirmModal').style.display = 'flex';
+    // وظيفة البحث
+    window.filterApps = () => {
+        const query = document.getElementById('searchBar').value.toLowerCase();
+        const items = document.querySelectorAll('.app-item');
+        items.forEach(item => {
+            const name = item.getAttribute('data-name');
+            item.style.display = name.includes(query) ? 'flex' : 'none';
+        });
     };
 
-    // 2. إغلاق النافذة
-    window.closeModal = () => {
-        targetDeleteKey = null;
-        document.getElementById('confirmModal').style.display = 'none';
-    };
-
-    // 3. تنفيذ الحذف عند الضغط على "نعم"
+    // الحذف والاشعارات (كما هي)
+    window.askDelete = (key) => { targetDeleteKey = key; document.getElementById('confirmModal').style.display = 'flex'; };
+    window.closeModal = () => { targetDeleteKey = null; document.getElementById('confirmModal').style.display = 'none'; };
     window.confirmDelete = () => {
         if (targetDeleteKey) {
             remove(ref(db, 'apps/' + targetDeleteKey))
-            .then(() => {
-                showToast("🗑️ تم حذف التطبيق");
-                closeModal();
-            });
+            .then(() => { showToast("🗑️ تم الحذف"); closeModal(); });
         }
     };
-
-    // دالة عرض الإشعار الجميل
     function showToast(text, color = "#10b981") {
         const x = document.getElementById("toast");
-        x.innerText = text;
-        x.style.backgroundColor = color;
-        x.className = "show";
-        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        x.innerText = text; x.style.backgroundColor = color; x.className = "show";
+        setTimeout(() => x.className = x.className.replace("show", ""), 3000);
     }
-
 </script>
 </body>
 </html>
