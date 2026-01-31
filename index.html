@@ -149,9 +149,7 @@
                 نبني الأفكار، وننظم الفوضى التقنية.
             </p>
         </div>
-        <div id="sidebarLinksContainer">
-            <div style="text-align:center; color:#94a3b8; font-size:0.8rem;">جاري التحميل...</div>
-        </div>
+        <div id="sidebarLinksContainer"></div>
     </div>
     <div id="overlay" onclick="closeNav()"></div>
 
@@ -212,38 +210,36 @@
         let currentCategory = 'ALL';
         let allCats = {};
 
-        // جلب الأقسام (مع مراعاة القفل)
+        // 1. جلب الأقسام
         onValue(ref(db, 'categories'), (snapshot) => {
             const val = snapshot.val();
-            if(val) { allCats = val; renderTabs(); }
+            if(val) { allCats = val; renderTabs(); renderApps(); } // إعادة رسم التطبيقات عند تحديث حالة الأقسام
         });
 
-        // جلب إعدادات السايدبار (الصورة والروابط)
+        // 2. جلب إعدادات السايدبار
         onValue(ref(db, 'settings'), (snapshot) => {
             const val = snapshot.val();
             if(val) {
-                // تحديث الصورة
                 if(val.profileImg) {
                     document.getElementById('sidebarProfileImg').src = val.profileImg;
                 }
-                
-                // تحديث الروابط
                 const linksContainer = document.getElementById('sidebarLinksContainer');
                 linksContainer.innerHTML = '';
                 
                 if(val.links && Array.isArray(val.links)) {
                     val.links.forEach(link => {
-                        // إضافة http إذا لم تكن موجودة للروابط الخارجية
                         let url = link.url;
-                        if(url && !url.startsWith('http') && !url.startsWith('tel:') && !url.startsWith('mailto:')) {
-                            url = 'https://' + url;
+                        // معالجة الروابط الذكية
+                        if(url && !url.startsWith('http') && !url.startsWith('tel:') && !url.startsWith('mailto:') && !url.startsWith('fb:')) {
+                            // إذا كان رقماً فقط وهو ليس اتصال، نعتبره رابط عادي
+                            // لكن إذا كان اتصال سيتم معالجته لاحقاً
+                             if (!url.match(/^[0-9]+$/)) url = 'https://' + url;
                         }
-                        
+
                         const a = document.createElement('a');
                         a.className = 'sidebar-link';
                         a.href = url;
-                        // فتح في نافذة جديدة إلا إذا كان اتصال
-                        if(!url.startsWith('tel:')) a.target = "_blank"; 
+                        if(!url.startsWith('tel:') && !url.startsWith('fb:')) a.target = "_blank"; 
                         
                         a.innerHTML = `<i class="${link.icon}"></i> ${link.name}`;
                         linksContainer.appendChild(a);
@@ -251,11 +247,6 @@
                 } else {
                     linksContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">لا توجد روابط مضافة</div>';
                 }
-            } else {
-                // روابط افتراضية في حال عدم وجود إعدادات
-                document.getElementById('sidebarLinksContainer').innerHTML = `
-                    <a href="#" class="sidebar-link"><i class="fas fa-info-circle"></i> لا توجد معلومات</a>
-                `;
             }
         });
 
@@ -266,7 +257,7 @@
             let html = `<button class="tab-btn ${currentCategory === 'ALL' ? 'active' : ''}" onclick="filterApps('ALL', this)">🌟 الكل</button>`;
             
             sortedCats.forEach(([key, val]) => {
-                // هنا التغيير المهم: إذا كان القسم مخفي (isHidden == true) لا نعرضه في التابس
+                // شرط مهم: إخفاء التبويب إذا كان القسم مقفلاً
                 if (!val.isHidden) {
                     html += `<button class="tab-btn ${currentCategory === key ? 'active' : ''}" onclick="filterApps('${key}', this)">${val.icon} ${val.name}</button>`;
                 }
@@ -281,7 +272,7 @@
                 allAppsData = Object.values(data)
                     .filter(app => !app.isHidden)
                     .sort((a, b) => (a.order || 0) - (b.order || 0));
-                document.getElementById('appCount').innerText = allAppsData.length;
+                // سنقوم بتحديث العداد لاحقاً بعد الفلترة النهائية
                 renderApps();
             }
         });
@@ -301,11 +292,24 @@
             container.innerHTML = '';
             const favs = JSON.parse(localStorage.getItem('favorites')) || [];
 
+            // --- الفلترة الذكية (الحل لمشكلة الإخفاء) ---
             const filtered = allAppsData.filter(app => {
+                // 1. تحقق هل القسم التابع له هذا التطبيق "مخفي"؟
+                const parentCat = allCats[app.type];
+                // إذا كان القسم موجوداً وهو مخفي (isHidden == true) -> لا تعرض التطبيق نهائياً
+                if (parentCat && parentCat.isHidden) return false;
+
+                // 2. فلترة حسب التبويب المختار
                 const matchCat = (currentCategory === 'ALL') || (app.type === currentCategory);
+                
+                // 3. فلترة حسب البحث
                 const matchSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase());
+                
                 return matchCat && matchSearch;
             });
+
+            // تحديث العداد بناءً على ما يراه المستخدم فقط
+            document.getElementById('appCount').innerText = filtered.length;
 
             if (filtered.length === 0) {
                 container.innerHTML = "<div class='status'>لا توجد نتائج</div>";
