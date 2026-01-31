@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم V12 | الأقسام</title>
+    <title>لوحة التحكم V13 | المرونة الكاملة</title>
     <style>
         :root { --primary: #3b82f6; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); text-align: center; margin: 0; padding: 20px; }
@@ -13,14 +13,24 @@
         input:focus { border-color: var(--primary); }
         .main-btn { background: linear-gradient(45deg, #2563eb, #3b82f6); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
         
-        .upload-area { border: 2px dashed #334155; padding: 20px; border-radius: 12px; margin: 10px 0; cursor: pointer; }
-        #previewImg { width: 100px; height: 100px; border-radius: 15px; object-fit: cover; display: none; margin: 10px auto; border: 2px solid var(--primary); }
+        /* منطقة رفع الصورة */
+        .upload-area { border: 2px dashed #334155; padding: 20px; border-radius: 12px; margin: 10px 0; cursor: pointer; position: relative; }
+        #previewImg { width: 80px; height: 80px; border-radius: 15px; object-fit: cover; display: none; margin: 10px auto; border: 2px solid var(--primary); }
         
-        .section-title { text-align: right; color: #94a3b8; font-size: 0.9rem; margin-top: 20px; }
+        /* شريط الفلترة (الأزرار السفلية) */
+        .filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-top: 20px; white-space: nowrap; }
+        .filter-btn { background: #334155; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; flex-shrink: 0; }
+        .filter-btn.active { background: var(--primary); color: white; }
+
+        /* القائمة */
+        .section-title { text-align: right; color: #94a3b8; font-size: 0.9rem; margin-top: 10px; display: flex; justify-content: space-between; }
         .app-item { display: flex; justify-content: space-between; align-items: center; background: #334155; padding: 12px; margin-top: 10px; border-radius: 12px; transition:0.3s; }
+        .badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.3); color: #cbd5e1; margin-right: 5px; }
+        
         .btn-group { display: flex; gap: 8px; }
         .sm-btn { width: auto; padding: 8px 15px; margin: 0; font-size: 0.8rem; cursor: pointer; }
         
+        /* التنبيهات */
         #toast { visibility: hidden; min-width: 200px; background: #10b981; color: white; padding: 15px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); border-radius: 50px; z-index: 2000; }
         #toast.show { visibility: visible; animation: fade 0.5s; }
         @keyframes fade { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
@@ -37,31 +47,43 @@
     </div>
 
     <div id="adminArea" style="display:none;">
-        <h3 id="formTitle">✨ إضافة جديد</h3>
+        <h3 id="formTitle">✨ إضافة / تعديل</h3>
         
-        <label style="display:block; text-align:right; font-size:0.8rem; color:#94a3b8;">اختر القسم (المجلد):</label>
-        <select id="appType" onchange="filterMyApps()">
-            <option value="PROGRAM">📱 تطبيقات (Programs)</option>
-            <option value="GAME">🎮 ألعاب (Games)</option>
-            <option value="WEBSITE">🌐 مواقع (Websites)</option>
-            <option value="FILE">📁 ملفات (Files)</option>
+        <label style="display:block; text-align:right; font-size:0.8rem; color:#94a3b8;">تصنيف التطبيق:</label>
+        <select id="inputType">
+            <option value="PROGRAM">📱 تطبيق (Program)</option>
+            <option value="GAME">🎮 لعبة (Game)</option>
+            <option value="WEBSITE">🌐 موقع (Website)</option>
+            <option value="FILE">📁 ملف (File)</option>
         </select>
 
-        <input type="text" id="appName" placeholder="الاسم (مثلاً: موقعي)">
+        <input type="text" id="appName" placeholder="الاسم">
         <input type="text" id="appLink" placeholder="الرابط">
         
         <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-            <span id="uploadLabel">📸 صورة (اختياري)</span>
+            <span id="uploadLabel">📸 صورة (اضغط هنا)</span>
             <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
             <img id="previewImg">
         </div>
 
-        <button id="saveBtn" class="main-btn" onclick="handleProcess()">🚀 نشر في هذا القسم</button>
+        <button id="saveBtn" class="main-btn" onclick="handleProcess()">🚀 حفظ ونشر</button>
         <button id="cancelBtn" style="display:none; background:#475569; color:white;" onclick="resetForm()">إلغاء</button>
 
         <hr style="border-color:#334155; margin:30px 0;">
         
-        <h4 class="section-title" id="listTitle">📂 محتويات قسم: تطبيقات</h4>
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="setFilter('ALL', this)">🌟 الكل</button>
+            <button class="filter-btn" onclick="setFilter('PROGRAM', this)">📱 تطبيقات</button>
+            <button class="filter-btn" onclick="setFilter('GAME', this)">🎮 ألعاب</button>
+            <button class="filter-btn" onclick="setFilter('WEBSITE', this)">🌐 مواقع</button>
+            <button class="filter-btn" onclick="setFilter('FILE', this)">📁 ملفات</button>
+        </div>
+
+        <div class="section-title">
+            <span id="listTitle">عرض الكل</span>
+            <span id="countBadge" style="background:#3b82f6; color:white; padding:0 8px; border-radius:10px; font-size:0.8rem;">0</span>
+        </div>
+        
         <div id="appsList">جاري التحميل...</div>
     </div>
 </div>
@@ -87,7 +109,8 @@
 
     let editKey = null;
     let currentImgBase64 = "";
-    let allDataCache = {}; // تخزين كل البيانات هنا
+    let allDataCache = {}; 
+    let currentFilter = 'ALL'; // الفلتر الافتراضي
 
     onAuthStateChanged(auth, (user) => {
         if (user && user.uid === myUID) {
@@ -99,7 +122,7 @@
 
     window.login = () => signInWithPopup(auth, provider);
 
-    // معالجة الصورة (Base64)
+    // معالجة الصورة
     window.processImage = () => {
         const file = document.getElementById('fileInput').files[0];
         if (file) {
@@ -125,11 +148,11 @@
         }
     };
 
-    // النشر أو التعديل
+    // الحفظ (إضافة أو تعديل ونقل)
     window.handleProcess = async () => {
         const name = document.getElementById('appName').value;
         const link = document.getElementById('appLink').value;
-        const type = document.getElementById('appType').value;
+        const type = document.getElementById('inputType').value; // نأخذ النوع من القائمة العلوية
         const btn = document.getElementById('saveBtn');
 
         if (!name || !link) return alert("الاسم والرابط مطلوبين");
@@ -142,8 +165,9 @@
             const data = { name, link, img: finalImg, type };
 
             if (editKey) {
+                // هنا يحدث السحر: التحديث سيأخذ النوع الجديد المختار، مما ينقل التطبيق لقسم آخر
                 await update(ref(db, 'apps/' + editKey), data);
-                msg("✅ تم التعديل");
+                msg("✅ تم التعديل والنقل");
             } else {
                 await push(ref(db, 'apps'), data);
                 msg("🚀 تم النشر");
@@ -152,47 +176,62 @@
         } catch (e) { alert("خطأ: " + e.message); }
         
         btn.disabled = false;
-        btn.innerText = "🚀 نشر في هذا القسم";
+        btn.innerText = "🚀 حفظ ونشر";
     };
 
-    // تحميل البيانات وتخزينها
     function loadData() {
         onValue(ref(db, 'apps'), (s) => {
             allDataCache = s.val() || {};
-            filterMyApps(); // استدعاء الفلتر لعرض البيانات حسب الاختيار الحالي
+            renderList(); // تحديث العرض
         });
     }
 
-    // فلترة القائمة بناءً على الـ Select المختار
-    window.filterMyApps = () => {
-        const selectedType = document.getElementById('appType').value;
+    // دالة تغيير الفلتر عند الضغط على الأزرار السفلية
+    window.setFilter = (filterType, btn) => {
+        currentFilter = filterType;
+        // تحديث شكل الأزرار
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderList();
+    };
+
+    // دالة العرض بناءً على الفلتر الحالي
+    window.renderList = () => {
         const list = document.getElementById('appsList');
         const title = document.getElementById('listTitle');
+        const badge = document.getElementById('countBadge');
         
-        // تحديث عنوان القائمة
-        let typeName = "تطبيقات";
-        if(selectedType === 'GAME') typeName = "ألعاب";
-        if(selectedType === 'WEBSITE') typeName = "مواقع";
-        if(selectedType === 'FILE') typeName = "ملفات";
-        title.innerText = "📂 محتويات قسم: " + typeName;
-
         list.innerHTML = "";
         
-        // تحويل البيانات لمصفوفة وعرض الموافق للقسم فقط
+        // تسميات للعرض
+        const typeNames = {
+            'ALL': 'عرض الكل', 'PROGRAM': 'تطبيقات', 'GAME': 'ألعاب', 'WEBSITE': 'مواقع', 'FILE': 'ملفات'
+        };
+        title.innerText = typeNames[currentFilter];
+
         const entries = Object.entries(allDataCache).reverse();
-        let found = false;
+        let count = 0;
 
         entries.forEach(([k, v]) => {
-            // الشرط السحري: اعرض فقط إذا كان النوع مطابق للاختيار
-            if (v.type === selectedType) {
-                found = true;
+            // شرط العرض: إما الفلتر "الكل" أو نوع التطبيق يطابق الفلتر
+            if (currentFilter === 'ALL' || v.type === currentFilter) {
+                count++;
+                
+                // تحديد اسم القسم لعرضه كـ Badge صغير بجانب الاسم
+                let catBadge = "";
+                if(v.type === 'PROGRAM') catBadge = "تطبيق";
+                else if(v.type === 'GAME') catBadge = "لعبة";
+                else if(v.type === 'WEBSITE') catBadge = "موقع";
+                else if(v.type === 'FILE') catBadge = "ملف";
+
                 const div = document.createElement('div');
                 div.className = 'app-item';
                 div.innerHTML = `
                     <div style="display:flex; align-items:center; gap:10px;">
                         <img src="${v.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
                         <div style="text-align:right">
-                            <strong>${v.name}</strong>
+                            <strong>${v.name}</strong><br>
+                            <span class="badge">${catBadge}</span>
                         </div>
                     </div>
                     <div class="btn-group">
@@ -204,24 +243,26 @@
             }
         });
 
-        if (!found) {
-            list.innerHTML = `<p style="color:#64748b; font-size:0.9rem;">المجلد فارغ حالياً</p>`;
-        }
+        badge.innerText = count;
+        if (count === 0) list.innerHTML = `<p style="color:#64748b; font-size:0.9rem;">لا يوجد عناصر هنا</p>`;
     };
 
+    // عند الضغط على تعديل
     window.startEdit = (k, n, l, i, t) => {
         editKey = k; currentImgBase64 = i;
+        
+        // تعبئة البيانات في النموذج العلوي
         document.getElementById('appName').value = n;
         document.getElementById('appLink').value = l;
-        document.getElementById('appType').value = t; // سيقوم بتغيير القائمة تلقائياً
+        document.getElementById('inputType').value = t; // تحديد القسم الحالي للتطبيق
+        
         document.getElementById('previewImg').style.display = 'block';
         document.getElementById('previewImg').src = i;
-        document.getElementById('formTitle').innerText = "✏️ تعديل";
+        document.getElementById('formTitle').innerText = "✏️ تعديل (يمكنك تغيير القسم)";
         document.getElementById('saveBtn').innerText = "حفظ التعديلات";
         document.getElementById('cancelBtn').style.display = 'inline-block';
         
-        filterMyApps(); // تحديث القائمة لتطابق عنصر التعديل
-        window.scrollTo(0,0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     window.resetForm = () => {
@@ -229,9 +270,10 @@
         document.getElementById('appName').value = '';
         document.getElementById('appLink').value = '';
         document.getElementById('previewImg').style.display = 'none';
-        document.getElementById('formTitle').innerText = "✨ إضافة جديد";
-        document.getElementById('saveBtn').innerText = "🚀 نشر في هذا القسم";
+        document.getElementById('formTitle').innerText = "✨ إضافة / تعديل";
+        document.getElementById('saveBtn').innerText = "🚀 حفظ ونشر";
         document.getElementById('cancelBtn').style.display = 'none';
+        document.getElementById('uploadLabel').innerText = "📸 صورة (اضغط هنا)";
     };
 
     window.del = (k) => { if(confirm("حذف؟")) remove(ref(db, 'apps/'+k)); };
