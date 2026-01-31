@@ -7,30 +7,124 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* (نفس الستايل السابق تماماً) */
-        :root { --bg-body: #0f172a; --bg-gradient: radial-gradient(circle at top, #1e293b, #0f172a); --text-main: #f8fafc; --text-muted: #94a3b8; --primary: #3b82f6; --card-bg: rgba(30, 41, 59, 0.95); --border: rgba(255,255,255,0.08); --nav-bg: #0f172a; }
-        [data-theme="light"] { --bg-body: #f8fafc; --bg-gradient: radial-gradient(circle at top, #e2e8f0, #f8fafc); --text-main: #1e293b; --text-muted: #64748b; --primary: #2563eb; --card-bg: #ffffff; --border: rgba(0,0,0,0.08); --nav-bg: #ffffff; }
+        :root {
+            --bg-body: #0f172a; 
+            --bg-gradient: radial-gradient(circle at top, #1e293b, #0f172a);
+            --text-main: #f8fafc; --text-muted: #94a3b8;
+            --primary: #3b82f6; 
+            --card-bg: rgba(30, 41, 59, 0.95);
+            --border: rgba(255,255,255,0.08);
+            --nav-bg: #0f172a;
+        }
+        [data-theme="light"] {
+            --bg-body: #f8fafc;
+            --bg-gradient: radial-gradient(circle at top, #e2e8f0, #f8fafc);
+            --text-main: #1e293b; --text-muted: #64748b;
+            --primary: #2563eb;
+            --card-bg: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --nav-bg: #ffffff;
+        }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-body); background-image: var(--bg-gradient); color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; padding-bottom: 30px; overflow-x: hidden; background-attachment: fixed; }
+        
+        body { 
+            background: var(--bg-body); background-image: var(--bg-gradient);
+            color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; 
+            padding-bottom: 30px; overflow-x: hidden; background-attachment: fixed;
+        }
         body.no-scroll { overflow: hidden; }
-        header { position: sticky; top: 0; z-index: 1000; background: var(--nav-bg); border-bottom: 1px solid var(--border); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .logo { font-size: 1.3rem; font-weight: 900; letter-spacing: 1px; } .logo span { color: var(--primary); } .header-left { display: flex; gap: 25px; align-items: center; } .icon-btn { font-size: 1.4rem; cursor: pointer; transition: 0.2s; color: var(--text-main); }
-        .hero { text-align: center; padding: 25px 20px 5px; } .hero h1 { font-size: 1.8rem; margin-bottom: 5px; color: var(--primary); } .hero p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
-        .stats { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; } .stat-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 10px 20px; min-width: 90px; cursor: pointer; user-select: none; } .stat-item:active { transform: scale(0.95); border-color: var(--primary); } .stat-num { font-weight: 800; color: var(--primary); font-size: 1.2rem; display: block; } .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
-        .search-container { position: relative; max-width: 500px; margin: 0 auto 20px; } .search-box { width: 100%; background: var(--card-bg); border: 1px solid var(--border); padding: 14px 45px 14px 20px; border-radius: 50px; color: var(--text-main); font-family: 'Cairo'; font-size: 1rem; outline: none; } .search-box:focus { border-color: var(--primary); } .search-icon { position: absolute; right: 20px; top: 16px; color: var(--text-muted); }
-        .tabs-wrapper { position: sticky; top: 73px; z-index: 900; padding: 5px 0; margin-bottom: 15px; background: transparent; } .tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 5px 20px; scrollbar-width: none; } .tabs-container::-webkit-scrollbar { display: none; } .tab-btn { background: var(--card-bg); color: var(--text-muted); border: 1px solid var(--border); padding: 8px 20px; border-radius: 50px; cursor: pointer; transition: 0.2s; font-family: 'Cairo'; font-weight: 700; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0; } .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; } @media(min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
-        .card { background: var(--card-bg); border-radius: 18px; padding: 15px; text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; align-items: center; border: 1px solid var(--border); position: relative; transition: transform 0.1s; cursor: pointer; } .card:active { transform: scale(0.97); background: rgba(59, 130, 246, 0.05); }
-        .mod-badge { position: absolute; top: 10px; left: 10px; background: rgba(59, 130, 246, 0.1); color: var(--primary); font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold; }
-        .heart-btn { position: absolute; top: 10px; right: 10px; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; z-index: 5; background: none; border: none; padding: 5px; } .heart-btn.active { color: #ef4444; }
-        .card img { width: 75px; height: 75px; border-radius: 16px; margin-bottom: 12px; object-fit: cover; background: #334155; } .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 10px; line-height: 1.3; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .get-btn { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); font-size: 0.8rem; font-weight: 700; padding: 6px 0; border-radius: 50px; width: 100%; text-align: center; display: block; } .card:hover .get-btn { background: var(--primary); color: white; } .get-btn.secondary { border-color: #94a3b8; color: #94a3b8; }
+
+        header {
+            position: sticky; top: 0; z-index: 1000; background: var(--nav-bg);
+            border-bottom: 1px solid var(--border); padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .logo { font-size: 1.3rem; font-weight: 900; letter-spacing: 1px; }
+        .logo span { color: var(--primary); }
+        .header-left { display: flex; gap: 25px; align-items: center; } 
+        .icon-btn { font-size: 1.4rem; cursor: pointer; transition: 0.2s; color: var(--text-main); }
+
+        .hero { text-align: center; padding: 25px 20px 5px; }
+        .hero h1 { font-size: 1.8rem; margin-bottom: 5px; color: var(--primary); }
+        .hero p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
+
+        .stats { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
+        .stat-item { 
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; 
+            padding: 10px 20px; min-width: 90px; cursor: pointer; user-select: none;
+        }
+        .stat-item:active { transform: scale(0.95); border-color: var(--primary); }
+        .stat-num { font-weight: 800; color: var(--primary); font-size: 1.2rem; display: block; }
+        .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+
+        .search-container { position: relative; max-width: 500px; margin: 0 auto 20px; }
+        .search-box {
+            width: 100%; background: var(--card-bg); border: 1px solid var(--border);
+            padding: 14px 45px 14px 20px; border-radius: 50px; color: var(--text-main);
+            font-family: 'Cairo'; font-size: 1rem; outline: none; 
+        }
+        .search-box:focus { border-color: var(--primary); }
+        .search-icon { position: absolute; right: 20px; top: 16px; color: var(--text-muted); }
+
+        .tabs-wrapper { position: sticky; top: 73px; z-index: 900; padding: 5px 0; margin-bottom: 15px; background: transparent; }
+        .tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 5px 20px; scrollbar-width: none; }
+        .tabs-container::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            background: var(--card-bg); color: var(--text-muted); border: 1px solid var(--border);
+            padding: 8px 20px; border-radius: 50px; cursor: pointer; transition: 0.2s;
+            font-family: 'Cairo'; font-weight: 700; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0;
+        }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
+        
+        .card {
+            background: var(--card-bg); border-radius: 18px; padding: 15px; 
+            text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; 
+            align-items: center; border: 1px solid var(--border); position: relative; 
+            transition: transform 0.1s; cursor: pointer;
+        }
+        .card:active { transform: scale(0.97); background: rgba(59, 130, 246, 0.05); }
+        
+        .mod-badge {
+            position: absolute; top: 10px; left: 10px; 
+            background: rgba(59, 130, 246, 0.1); color: var(--primary);
+            font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold;
+        }
+        
+        .heart-btn {
+            position: absolute; top: 10px; right: 10px; font-size: 1.1rem; color: var(--text-muted);
+            cursor: pointer; z-index: 5; background: none; border: none; padding: 5px;
+        }
+        .heart-btn.active { color: #ef4444; }
+
+        .card img { width: 75px; height: 75px; border-radius: 16px; margin-bottom: 12px; object-fit: cover; background: #334155; }
+        .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 10px; line-height: 1.3; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+        .get-btn {
+            background: transparent; color: var(--primary); border: 1.5px solid var(--primary);
+            font-size: 0.8rem; font-weight: 700; padding: 6px 0; border-radius: 50px; 
+            width: 100%; text-align: center; display: block;
+        }
+        .card:hover .get-btn { background: var(--primary); color: white; }
+        .get-btn.secondary { border-color: #94a3b8; color: #94a3b8; } 
+
         .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0; background-color: var(--nav-bg); overflow-x: hidden; transition: 0.3s; padding-top: 20px; border-left: 1px solid var(--border); box-shadow: -5px 0 20px rgba(0,0,0,0.5); }
         .sidebar-header { text-align: center; padding-bottom: 20px; margin-bottom: 10px; }
         .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 10px; object-fit: cover; }
-        .sidebar-link { margin: 10px 20px; padding: 12px 15px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; text-decoration: none; font-size: 0.95rem; color: var(--text-muted); display: flex; align-items: center; border: 1px solid var(--border); } .sidebar-link i { width: 30px; color: var(--primary); font-size: 1.1rem; }
+        .sidebar-link { margin: 10px 20px; padding: 12px 15px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; text-decoration: none; font-size: 0.95rem; color: var(--text-muted); display: flex; align-items: center; border: 1px solid var(--border); }
+        .sidebar-link i { width: 30px; color: var(--primary); font-size: 1.1rem; }
         .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: var(--text-muted); background: none; border: none; }
-        #imgViewer { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: #000; justify-content: center; align-items: center; flex-direction: column; } #imgViewer img { max-width: 100%; max-height: 80vh; object-fit: contain; } .close-viewer { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        
+        #imgViewer {
+            display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: #000; justify-content: center; align-items: center; flex-direction: column;
+        }
+        #imgViewer img { max-width: 100%; max-height: 80vh; object-fit: contain; }
+        .close-viewer { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        
         #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
         .status { grid-column: span 2; text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 0.9rem; }
         footer { text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; border-top: 1px solid var(--border); }
@@ -49,13 +143,15 @@
     <div id="mySidebar" class="sidebar">
         <button class="close-btn" onclick="closeNav()">&times;</button>
         <div class="sidebar-header">
-            <img id="sidebarImg" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="profile-img">
+            <img src="https://midomido.neocities.org/mohammadalboushi.png" alt="Profile" class="profile-img" id="sidebarProfileImg">
             <h3 style="margin:10px 0; color:var(--text-main);">Mohammad Al Boushi</h3>
             <p style="color:var(--text-muted); font-size:0.8rem; padding:0 10px; line-height:1.4;">
                 نبني الأفكار، وننظم الفوضى التقنية.
             </p>
         </div>
-        <div id="sidebarLinks"></div>
+        <div id="sidebarLinksContainer">
+            <div style="text-align:center; color:#94a3b8; font-size:0.8rem;">جاري التحميل...</div>
+        </div>
     </div>
     <div id="overlay" onclick="closeNav()"></div>
 
@@ -68,12 +164,33 @@
     <div class="hero">
         <h1>متجر التطبيقات</h1>
         <p>وجهتك الأولى للتطبيقات المعدلة والحلول الذكية</p>
-        <div class="stats"><div class="stat-item"><span class="stat-num" id="appCount">0</span><span class="stat-lbl">تطبيق</span></div><div class="stat-item"><span class="stat-num">5K+</span><span class="stat-lbl">تنزيل</span></div><div class="stat-item"><span class="stat-num">4.9</span><span class="stat-lbl">تقييم</span></div></div>
-        <div class="search-container"><i class="fas fa-search search-icon"></i><input type="text" id="searchInput" class="search-box" placeholder="ابحث عن تطبيق، لعبة، أو ملف..."></div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-num" id="appCount">0</span><span class="stat-lbl">تطبيق</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num">5K+</span><span class="stat-lbl">تنزيل</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num">4.9</span><span class="stat-lbl">تقييم</span>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="searchInput" class="search-box" placeholder="ابحث عن تطبيق، لعبة، أو ملف...">
+        </div>
     </div>
 
-    <div class="tabs-wrapper"><div class="tabs-container" id="tabsList"></div></div>
-    <div class="grid" id="container"><div class="status"><i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال بالسيرفر...</div></div>
+    <div class="tabs-wrapper">
+        <div class="tabs-container" id="tabsList"></div>
+    </div>
+
+    <div class="grid" id="container">
+        <div class="status"><i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال بالسيرفر...</div>
+    </div>
+
     <footer>&copy; 2026 M.Al.Boushi Store - جميع الحقوق محفوظة</footer>
 
     <script type="module">
@@ -91,38 +208,70 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let allAppsData = []; let currentCategory = 'ALL'; let allCats = {};
+        let allAppsData = [];
+        let currentCategory = 'ALL';
+        let allCats = {};
 
-        // 1. جلب بيانات البروفايل (الجديد)
-        onValue(ref(db, 'settings/profile'), (s) => {
-            const data = s.val() || {};
-            // تحديث الصورة
-            if(data.img) document.getElementById('sidebarImg').src = data.img;
-            // تحديث الروابط
-            const linksDiv = document.getElementById('sidebarLinks');
-            linksDiv.innerHTML = '';
-            if(data.whatsapp) linksDiv.innerHTML += `<a href="${data.whatsapp}" class="sidebar-link"><i class="fab fa-whatsapp"></i> واتساب</a>`;
-            if(data.facebook) linksDiv.innerHTML += `<a href="${data.facebook}" class="sidebar-link"><i class="fab fa-facebook"></i> فيسبوك</a>`;
-            if(data.instagram) linksDiv.innerHTML += `<a href="${data.instagram}" class="sidebar-link"><i class="fab fa-instagram"></i> انستغرام</a>`;
-            if(data.phone) linksDiv.innerHTML += `<a href="tel:${data.phone}" class="sidebar-link"><i class="fas fa-phone"></i> اتصال هاتفي</a>`;
-        });
-
-        // 2. جلب الأقسام (مع الفلترة حسب الإخفاء)
+        // جلب الأقسام (مع مراعاة القفل)
         onValue(ref(db, 'categories'), (snapshot) => {
             const val = snapshot.val();
             if(val) { allCats = val; renderTabs(); }
         });
 
+        // جلب إعدادات السايدبار (الصورة والروابط)
+        onValue(ref(db, 'settings'), (snapshot) => {
+            const val = snapshot.val();
+            if(val) {
+                // تحديث الصورة
+                if(val.profileImg) {
+                    document.getElementById('sidebarProfileImg').src = val.profileImg;
+                }
+                
+                // تحديث الروابط
+                const linksContainer = document.getElementById('sidebarLinksContainer');
+                linksContainer.innerHTML = '';
+                
+                if(val.links && Array.isArray(val.links)) {
+                    val.links.forEach(link => {
+                        // إضافة http إذا لم تكن موجودة للروابط الخارجية
+                        let url = link.url;
+                        if(url && !url.startsWith('http') && !url.startsWith('tel:') && !url.startsWith('mailto:')) {
+                            url = 'https://' + url;
+                        }
+                        
+                        const a = document.createElement('a');
+                        a.className = 'sidebar-link';
+                        a.href = url;
+                        // فتح في نافذة جديدة إلا إذا كان اتصال
+                        if(!url.startsWith('tel:')) a.target = "_blank"; 
+                        
+                        a.innerHTML = `<i class="${link.icon}"></i> ${link.name}`;
+                        linksContainer.appendChild(a);
+                    });
+                } else {
+                    linksContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">لا توجد روابط مضافة</div>';
+                }
+            } else {
+                // روابط افتراضية في حال عدم وجود إعدادات
+                document.getElementById('sidebarLinksContainer').innerHTML = `
+                    <a href="#" class="sidebar-link"><i class="fas fa-info-circle"></i> لا توجد معلومات</a>
+                `;
+            }
+        });
+
         function renderTabs() {
             const container = document.getElementById('tabsList');
             const sortedCats = Object.entries(allCats).sort(([,a], [,b]) => a.order - b.order);
+            
             let html = `<button class="tab-btn ${currentCategory === 'ALL' ? 'active' : ''}" onclick="filterApps('ALL', this)">🌟 الكل</button>`;
+            
             sortedCats.forEach(([key, val]) => {
-                // عرض القسم فقط إذا لم يكن مخفياً
+                // هنا التغيير المهم: إذا كان القسم مخفي (isHidden == true) لا نعرضه في التابس
                 if (!val.isHidden) {
                     html += `<button class="tab-btn ${currentCategory === key ? 'active' : ''}" onclick="filterApps('${key}', this)">${val.icon} ${val.name}</button>`;
                 }
             });
+            
             container.innerHTML = html;
         }
 
@@ -153,10 +302,6 @@
             const favs = JSON.parse(localStorage.getItem('favorites')) || [];
 
             const filtered = allAppsData.filter(app => {
-                // عدم عرض تطبيقات الأقسام المخفية
-                const catInfo = allCats[app.type];
-                if(catInfo && catInfo.isHidden) return false;
-
                 const matchCat = (currentCategory === 'ALL') || (app.type === currentCategory);
                 const matchSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase());
                 return matchCat && matchSearch;
@@ -168,29 +313,85 @@
             }
 
             filtered.forEach(app => {
-                let badgeTxt = "APP"; if(allCats[app.type]) badgeTxt = allCats[app.type].name;
+                let badgeTxt = "APP"; 
+                if(allCats[app.type]) badgeTxt = allCats[app.type].name;
                 const isFav = favs.includes(app.name);
                 const heartClass = isFav ? "fa-solid active" : "fa-regular";
-                let actionText = "تحميل"; let clickAction = `window.open('${app.link}', '_blank')`;
+
+                let actionText = "تحميل";
+                let clickAction = `window.open('${app.link}', '_blank')`;
                 
-                if (app.type === 'WEBSITE') { actionText = "زيارة"; } 
-                else if (app.type === 'FILE') { actionText = "👁️ مشاهدة"; clickAction = `viewImage('${app.img}')`; }
+                if (app.type === 'WEBSITE') {
+                    actionText = "زيارة";
+                } else if (app.type === 'FILE') {
+                    actionText = "👁️ مشاهدة";
+                    clickAction = `viewImage('${app.img}')`; 
+                }
 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.setAttribute('onclick', clickAction);
-                card.innerHTML = `<span class="mod-badge">${badgeTxt}</span><button class="heart-btn" onclick="toggleFavorite(this, '${app.name}')"><i class="${heartClass} fa-heart"></i></button><img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'" loading="lazy"><div class="card-title">${app.name}</div><div class="get-btn ${app.type === 'FILE' ? 'secondary' : ''}">${actionText}</div>`;
+                
+                card.innerHTML = `
+                    <span class="mod-badge">${badgeTxt}</span>
+                    <button class="heart-btn" onclick="toggleFavorite(this, '${app.name}')">
+                        <i class="${heartClass} fa-heart"></i>
+                    </button>
+                    <img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'" loading="lazy">
+                    <div class="card-title">${app.name}</div>
+                    <div class="get-btn ${app.type === 'FILE' ? 'secondary' : ''}">${actionText}</div>
+                `;
                 container.appendChild(card);
             });
         }
 
         document.getElementById('searchInput').addEventListener('input', (e) => renderApps(e.target.value));
-        window.viewImage = (url) => { if(window.event) window.event.stopPropagation(); document.getElementById('fullImage').src = url; document.getElementById('downloadBtn').href = url; document.getElementById('imgViewer').style.display = 'flex'; }
-        window.closeViewer = () => { document.getElementById('imgViewer').style.display = 'none'; }
-        window.toggleTheme = () => { const btn = document.getElementById('themeBtn'); if (document.body.hasAttribute('data-theme')) { document.body.removeAttribute('data-theme'); btn.classList.replace('fa-sun', 'fa-moon'); localStorage.setItem('theme', 'dark'); } else { document.body.setAttribute('data-theme', 'light'); btn.classList.replace('fa-moon', 'fa-sun'); localStorage.setItem('theme', 'light'); } }; if (localStorage.getItem('theme') === 'light') { document.body.setAttribute('data-theme', 'light'); document.getElementById('themeBtn').classList.replace('fa-moon', 'fa-sun'); }
+
+        window.viewImage = (url) => {
+            if(window.event) window.event.stopPropagation();
+            document.getElementById('fullImage').src = url;
+            document.getElementById('downloadBtn').href = url;
+            document.getElementById('imgViewer').style.display = 'flex';
+        }
+        
+        window.closeViewer = () => {
+            document.getElementById('imgViewer').style.display = 'none';
+        }
+
+        window.toggleTheme = () => {
+            const btn = document.getElementById('themeBtn');
+            if (document.body.hasAttribute('data-theme')) {
+                document.body.removeAttribute('data-theme');
+                btn.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.setAttribute('data-theme', 'light');
+                btn.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'light');
+            }
+        };
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            document.getElementById('themeBtn').classList.replace('fa-moon', 'fa-sun');
+        }
+
         window.openNav = () => { document.getElementById("mySidebar").style.width = "280px"; document.getElementById("overlay").style.display = "block"; document.body.classList.add("no-scroll"); };
         window.closeNav = () => { document.getElementById("mySidebar").style.width = "0"; document.getElementById("overlay").style.display = "none"; document.body.classList.remove("no-scroll"); };
-        window.toggleFavorite = (btn, appName) => { event.stopPropagation(); let favs = JSON.parse(localStorage.getItem('favorites')) || []; if (favs.includes(appName)) { favs = favs.filter(i => i !== appName); btn.classList.remove('active'); btn.classList.replace('fa-solid', 'fa-regular'); } else { favs.push(appName); btn.classList.add('active'); btn.classList.replace('fa-regular', 'fa-solid'); } localStorage.setItem('favorites', JSON.stringify(favs)); };
+        
+        window.toggleFavorite = (btn, appName) => {
+            event.stopPropagation(); 
+            let favs = JSON.parse(localStorage.getItem('favorites')) || [];
+            if (favs.includes(appName)) {
+                favs = favs.filter(i => i !== appName);
+                btn.classList.remove('active');
+                btn.classList.replace('fa-solid', 'fa-regular');
+            } else {
+                favs.push(appName);
+                btn.classList.add('active');
+                btn.classList.replace('fa-regular', 'fa-solid');
+            }
+            localStorage.setItem('favorites', JSON.stringify(favs));
+        };
     </script>
 </body>
 </html>
