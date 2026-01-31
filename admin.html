@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin V15 | الترتيب والسحب</title>
+    <title>Admin V15 | الترتيب الشامل</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         :root { --primary: #3b82f6; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); text-align: center; margin: 0; padding: 20px; padding-bottom: 100px; }
         
-        .header-tools { display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 0 auto 15px; }
-        .icon-btn { background: var(--card); color: white; border: none; padding: 10px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; }
-
         .box { background: var(--card); padding: 25px; border-radius: 20px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; box-sizing: border-box; }
         input, select { background: #334155; color: white; }
@@ -19,29 +16,25 @@
         .upload-area { border: 2px dashed #334155; padding: 15px; border-radius: 12px; margin: 10px 0; cursor: pointer; }
         #previewImg { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; display: none; margin: 10px auto; border: 2px solid var(--primary); }
         
-        /* القائمة */
-        .app-item { display: flex; align-items: center; background: #334155; padding: 10px; margin-top: 10px; border-radius: 12px; touch-action: none; /* مهم للموبايل */ }
-        .app-item.hidden-item { opacity: 0.5; border: 1px dashed #94a3b8; }
-        .drag-handle { cursor: grab; padding: 0 10px; font-size: 1.2rem; color: #64748b; }
+        /* تصميم عنصر القائمة */
+        .app-item { 
+            display: flex; align-items: center; background: #334155; padding: 10px; margin-top: 10px; 
+            border-radius: 12px; border: 1px solid transparent; transition: 0.2s;
+        }
+        .app-item.sortable-ghost { opacity: 0.4; background: var(--primary); } /* شكل العنصر أثناء السحب */
         
-        .select-check { width: 20px; height: 20px; margin-left: 10px; cursor: pointer; display: none; }
-        .show-checks .select-check { display: block; }
-
+        /* مقبض السحب (الأيقونة) */
+        .drag-handle { 
+            cursor: grab; padding: 10px; font-size: 1.5rem; color: #94a3b8; 
+            touch-action: none; /* لمنع تحرك الصفحة أثناء السحب */
+        }
+        
+        .select-check { width: 20px; height: 20px; margin-left: 10px; }
+        
         /* شريط الإجراءات */
         #bulkActionsBar { position: fixed; bottom: -100px; left: 0; width: 100%; background: var(--card); padding: 15px; transition: 0.3s; z-index: 100; display: flex; justify-content: space-around; }
         #bulkActionsBar.visible { bottom: 0; }
         
-        /* Modal */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-box { background: var(--card); padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; }
-        .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #334155; }
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .4s; border-radius: 20px; }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider:before { transform: translateX(20px); }
-
         #toast { visibility: hidden; min-width: 200px; background: #10b981; color: white; padding: 15px; position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); border-radius: 50px; z-index: 3000; }
         #toast.show { visibility: visible; animation: fade 0.5s; }
         @keyframes fade { from {bottom: 0; opacity: 0;} to {bottom: 80px; opacity: 1;} }
@@ -51,19 +44,6 @@
 
 <div id="toast">✅ تم</div>
 
-<div id="settingsModal" class="modal-overlay">
-    <div class="modal-box">
-        <h3>⚙️ إعدادات الأقسام</h3>
-        <div id="categoriesSettings"></div>
-        <button onclick="closeSettings()" style="background:#475569; color:white; margin-top:20px;">إغلاق</button>
-    </div>
-</div>
-
-<div class="header-tools" id="headerTools" style="display:none;">
-    <h2 style="margin:0;">لوحة المدير</h2>
-    <button class="icon-btn" onclick="openSettings()">⚙️</button>
-</div>
-
 <div class="box">
     <div id="loginArea">
         <h2>🔐 دخول المدير</h2>
@@ -71,9 +51,9 @@
     </div>
 
     <div id="adminArea" style="display:none;">
+        <h3>✨ لوحة التحكم</h3>
         
         <div id="inputForm">
-            <h3 id="formTitle" style="margin-top:0;">✨ إضافة جديد</h3>
             <select id="inputType">
                 <option value="PROGRAM">📱 تطبيق</option>
                 <option value="GAME">🎮 لعبة</option>
@@ -93,9 +73,9 @@
 
         <hr style="border-color:#334155; margin:25px 0;">
         
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:0.8rem; color:#94a3b8;">اضغط مطولاً للسحب والترتيب ↕️</span>
-            <button id="selectModeBtn" onclick="toggleSelectionMode()" style="width:auto; padding:5px 15px; font-size:0.8rem;">✅ تحديد</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-size:0.8rem; color:#f59e0b;">💡 اسحب من الرمز ☰ للترتيب</span>
+            <button onclick="toggleSelectionMode()" style="width:auto; padding:5px 15px; font-size:0.8rem;">✅ تحديد</button>
         </div>
 
         <div id="appsList">جاري التحميل...</div>
@@ -103,15 +83,14 @@
 </div>
 
 <div id="bulkActionsBar">
-    <button onclick="bulkDelete()" style="background:#ef4444; color:white; border:none; padding:10px; border-radius:10px;">🗑️ حذف</button>
-    <button onclick="bulkToggleVisibility()" style="background:#f59e0b; color:white; border:none; padding:10px; border-radius:10px;">👁️ إخفاء/إظهار</button>
-    <button onclick="toggleSelectionMode()" style="background:#475569; color:white; border:none; padding:10px; border-radius:10px;">❌ إلغاء</button>
+    <button onclick="bulkDelete()" style="background:#ef4444; color:white; border:none; padding:10px; border-radius:10px;">🗑️ حذف المحدد</button>
+    <button onclick="toggleSelectionMode()" style="background:#475569; color:white; border:none; padding:10px; border-radius:10px;">إلغاء</button>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push, update, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC_iEb4UhUREVJ2mfj00BounPVaeGQr7wI",
@@ -125,7 +104,7 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
     const provider = new GoogleAuthProvider();
-    const myUID = "eBOYmcmDI5S6l4NQd36bEa5kEcZ2"; // تأكد من ال UID
+    const myUID = "eBOYmcmDI5S6l4NQd36bEa5kEcZ2";
 
     let editKey = null;
     let currentImgBase64 = "";
@@ -133,33 +112,33 @@
     let isSelectMode = false;
     let selectedItems = new Set();
 
-    // تشغيل مكتبة السحب
-    new Sortable(document.getElementById('appsList'), {
-        handle: '.drag-handle', // السحب من الأيقونة فقط
+    // إعداد مكتبة السحب (SortableJS)
+    const sortable = new Sortable(document.getElementById('appsList'), {
+        handle: '.drag-handle', // السحب يعمل فقط من الأيقونة
         animation: 150,
+        delay: 100, // تأخير بسيط للموبايل لمنع السحب الخطأ
+        delayOnTouchOnly: true,
         onEnd: function (evt) {
-            saveOrder(); // حفظ الترتيب الجديد عند الإفلات
+            saveOrder(); // حفظ الترتيب عند الإفلات
         }
     });
 
-    // دالة حفظ الترتيب الجديد في فايربيس
+    // دالة حفظ الترتيب في قاعدة البيانات
     function saveOrder() {
         const items = document.querySelectorAll('.app-item');
         const updates = {};
         items.forEach((item, index) => {
             const key = item.getAttribute('data-key');
-            updates[`apps/${key}/order`] = index;
+            updates[`apps/${key}/order`] = index; // حفظ الرقم التسلسلي الجديد
         });
-        update(ref(db), updates).then(() => msg("✅ تم حفظ الترتيب"));
+        update(ref(db), updates).then(() => msg("✅ تم حفظ الترتيب الجديد"));
     }
 
     onAuthStateChanged(auth, (user) => {
         if (user && user.uid === myUID) {
             document.getElementById('loginArea').style.display = 'none';
             document.getElementById('adminArea').style.display = 'block';
-            document.getElementById('headerTools').style.display = 'flex';
             loadData();
-            loadSettings();
         }
     });
 
@@ -200,8 +179,7 @@
             const data = { 
                 name, link, type, 
                 img: currentImgBase64 || "https://cdn-icons-png.flaticon.com/512/564/564619.png",
-                isHidden: false,
-                order: 9999 // ترتيب افتراضي
+                order: 0 // الترتيب الافتراضي (سيظهر في الأول)
             };
 
             if (editKey) {
@@ -218,34 +196,31 @@
 
     function loadData() {
         onValue(ref(db, 'apps'), (s) => {
-            const val = s.val();
-            allDataCache = val || {};
+            allDataCache = s.val() || {};
             renderList();
         });
     }
 
-    // عرض القائمة مرتبة حسب الـ Order
     function renderList() {
         const list = document.getElementById('appsList');
         list.innerHTML = "";
         
-        // تحويل البيانات لمصفوفة وترتيبها
+        // ترتيب العناصر حسب قيمة 'order' المحفوظة
         const sortedArray = Object.entries(allDataCache).sort(([,a], [,b]) => {
             return (a.order || 0) - (b.order || 0);
         });
 
         sortedArray.forEach(([k, v]) => {
-            const isHidden = v.isHidden === true;
             const div = document.createElement('div');
-            div.className = `app-item ${isHidden ? 'hidden-item' : ''}`;
+            div.className = 'app-item';
             div.setAttribute('data-key', k);
             div.innerHTML = `
                 <span class="drag-handle">☰</span>
-                <input type="checkbox" class="select-check" onchange="toggleItem('${k}', this)">
+                ${isSelectMode ? `<input type="checkbox" class="select-check" onchange="toggleItem('${k}', this)">` : ''}
                 <div style="display:flex; align-items:center; gap:10px; flex-grow:1; margin-right:10px;">
                     <img src="${v.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
                     <div style="text-align:right;">
-                        <strong>${v.name}</strong> ${isHidden ? '<small>👁️‍🗨️</small>' : ''}<br>
+                        <strong>${v.name}</strong><br>
                         <span style="font-size:0.7rem; color:#94a3b8;">${v.type}</span>
                     </div>
                 </div>
@@ -255,7 +230,6 @@
         });
         
         if (isSelectMode) {
-            list.classList.add('show-checks');
             document.querySelectorAll('.select-check').forEach(cb => {
                 const key = cb.getAttribute('onchange').match(/'([^']+)'/)[1];
                 if (selectedItems.has(key)) cb.checked = true;
@@ -263,22 +237,12 @@
         }
     }
 
-    // دوال التحديد
     window.toggleSelectionMode = () => {
         isSelectMode = !isSelectMode;
         selectedItems.clear();
         const bar = document.getElementById('bulkActionsBar');
-        const list = document.getElementById('appsList');
-        
-        if (isSelectMode) {
-            list.classList.add('show-checks');
-            bar.classList.add('visible');
-            document.getElementById('selectModeBtn').innerText = "إلغاء";
-        } else {
-            list.classList.remove('show-checks');
-            bar.classList.remove('visible');
-            document.getElementById('selectModeBtn').innerText = "✅ تحديد";
-        }
+        if (isSelectMode) bar.classList.add('visible');
+        else bar.classList.remove('visible');
         renderList();
     };
 
@@ -296,41 +260,6 @@
         }
     };
 
-    window.bulkToggleVisibility = async () => {
-        const updates = {};
-        selectedItems.forEach(k => {
-            updates[`apps/${k}/isHidden`] = !allDataCache[k].isHidden;
-        });
-        await update(ref(db), updates);
-        msg("👁️ تم التغيير");
-        toggleSelectionMode();
-    };
-
-    // إعدادات الأقسام
-    function loadSettings() {
-        onValue(ref(db, 'settings/categories'), (s) => {
-            const cats = s.val() || { PROGRAM: true, GAME: true, WEBSITE: true, FILE: true };
-            const container = document.getElementById('categoriesSettings');
-            container.innerHTML = '';
-            const labels = { 'PROGRAM': 'التطبيقات', 'GAME': 'الألعاب', 'WEBSITE': 'المواقع', 'FILE': 'الملفات' };
-            for(const [k, lbl] of Object.entries(labels)) {
-                container.innerHTML += `
-                    <div class="toggle-row">
-                        <span>${lbl}</span>
-                        <label class="switch">
-                            <input type="checkbox" ${cats[k]!==false ? 'checked' : ''} onchange="toggleCat('${k}', this.checked)">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                `;
-            }
-        });
-    }
-    window.toggleCat = (k, val) => set(ref(db, `settings/categories/${k}`), val);
-    window.openSettings = () => document.getElementById('settingsModal').style.display = 'flex';
-    window.closeSettings = () => document.getElementById('settingsModal').style.display = 'none';
-    
-    // باقي الدوال
     window.startEdit = (k, n, l, i, t) => {
         editKey = k; currentImgBase64 = i;
         document.getElementById('appName').value = n;
@@ -338,16 +267,20 @@
         document.getElementById('inputType').value = t;
         document.getElementById('previewImg').src = i;
         document.getElementById('previewImg').style.display = 'block';
-        document.getElementById('formTitle').innerText = "✏️ تعديل";
+        document.getElementById('saveBtn').innerText = "حفظ";
+        document.getElementById('cancelBtn').style.display = 'inline-block';
         window.scrollTo(0,0);
     };
+
     window.resetForm = () => {
         editKey = null; currentImgBase64 = "";
         document.getElementById('appName').value = '';
         document.getElementById('appLink').value = '';
         document.getElementById('previewImg').style.display = 'none';
-        document.getElementById('formTitle').innerText = "✨ إضافة جديد";
+        document.getElementById('saveBtn').innerText = "🚀 حفظ ونشر";
+        document.getElementById('cancelBtn').style.display = 'none';
     };
+
     function msg(t) { const x = document.getElementById("toast"); x.innerText = t; x.className = "show"; setTimeout(() => x.className = "", 3000); }
 </script>
 </body>
