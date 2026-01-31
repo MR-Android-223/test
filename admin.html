@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V33 | إصلاح الطبقات</title>
+    <title>Admin V34 | تخصيص كامل</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -17,7 +17,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg-body); background-image: var(--bg-gradient); color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; padding-bottom: 100px; touch-action: pan-y; }
 
-        /* تأثير الضغط للأزرار - ميزة جديدة */
+        /* تأثير الضغط للأزرار */
         button:active, .cat-action:active, .header-btn:active, .fab-btn:active, .bulk-btn:active, .settings-menu-btn:active {
             transform: scale(0.94);
             transition: transform 0.1s;
@@ -91,7 +91,7 @@
         #bulkBar.visible { bottom: 0; }
         .bulk-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; color: white; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 0.8rem; }
 
-        /* تعديل الطبقات (Z-Index) لحل مشكلة النوافذ المتداخلة */
+        /* تعديل الطبقات (Z-Index) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         /* جعل نافذة الحذف والتنبيه فوق نافذة الأقسام */
         #delCatModal, #alertModal { z-index: 4000 !important; }
@@ -217,10 +217,15 @@
 
             <div id="sidebarEditSection" class="settings-section">
                 <div style="border-bottom:1px solid #334155; padding-bottom:15px; margin-bottom:15px;">
-                    <div style="font-weight:bold; margin-bottom:10px; color:white;">الصورة الشخصية</div>
+                    <div style="font-weight:bold; margin-bottom:10px; color:white;">الصورة الشخصية والوصف</div>
                     <img id="profilePreview" src="" style="width:80px; height:80px; border-radius:50%; border:2px solid #3b82f6; object-fit:cover; margin-bottom:10px;">
                     <button onclick="document.getElementById('profileImgInput').click()" class="btn-full btn-cancel" style="font-size:0.8rem;">تغيير الصورة</button>
                     <input type="file" id="profileImgInput" hidden accept="image/*" onchange="processProfileImage()">
+                    
+                    <div style="margin-top:10px; text-align:right;">
+                        <label style="color:#94a3b8; font-size:0.8rem;">عبارة الوصف (البايو):</label>
+                        <input type="text" id="profileBioInput" placeholder="اكتب عبارة تظهر تحت الاسم..." style="width:100%; margin-top:5px; background:#0f172a; border:1px solid #334155;">
+                    </div>
                 </div>
                 
                 <div style="font-weight:bold; margin-bottom:10px; color:white;">روابط التواصل</div>
@@ -339,6 +344,7 @@
 
         let sidebarData = {
             profileImg: "https://midomido.neocities.org/mohammadalboushi.png",
+            bio: "نبني الأفكار، وننظم الفوضى التقنية.",
             links: []
         };
 
@@ -613,6 +619,9 @@
             newProfileImg = sidebarData.profileImg || "https://midomido.neocities.org/mohammadalboushi.png";
             document.getElementById('profilePreview').src = newProfileImg;
 
+            // تعبئة حقل البايو الجديد
+            document.getElementById('profileBioInput').value = sidebarData.bio || "نبني الأفكار، وننظم الفوضى التقنية.";
+
             const list = document.getElementById('linksList');
             list.innerHTML = '';
             
@@ -688,6 +697,9 @@
             saveBtn.innerText = "جاري الحفظ...";
             saveBtn.style.opacity = "0.7";
 
+            // جلب قيمة البايو الجديدة
+            const bio = document.getElementById('profileBioInput').value;
+
             const linkItems = document.querySelectorAll('.link-item');
             const newLinks = [];
             
@@ -701,6 +713,7 @@
 
             const finalData = {
                 profileImg: newProfileImg,
+                bio: bio, // حفظ الوصف الجديد
                 links: newLinks
             };
 
