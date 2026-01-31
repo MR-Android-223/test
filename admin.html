@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V19 | التحكم الكامل</title>
+    <title>Admin V20 | إدارة الأقسام</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
-        /* نفس ستايل المتجر V18 تماماً */
         :root {
             --bg-body: #0f172a; --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b, #0f172a);
             --card-glass: rgba(30, 41, 59, 0.9); --text-main: #f8fafc; --text-muted: #94a3b8;
@@ -45,11 +44,9 @@
         .card img { width: 60px; height: 60px; border-radius: 14px; margin-bottom: 10px; object-fit: cover; }
         .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 5px; height: 40px; overflow: hidden; }
         
-        /* أدوات الأدمن */
         .edit-badge { position: absolute; top: 10px; left: 10px; background: #f59e0b; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; }
         .drag-handle { position: absolute; top: 10px; right: 10px; color: #94a3b8; cursor: grab; padding: 5px; }
 
-        /* الزر العائم للإضافة */
         .fab-btn {
             position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px;
             background: var(--primary); color: white; border-radius: 50%;
@@ -59,9 +56,9 @@
         }
         .fab-btn:active { transform: scale(0.9); }
 
-        /* Modals (النوافذ المنبثقة) */
+        /* ستايل المودال وقوائم التعديل */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-box { background: #1e293b; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
+        .modal-box { background: #1e293b; padding: 25px; border-radius: 20px; width: 95%; max-width: 400px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
         
         input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; box-sizing: border-box; font-family: 'Cairo'; }
         input, select { background: #334155; color: white; }
@@ -70,7 +67,18 @@
         .upload-area { border: 2px dashed #334155; padding: 15px; border-radius: 12px; margin: 10px 0; cursor: pointer; text-align: center; }
         #previewImg { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; display: none; margin: 10px auto; }
         
-        .cat-item { display: flex; justify-content: space-between; align-items: center; background: #334155; padding: 10px; margin-bottom: 5px; border-radius: 10px; }
+        /* ستايل قائمة الأقسام في المودال */
+        .cat-item { 
+            display: flex; gap: 8px; align-items: center; 
+            background: #334155; padding: 8px; margin-bottom: 8px; border-radius: 10px; 
+            border: 1px solid transparent; transition: 0.2s;
+        }
+        .cat-item:focus-within { border-color: var(--primary); }
+        .cat-input { background: transparent; border: none; color: white; padding: 5px; width: 100%; font-size: 0.9rem; }
+        .cat-icon-input { background: rgba(0,0,0,0.2); border: none; color: white; padding: 5px; width: 40px; text-align: center; border-radius: 8px; }
+        .cat-drag { cursor: grab; color: #94a3b8; font-size: 1.2rem; padding: 5px; touch-action: none; }
+        .action-btn { width: auto; padding: 6px 10px; font-size: 0.8rem; border-radius: 8px; margin: 0; cursor: pointer; }
+
     </style>
 </head>
 <body>
@@ -84,8 +92,7 @@
     </header>
 
     <div class="tabs-wrapper">
-        <div class="tabs-container" id="tabsList">
-            </div>
+        <div class="tabs-container" id="tabsList"></div>
     </div>
 
     <div class="grid" id="appsContainer">
@@ -94,51 +101,49 @@
 
     <button class="fab-btn" onclick="openEditModal()">+</button>
 
-
     <div id="appModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle" style="color:white; margin-bottom:15px; text-align:center;">إضافة تطبيق</h3>
-            
             <select id="appCat"></select>
             <input type="text" id="appName" placeholder="اسم التطبيق">
             <input type="text" id="appLink" placeholder="الرابط">
-            
             <div class="upload-area" onclick="document.getElementById('fileInput').click()">
                 <span id="uploadLabel">📸 اختر صورة</span>
                 <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
                 <img id="previewImg">
             </div>
-
             <div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0;">
                 <label style="color:#cbd5e1; font-size:0.9rem;">إخفاء التطبيق؟</label>
                 <input type="checkbox" id="appHidden" style="width:20px; height:20px;">
             </div>
-
             <button onclick="saveApp()" id="saveBtn" class="btn-primary">حفظ ونشر</button>
             <button onclick="deleteApp()" id="delBtn" class="btn-danger" style="display:none; margin-top:10px;">حذف التطبيق</button>
             <button onclick="closeModal('appModal')" style="background:transparent; color:#94a3b8; margin-top:10px;">إغلاق</button>
         </div>
     </div>
 
-
     <div id="catModal" class="modal-overlay">
         <div class="modal-box">
-            <h3 style="color:white; margin-bottom:15px; text-align:center;">إدارة الأقسام</h3>
+            <h3 style="color:white; margin-bottom:15px; text-align:center;">إدارة وترتيب الأقسام</h3>
             
-            <div style="background:#0f172a; padding:10px; border-radius:12px; margin-bottom:15px;">
-                <input type="text" id="newCatName" placeholder="اسم القسم (مثلاً: شروحات)">
-                <input type="text" id="newCatIcon" placeholder="الرمز (مثلاً: 📚)">
-                <input type="text" id="newCatID" placeholder="ID بالانجليزي (مثلاً: COURSES)">
-                <button onclick="addCategory()" class="btn-primary" style="padding:8px;">+ إضافة القسم</button>
-            </div>
+            <p style="font-size:0.8rem; color:#f59e0b; text-align:center; margin-bottom:10px;">💡 اسحب ☰ لترتيب الأقسام | اضغط 💾 لحفظ الاسم</p>
 
-            <div id="catList" style="max-height:200px; overflow-y:auto;">
+            <div id="catList" style="max-height:300px; overflow-y:auto; margin-bottom:20px;">
                 </div>
+
+            <div style="background:#0f172a; padding:10px; border-radius:12px; border:1px dashed #334155;">
+                <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:5px;">إضافة قسم جديد:</p>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="newCatIcon" placeholder="رمز" style="width:50px; text-align:center; margin:0;">
+                    <input type="text" id="newCatName" placeholder="الاسم (مثلاً: كتب)" style="margin:0;">
+                </div>
+                <input type="text" id="newCatID" placeholder="ID (انجليزي فقط: BOOKS)" style="margin:5px 0;">
+                <button onclick="addCategory()" class="btn-primary" style="padding:8px; margin:0;">+ إضافة</button>
+            </div>
 
             <button onclick="closeModal('catModal')" style="background:transparent; color:#94a3b8; margin-top:10px;">إغلاق</button>
         </div>
     </div>
-
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -165,7 +170,6 @@
         let editKey = null;
         let currentFilter = 'ALL';
 
-        // --- 1. المصادقة والتهيئة ---
         onAuthStateChanged(auth, (user) => {
             if (user && user.uid === myUID) {
                 document.getElementById('loginBtn').style.display = 'none';
@@ -175,11 +179,9 @@
         window.login = () => signInWithPopup(auth, provider);
 
         function initSystem() {
-            // جلب الأقسام
             onValue(ref(db, 'categories'), (snapshot) => {
                 const val = snapshot.val();
                 if (!val) {
-                    // إذا القاعدة فارغة، ننشئ الأقسام الافتراضية
                     const defaults = {
                         'PROGRAM': { name: 'تطبيقات', icon: '📱', order: 1 },
                         'GAME': { name: 'ألعاب', icon: '🎮', order: 2 },
@@ -194,25 +196,63 @@
                 }
             });
 
-            // جلب التطبيقات
             onValue(ref(db, 'apps'), (snapshot) => {
                 allApps = snapshot.val() || {};
                 renderApps();
             });
         }
 
-        // --- 2. إدارة الأقسام (الديناميكية) ---
-        function renderTabs() {
+        // --- إدارة الأقسام (تعديل + ترتيب) ---
+        function renderCatList() {
+            const list = document.getElementById('catList');
+            list.innerHTML = '';
+            
+            // ترتيب العرض حسب Order
+            const sortedCats = Object.entries(allCats).sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
+
+            sortedCats.forEach(([key, val]) => {
+                const div = document.createElement('div');
+                div.className = 'cat-item';
+                div.setAttribute('data-id', key);
+                div.innerHTML = `
+                    <span class="cat-drag">☰</span>
+                    <input type="text" class="cat-icon-input" value="${val.icon}" id="icon-${key}">
+                    <input type="text" class="cat-input" value="${val.name}" id="name-${key}">
+                    <button class="action-btn" onclick="saveCat('${key}')" style="background:#3b82f6; color:white;">💾</button>
+                    <button class="action-btn" onclick="delCat('${key}')" style="background:#ef4444; color:white;">🗑️</button>
+                `;
+                list.appendChild(div);
+            });
+
+            // تفعيل السحب للقائمة
+            new Sortable(list, {
+                handle: '.cat-drag',
+                animation: 150,
+                onEnd: () => {
+                    const items = list.querySelectorAll('.cat-item');
+                    const updates = {};
+                    items.forEach((item, index) => {
+                        const id = item.getAttribute('data-id');
+                        updates[`categories/${id}/order`] = index;
+                    });
+                    update(ref(db), updates); // حفظ الترتيب الجديد
+                }
+            });
+        }
+
+        window.saveCat = (key) => {
+            const newName = document.getElementById(`name-${key}`).value;
+            const newIcon = document.getElementById(`icon-${key}`).value;
+            update(ref(db, `categories/${key}`), { name: newName, icon: newIcon });
+            alert("✅ تم تحديث القسم");
+        };
+
+        window.renderTabs = () => {
             const container = document.getElementById('tabsList');
             const select = document.getElementById('appCat');
-            
-            // ترتيب الأقسام
-            const sortedCats = Object.entries(allCats).sort(([,a], [,b]) => a.order - b.order);
+            const sortedCats = Object.entries(allCats).sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
 
-            // تعبئة التبويبات
             let tabsHTML = `<button class="tab-btn ${currentFilter === 'ALL' ? 'active' : ''}" onclick="setFilter('ALL')">🌟 الكل</button>`;
-            
-            // تعبئة قائمة الاختيار في المودال
             let selectHTML = '';
 
             sortedCats.forEach(([key, val]) => {
@@ -222,67 +262,42 @@
 
             container.innerHTML = tabsHTML;
             select.innerHTML = selectHTML;
-        }
-
-        function renderCatList() {
-            const list = document.getElementById('catList');
-            list.innerHTML = '';
-            Object.entries(allCats).forEach(([key, val]) => {
-                list.innerHTML += `
-                    <div class="cat-item">
-                        <span>${val.icon} ${val.name}</span>
-                        <button onclick="delCat('${key}')" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:5px; width:auto;">حذف</button>
-                    </div>
-                `;
-            });
-        }
+        };
 
         window.addCategory = () => {
             const name = document.getElementById('newCatName').value;
             const icon = document.getElementById('newCatIcon').value;
             const id = document.getElementById('newCatID').value.toUpperCase().replace(/\s/g, '_');
-            
-            if(!name || !id) return alert("الاسم وال ID مطلوبين");
+            if(!name || !id) return alert("البيانات ناقصة");
             
             update(ref(db, `categories/${id}`), {
-                name: name,
-                icon: icon || '📂',
-                order: 99
+                name: name, icon: icon || '📂', order: 99
             });
-            alert("تمت الإضافة! ستظهر فوراً.");
             document.getElementById('newCatName').value = '';
+            document.getElementById('newCatID').value = '';
         };
 
         window.delCat = (key) => {
-            if(confirm("حذف القسم؟ (لن تحذف التطبيقات بداخله لكنها ستختفي من الفلتر)")) {
-                remove(ref(db, `categories/${key}`));
-            }
+            if(confirm("حذف القسم؟")) remove(ref(db, `categories/${key}`));
         };
 
-        // --- 3. إدارة التطبيقات ---
-        window.setFilter = (filter) => {
-            currentFilter = filter;
-            renderTabs();
-            renderApps();
-        };
+        // --- باقي الوظائف (تطبيقات) ---
+        window.setFilter = (f) => { currentFilter = f; renderTabs(); renderApps(); };
 
         function renderApps() {
             const container = document.getElementById('appsContainer');
             container.innerHTML = '';
-            
-            // الترتيب والفلترة
-            const sortedApps = Object.entries(allApps)
-                .sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
+            const sortedApps = Object.entries(allApps).sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
 
             sortedApps.forEach(([k, v]) => {
                 if (currentFilter === 'ALL' || v.type === currentFilter) {
-                    const isHidden = v.isHidden ? 'opacity:0.5;' : '';
-                    
                     const card = document.createElement('div');
                     card.className = 'card';
-                    card.style.cssText = isHidden;
-                    card.onclick = () => openEditModal(k, v); // عند الضغط نفتح التعديل
-                    
+                    if(v.isHidden) card.style.opacity = '0.5';
+                    card.setAttribute('data-key', k);
+                    card.onclick = (e) => {
+                        if(!e.target.classList.contains('drag-handle')) openEditModal(k, v);
+                    };
                     card.innerHTML = `
                         <span class="edit-badge">✏️ تعديل</span>
                         ${currentFilter === 'ALL' ? '<i class="fas fa-bars drag-handle"></i>' : ''}
@@ -290,13 +305,10 @@
                         <div class="card-title">${v.name}</div>
                         <div style="font-size:0.7rem; color:#94a3b8;">${v.type}</div>
                     `;
-                    // إضافة ميزة السحب للكارد
-                    card.setAttribute('data-key', k);
                     container.appendChild(card);
                 }
             });
 
-            // تفعيل السحب فقط في وضع "الكل"
             if (currentFilter === 'ALL') {
                 new Sortable(container, {
                     handle: '.drag-handle',
@@ -304,24 +316,18 @@
                     onEnd: () => {
                         const items = container.querySelectorAll('.card');
                         const updates = {};
-                        items.forEach((item, index) => {
-                            updates[`apps/${item.getAttribute('data-key')}/order`] = index;
-                        });
+                        items.forEach((item, index) => updates[`apps/${item.getAttribute('data-key')}/order`] = index);
                         update(ref(db), updates);
                     }
                 });
             }
         }
 
-        // --- 4. وظائف المودال (إضافة/تعديل) ---
         window.openEditModal = (key = null, data = null) => {
             const modal = document.getElementById('appModal');
             modal.style.display = 'flex';
-            
             if (key) {
-                // وضع التعديل
-                editKey = key;
-                currentImg = data.img;
+                editKey = key; currentImg = data.img;
                 document.getElementById('modalTitle').innerText = "تعديل التطبيق";
                 document.getElementById('appCat').value = data.type;
                 document.getElementById('appName').value = data.name;
@@ -330,11 +336,9 @@
                 document.getElementById('previewImg').src = data.img;
                 document.getElementById('previewImg').style.display = 'block';
                 document.getElementById('delBtn').style.display = 'block';
-                document.getElementById('saveBtn').innerText = "حفظ التعديلات";
+                document.getElementById('saveBtn').innerText = "حفظ";
             } else {
-                // وضع الإضافة
-                editKey = null;
-                currentImg = "";
+                editKey = null; currentImg = "";
                 document.getElementById('modalTitle').innerText = "إضافة جديد";
                 document.getElementById('appName').value = "";
                 document.getElementById('appLink').value = "";
@@ -349,42 +353,24 @@
             const link = document.getElementById('appLink').value;
             const type = document.getElementById('appCat').value;
             const isHidden = document.getElementById('appHidden').checked;
+            if (!name || !link) return alert("ناقصة");
 
-            if (!name || !link) return alert("البيانات ناقصة");
-
-            const data = {
-                name, link, type, isHidden,
-                img: currentImg || "https://cdn-icons-png.flaticon.com/512/564/564619.png",
-                order: editKey ? allApps[editKey].order : 0
-            };
-
-            if (editKey) {
-                update(ref(db, 'apps/' + editKey), data);
-            } else {
-                push(ref(db, 'apps'), data);
-            }
+            const data = { name, link, type, isHidden, img: currentImg || "https://cdn-icons-png.flaticon.com/512/564/564619.png", order: editKey ? allApps[editKey].order : 0 };
+            if (editKey) update(ref(db, 'apps/' + editKey), data); else push(ref(db, 'apps'), data);
             closeModal('appModal');
         };
 
-        window.deleteApp = () => {
-            if(confirm("حذف التطبيق نهائياً؟")) {
-                remove(ref(db, 'apps/' + editKey));
-                closeModal('appModal');
-            }
-        };
-
+        window.deleteApp = () => { if(confirm("حذف؟")) { remove(ref(db, 'apps/' + editKey)); closeModal('appModal'); }};
         window.processImage = () => {
             const file = document.getElementById('fileInput').files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
+                    const img = new Image(); img.src = e.target.result;
                     img.onload = () => {
                         const canvas = document.createElement("canvas");
-                        const scale = 200 / img.width;
-                        canvas.width = 200; canvas.height = img.height * scale;
+                        canvas.width = 200; canvas.height = img.height * (200/img.width);
                         canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
                         currentImg = canvas.toDataURL("image/jpeg", 0.7);
                         document.getElementById('previewImg').src = currentImg;
@@ -393,7 +379,6 @@
                 }
             }
         };
-
         window.openCatModal = () => document.getElementById('catModal').style.display = 'flex';
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
     </script>
