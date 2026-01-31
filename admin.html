@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V28 | إعدادات متقدمة</title>
+    <title>Admin V29 | إعدادات متقدمة</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -124,8 +124,7 @@
             cursor: pointer; border: 1px solid rgba(255,255,255,0.05); font-weight: 600;
         }
         .settings-menu-btn:hover { background: #475569; }
-        .settings-section { display: none; text-align: right; }
-        .settings-section.active { display: block; animation: fadeIn 0.3s; }
+        .settings-section { display: none; text-align: right; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
 
     </style>
@@ -369,7 +368,6 @@
             let selectHTML = '';
 
             sortedCats.forEach(([key, val]) => {
-                // إذا كان القسم مخفي في الإعدادات، نميزه للمشرف لكن لا نخفيه هنا حتى يستطيع إدارته
                 const hiddenStyle = val.isHidden ? 'opacity:0.6;' : '';
                 const hiddenIcon = val.isHidden ? '🔒' : '';
                 
@@ -526,7 +524,7 @@
             closeModal('delCatModal');
         };
 
-        // --- وظائف الإعدادات الجديدة (New Settings Logic) ---
+        // --- إصلاح وظائف الإعدادات ---
 
         window.openSettingsModal = () => {
             document.getElementById('settingsModal').style.display = 'flex';
@@ -534,23 +532,30 @@
         };
 
         window.openSettingsSection = (sectionName) => {
+            // إخفاء القائمة الرئيسية
             document.getElementById('settingsMain').style.display = 'none';
-            document.querySelectorAll('.settings-section').forEach(el => el.style.display = 'none');
             
+            // إخفاء جميع الأقسام الفرعية أولاً
+            document.querySelectorAll('.settings-section').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // إظهار القسم المطلوب بالقوة
             if(sectionName === 'catLock') {
-                document.getElementById('catLockSection').classList.add('active');
+                document.getElementById('catLockSection').style.display = 'block';
                 renderCatLockList();
             } else if (sectionName === 'sidebarEdit') {
-                document.getElementById('sidebarEditSection').classList.add('active');
+                document.getElementById('sidebarEditSection').style.display = 'block';
                 renderSidebarEdit();
             }
         };
 
         window.backToSettingsMain = () => {
+            // إخفاء جميع الأقسام الفرعية
             document.querySelectorAll('.settings-section').forEach(el => {
-                el.classList.remove('active');
                 el.style.display = 'none';
             });
+            // إظهار القائمة الرئيسية
             document.getElementById('settingsMain').style.display = 'block';
         };
 
@@ -581,9 +586,7 @@
         }
 
         window.toggleCatStatus = (key, currentStatus) => {
-            // currentStatus = true means Hidden. Toggle to false (Show).
             update(ref(db, `categories/${key}`), { isHidden: !currentStatus });
-            // إعادة الريندر ستحدث تلقائياً بسبب onValue
         };
 
         // 2. منطق تعديل السايدبار
@@ -627,7 +630,7 @@
                     const i=new Image(); i.src=e.target.result; 
                     i.onload=()=>{ 
                         const canvas=document.createElement("canvas"); 
-                        const maxSize=400; // تصغير الصورة الشخصية قليلاً لتكون خفيفة
+                        const maxSize=400; 
                         let w=i.width; let h=i.height;
                         if(w>h){ if(w>maxSize){h*=maxSize/w; w=maxSize;} } else { if(h>maxSize){w*=maxSize/h; h=maxSize;} }
                         canvas.width=w; canvas.height=h; 
@@ -651,7 +654,7 @@
         };
 
         window.saveSidebarSettings = () => {
-            // تجميع البيانات من الحقول
+            // تجميع البيانات من الحقول بالترتيب الجديد
             const linkItems = document.querySelectorAll('.link-item');
             const newLinks = [];
             
@@ -710,7 +713,6 @@
         };
         window.deleteSingleApp = () => { remove(ref(db, 'apps/'+editKey)); closeModal('appModal'); };
         
-        // --- دالة المعالجة المحسنة (HD Quality) ---
         window.processImage = () => { 
             const f=document.getElementById('fileInput').files[0]; 
             if(f){ 
