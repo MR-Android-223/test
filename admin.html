@@ -3,74 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم V11 | التخزين المباشر</title>
+    <title>M.Al.Boushi Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #3b82f6; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); text-align: center; margin: 0; padding: 20px; }
-        .box { background: var(--card); padding: 30px; border-radius: 20px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input, select, button { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; box-sizing: border-box; }
-        input, select { background: #334155; color: white; border: 1px solid transparent; }
-        input:focus { border-color: var(--primary); }
-        .main-btn { background: linear-gradient(45deg, #2563eb, #3b82f6); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .main-btn:disabled { opacity: 0.6; cursor: wait; }
+        :root { --bg-body: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --primary: #3b82f6; }
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Cairo', sans-serif; margin: 0; padding: 20px; }
         
-        .upload-area { border: 2px dashed #334155; padding: 20px; border-radius: 12px; margin: 10px 0; cursor: pointer; }
-        #previewImg { width: 100px; height: 100px; border-radius: 15px; object-fit: cover; display: none; margin: 10px auto; border: 2px solid var(--primary); }
+        /* الرأس */
+        header { text-align: center; margin-bottom: 20px; }
+        .logo { font-size: 1.8rem; font-weight: 900; color: var(--primary); margin-bottom: 10px; }
         
-        #searchBar { background: var(--bg); border: 1px solid #334155; margin-bottom: 20px; }
-        .app-item { display: flex; justify-content: space-between; align-items: center; background: #334155; padding: 12px; margin-top: 10px; border-radius: 12px; }
-        .btn-group { display: flex; gap: 8px; }
-        .sm-btn { width: auto; padding: 8px 15px; margin: 0; font-size: 0.8rem; cursor: pointer; }
-        .edit-btn { background: #f59e0b; color: white; }
-        .del-btn { background: #ef4444; color: white; }
+        /* التبويبات (الأقسام) */
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .tab-btn { background: #334155; color: #94a3b8; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; font-weight: bold; }
+        .tab-btn.active { background: var(--primary); color: white; transform: scale(1.05); }
+        
+        /* البحث */
+        .search-box { max-width: 500px; margin: 0 auto 30px; position: relative; }
+        .search-box input { width: 100%; padding: 12px 45px 12px 20px; border-radius: 50px; border: none; background: var(--bg-card); color: white; font-family: 'Cairo'; outline: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .search-box i { position: absolute; right: 20px; top: 13px; color: #94a3b8; }
 
-        #toast { visibility: hidden; min-width: 200px; background: #10b981; color: white; padding: 15px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); border-radius: 50px; z-index: 2000; }
-        #toast.show { visibility: visible; animation: fade 0.5s; }
-        @keyframes fade { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        /* الشبكة */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 800px; margin: 0 auto; }
+        @media(min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+
+        /* الكرت */
+        .card { background: var(--bg-card); border-radius: 16px; padding: 15px; text-decoration: none; color: white; display: flex; flex-direction: column; align-items: center; position: relative; transition: 0.2s; border: 1px solid rgba(255,255,255,0.05); }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card img { width: 70px; height: 70px; border-radius: 14px; margin-bottom: 10px; object-fit: cover; background: #000; }
+        .card-title { font-size: 0.9rem; font-weight: bold; text-align: center; margin-bottom: 10px; height: 40px; overflow: hidden; }
+        .badge { position: absolute; top: 10px; left: 10px; background: rgba(59,130,246,0.1); color: var(--primary); font-size: 0.6rem; padding: 2px 8px; border-radius: 4px; }
+        .btn { background: var(--primary); color: white; padding: 5px 20px; border-radius: 20px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-<div id="toast">✅ تم بنجاح</div>
-
-<div class="box">
-    <div id="loginArea">
-        <h2>🔐 دخول المدير</h2>
-        <button onclick="login()" style="background:#ea4335; color:white;">تسجيل الدخول عبر Google</button>
-    </div>
-
-    <div id="adminArea" style="display:none;">
-        <h3 id="formTitle">✨ إضافة تطبيق جديد</h3>
+    <header>
+        <div class="logo">M.Al.Boushi</div>
         
-        <input type="text" id="appName" placeholder="اسم التطبيق">
-        <input type="text" id="appLink" placeholder="رابط التحميل المباشر">
-        
-        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-            <span id="uploadLabel">📸 اضغط لاختيار صورة</span>
-            <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
-            <img id="previewImg">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="filterCategory('all', this)">الكل</button>
+            <button class="tab-btn" onclick="filterCategory('PROGRAM', this)">تطبيقات</button>
+            <button class="tab-btn" onclick="filterCategory('GAME', this)">ألعاب</button>
+            <button class="tab-btn" onclick="filterCategory('WEBSITE', this)">مواقع</button>
+            <button class="tab-btn" onclick="filterCategory('FILE', this)">ملفات</button>
         </div>
 
-        <select id="appType">
-            <option value="MOD">تطبيق معدل (MOD)</option>
-            <option value="GAME">لعبة (GAME)</option>
-            <option value="PDF">كتاب (PDF)</option>
-        </select>
-        
-        <button id="saveBtn" class="main-btn" onclick="handleProcess()">🚀 نشر التطبيق</button>
-        <button id="cancelBtn" style="display:none; background:#475569; color:white;" onclick="resetForm()">إلغاء</button>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="ابحث عن تطبيق...">
+        </div>
+    </header>
 
-        <hr style="border-color:#334155; margin:30px 0;">
-        
-        <input type="text" id="searchBar" placeholder="🔍 ابحث..." onkeyup="filterApps()">
-        <div id="appsList">جاري التحميل...</div>
+    <div class="grid" id="container">
+        <div style="grid-column:span 2; text-align:center; color:#64748b;">جاري التحميل...</div>
     </div>
-</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC_iEb4UhUREVJ2mfj00BounPVaeGQr7wI",
@@ -81,154 +73,78 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getDatabase(app);
-    const provider = new GoogleAuthProvider();
-    const myUID = "eBOYmcmDI5S6l4NQd36bEa5kEcZ2";
 
-    let editKey = null;
-    let currentImgBase64 = "";
+    // متغير عام لتخزين البيانات
+    let allApps = [];
 
-    onAuthStateChanged(auth, (user) => {
-        if (user && user.uid === myUID) {
-            document.getElementById('loginArea').style.display = 'none';
-            document.getElementById('adminArea').style.display = 'block';
-            loadData();
+    onValue(ref(db, 'apps'), (snapshot) => {
+        const container = document.getElementById('container');
+        container.innerHTML = '';
+        const data = snapshot.val();
+
+        if (data) {
+            // تحويل البيانات لمصفوفة لسهولة الفلترة
+            allApps = Object.values(data).reverse();
+            renderApps(allApps); // عرض الكل مبدئياً
+        } else {
+            container.innerHTML = '<div style="grid-column:span 2; text-align:center;">لا يوجد تطبيقات</div>';
         }
     });
 
-    window.login = () => signInWithPopup(auth, provider);
-
-    // دالة جديدة: ضغط الصورة وتحويلها لنص لتخزينها مباشرة
-    window.processImage = () => {
-        const file = document.getElementById('fileInput').files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function (event) {
-                const imgElement = document.createElement("img");
-                imgElement.src = event.target.result;
-                imgElement.onload = function (e) {
-                    // إنشاء كانفاس لتصغير الصورة
-                    const canvas = document.createElement("canvas");
-                    const MAX_WIDTH = 200; // تصغير الحجم لكي لا يثقل القاعدة
-                    const scaleSize = MAX_WIDTH / e.target.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = e.target.height * scaleSize;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(e.target, 0, 0, canvas.width, canvas.height);
-                    
-                    // الحفظ ككود نصي
-                    currentImgBase64 = canvas.toDataURL("image/jpeg", 0.7);
-                    
-                    // العرض
-                    document.getElementById('previewImg').src = currentImgBase64;
-                    document.getElementById('previewImg').style.display = 'block';
-                    document.getElementById('uploadLabel').innerText = "تمت المعالجة ✅";
-                }
-            }
+    // دالة العرض (تأخذ مصفوفة وتعرضها)
+    function renderApps(appsList) {
+        const container = document.getElementById('container');
+        container.innerHTML = '';
+        
+        if(appsList.length === 0) {
+            container.innerHTML = '<div style="grid-column:span 2; text-align:center; color:#64748b;">لا يوجد نتائج في هذا القسم</div>';
+            return;
         }
-    };
 
-    window.handleProcess = async () => {
-        const name = document.getElementById('appName').value;
-        const link = document.getElementById('appLink').value;
-        const type = document.getElementById('appType').value;
-        const btn = document.getElementById('saveBtn');
+        appsList.forEach(app => {
+            const card = document.createElement('a');
+            card.className = 'card';
+            card.href = app.link;
+            card.target = '_blank';
+            
+            // تحديد اسم القسم للعرض
+            let catName = "تطبيق";
+            if(app.type === 'WEBSITE') catName = "موقع";
+            if(app.type === 'GAME') catName = "لعبة";
+            if(app.type === 'FILE') catName = "ملف";
 
-        if (!name || !link) return alert("الرجاء كتابة الاسم والرابط");
-
-        btn.disabled = true;
-        btn.innerText = "⏳ جاري الحفظ...";
-
-        try {
-            // استخدام الصورة الجديدة أو القديمة أو الافتراضية
-            const finalImg = currentImgBase64 || "https://cdn-icons-png.flaticon.com/512/564/564619.png";
-
-            const data = { name, link, img: finalImg, type };
-
-            if (editKey) {
-                await update(ref(db, 'apps/' + editKey), data);
-                msg("✅ تم التعديل");
-            } else {
-                await push(ref(db, 'apps'), data);
-                msg("🚀 تم النشر");
-            }
-            resetForm();
-        } catch (e) { 
-            alert("حدث خطأ: " + e.message); 
-        }
-        btn.disabled = false;
-        btn.innerText = "🚀 نشر التطبيق";
-    };
-
-    function loadData() {
-        onValue(ref(db, 'apps'), (s) => {
-            const list = document.getElementById('appsList');
-            list.innerHTML = "";
-            const val = s.val();
-            if (val) {
-                Object.entries(val).reverse().forEach(([k, v]) => {
-                    const div = document.createElement('div');
-                    div.className = 'app-item';
-                    div.setAttribute('data-name', v.name.toLowerCase());
-                    div.innerHTML = `
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <img src="${v.img}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
-                            <div style="text-align:right">
-                                <strong>${v.name}</strong><br><small style="color:#94a3b8">${v.type}</small>
-                            </div>
-                        </div>
-                        <div class="btn-group">
-                            <button class="sm-btn edit-btn" onclick="startEdit('${k}','${v.name}','${v.link}','${v.img}','${v.type}')">✏️</button>
-                            <button class="sm-btn del-btn" onclick="del('${k}')">🗑️</button>
-                        </div>
-                    `;
-                    list.appendChild(div);
-                });
-            }
+            card.innerHTML = `
+                <span class="badge">${catName}</span>
+                <img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
+                <div class="card-title">${app.name}</div>
+                <div class="btn">فتح</div>
+            `;
+            container.appendChild(card);
         });
     }
 
-    window.startEdit = (k, n, l, i, t) => {
-        editKey = k; currentImgBase64 = i;
-        document.getElementById('appName').value = n;
-        document.getElementById('appLink').value = l;
-        document.getElementById('appType').value = t;
-        document.getElementById('previewImg').style.display = 'block';
-        document.getElementById('previewImg').src = i;
-        document.getElementById('formTitle').innerText = "✏️ تعديل التطبيق";
-        document.getElementById('saveBtn').innerText = "حفظ التعديلات";
-        document.getElementById('saveBtn').style.background = "#f59e0b";
-        document.getElementById('cancelBtn').style.display = 'block';
-        window.scrollTo(0,0);
+    // دالة فلترة الأقسام
+    window.filterCategory = (cat, btn) => {
+        // تغيير لون الزر
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // الفلترة
+        if (cat === 'all') {
+            renderApps(allApps);
+        } else {
+            const filtered = allApps.filter(app => app.type === cat);
+            renderApps(filtered);
+        }
     };
 
-    window.resetForm = () => {
-        editKey = null; currentImgBase64 = "";
-        document.querySelectorAll('input').forEach(i => i.value = '');
-        document.getElementById('previewImg').style.display = 'none';
-        document.getElementById('formTitle').innerText = "✨ إضافة تطبيق جديد";
-        document.getElementById('uploadLabel').innerText = "📸 اضغط لاختيار صورة";
-        document.getElementById('saveBtn').innerText = "🚀 نشر التطبيق";
-        document.getElementById('saveBtn').style.background = "linear-gradient(45deg, #2563eb, #3b82f6)";
-        document.getElementById('cancelBtn').style.display = 'none';
-    };
-
-    window.del = (k) => { if(confirm("هل تريد حذف هذا التطبيق؟")) remove(ref(db, 'apps/'+k)); };
-    
-    window.filterApps = () => {
-        const q = document.getElementById('searchBar').value.toLowerCase();
-        document.querySelectorAll('.app-item').forEach(i => {
-            i.style.display = i.getAttribute('data-name').includes(q) ? 'flex' : 'none';
-        });
-    };
-
-    function msg(t) {
-        const x = document.getElementById("toast");
-        x.innerText = t; x.className = "show";
-        setTimeout(() => x.className = "", 3000);
-    }
+    // دالة البحث
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const val = e.target.value.toLowerCase();
+        const searched = allApps.filter(app => app.name.toLowerCase().includes(val));
+        renderApps(searched);
+    });
 </script>
 </body>
 </html>
