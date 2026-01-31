@@ -145,8 +145,8 @@
         <div class="sidebar-header">
             <img src="https://midomido.neocities.org/mohammadalboushi.png" alt="Profile" class="profile-img" id="sidebarProfileImg">
             <h3 style="margin:10px 0; color:var(--text-main);">Mohammad Al Boushi</h3>
-            <p style="color:var(--text-muted); font-size:0.8rem; padding:0 10px; line-height:1.4;">
-                نبني الأفكار، وننظم الفوضى التقنية.
+            <p id="sidebarBio" style="color:var(--text-muted); font-size:0.8rem; padding:0 10px; line-height:1.4;">
+                جاري التحميل...
             </p>
         </div>
         <div id="sidebarLinksContainer"></div>
@@ -213,33 +213,41 @@
         // 1. جلب الأقسام
         onValue(ref(db, 'categories'), (snapshot) => {
             const val = snapshot.val();
-            if(val) { allCats = val; renderTabs(); renderApps(); } // إعادة رسم التطبيقات عند تحديث حالة الأقسام
+            if(val) { allCats = val; renderTabs(); renderApps(); } 
         });
 
-        // 2. جلب إعدادات السايدبار
+        // 2. جلب إعدادات السايدبار (الصورة، البايو، والروابط)
         onValue(ref(db, 'settings'), (snapshot) => {
             const val = snapshot.val();
             if(val) {
+                // الصورة
                 if(val.profileImg) {
                     document.getElementById('sidebarProfileImg').src = val.profileImg;
                 }
+
+                // البايو (الوصف)
+                const bioText = val.bio || "نبني الأفكار، وننظم الفوضى التقنية.";
+                document.getElementById('sidebarBio').innerText = bioText;
+
+                // الروابط
                 const linksContainer = document.getElementById('sidebarLinksContainer');
                 linksContainer.innerHTML = '';
                 
                 if(val.links && Array.isArray(val.links)) {
                     val.links.forEach(link => {
                         let url = link.url;
-                        // معالجة الروابط الذكية
-                        if(url && !url.startsWith('http') && !url.startsWith('tel:') && !url.startsWith('mailto:') && !url.startsWith('fb:')) {
-                            // إذا كان رقماً فقط وهو ليس اتصال، نعتبره رابط عادي
-                            // لكن إذا كان اتصال سيتم معالجته لاحقاً
+                        // منطق إضافة https الذكي (يتجاهل الروابط الخاصة مثل intent و fb)
+                        if(url && !url.startsWith('http') && !url.startsWith('tel:') && !url.startsWith('mailto:') && !url.startsWith('fb:') && !url.startsWith('intent:') && !url.startsWith('vnd.youtube:')) {
                              if (!url.match(/^[0-9]+$/)) url = 'https://' + url;
                         }
 
                         const a = document.createElement('a');
                         a.className = 'sidebar-link';
                         a.href = url;
-                        if(!url.startsWith('tel:') && !url.startsWith('fb:')) a.target = "_blank"; 
+                        // فتح في نافذة جديدة إلا إذا كان رابط نظام (اتصال، تطبيق)
+                        if(!url.startsWith('tel:') && !url.startsWith('fb:') && !url.startsWith('intent:') && !url.startsWith('vnd.youtube:')) {
+                            a.target = "_blank"; 
+                        }
                         
                         a.innerHTML = `<i class="${link.icon}"></i> ${link.name}`;
                         linksContainer.appendChild(a);
@@ -247,6 +255,9 @@
                 } else {
                     linksContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">لا توجد روابط مضافة</div>';
                 }
+            } else {
+                // في حال كانت قاعدة البيانات فارغة تماماً
+                 document.getElementById('sidebarBio').innerText = "نبني الأفكار، وننظم الفوضى التقنية.";
             }
         });
 
@@ -257,7 +268,7 @@
             let html = `<button class="tab-btn ${currentCategory === 'ALL' ? 'active' : ''}" onclick="filterApps('ALL', this)">🌟 الكل</button>`;
             
             sortedCats.forEach(([key, val]) => {
-                // شرط مهم: إخفاء التبويب إذا كان القسم مقفلاً
+                // إخفاء التبويب إذا كان القسم مقفلاً
                 if (!val.isHidden) {
                     html += `<button class="tab-btn ${currentCategory === key ? 'active' : ''}" onclick="filterApps('${key}', this)">${val.icon} ${val.name}</button>`;
                 }
@@ -272,7 +283,6 @@
                 allAppsData = Object.values(data)
                     .filter(app => !app.isHidden)
                     .sort((a, b) => (a.order || 0) - (b.order || 0));
-                // سنقوم بتحديث العداد لاحقاً بعد الفلترة النهائية
                 renderApps();
             }
         });
@@ -292,23 +302,16 @@
             container.innerHTML = '';
             const favs = JSON.parse(localStorage.getItem('favorites')) || [];
 
-            // --- الفلترة الذكية (الحل لمشكلة الإخفاء) ---
+            // الفلترة مع مراعاة الأقسام المخفية
             const filtered = allAppsData.filter(app => {
-                // 1. تحقق هل القسم التابع له هذا التطبيق "مخفي"؟
                 const parentCat = allCats[app.type];
-                // إذا كان القسم موجوداً وهو مخفي (isHidden == true) -> لا تعرض التطبيق نهائياً
                 if (parentCat && parentCat.isHidden) return false;
 
-                // 2. فلترة حسب التبويب المختار
                 const matchCat = (currentCategory === 'ALL') || (app.type === currentCategory);
-                
-                // 3. فلترة حسب البحث
                 const matchSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase());
-                
                 return matchCat && matchSearch;
             });
 
-            // تحديث العداد بناءً على ما يراه المستخدم فقط
             document.getElementById('appCount').innerText = filtered.length;
 
             if (filtered.length === 0) {
