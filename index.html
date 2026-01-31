@@ -118,9 +118,9 @@
         .sidebar-link i { width: 30px; color: var(--primary); font-size: 1.1rem; }
         .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: var(--text-muted); background: none; border: none; }
         
-        #imgViewer, .modal-overlay {
+        #imgViewer {
             display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.85); justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px);
+            background-color: #000; justify-content: center; align-items: center; flex-direction: column;
         }
         #imgViewer img { max-width: 100%; max-height: 80vh; object-fit: contain; }
         .close-viewer { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -129,10 +129,29 @@
         .status { grid-column: span 2; text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 0.9rem; }
         footer { text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; border-top: 1px solid var(--border); }
 
-        /* نافذة الرسالة */
-        .modal-box { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 90%; max-width: 380px; border: 1px solid var(--border); text-align: center; }
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid var(--border); outline: none; font-size: 1rem; background: rgba(255,255,255,0.05); color: var(--text-main); font-family: 'Cairo'; }
-        .btn-send { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; font-family: 'Cairo'; background: var(--primary); color: white; margin-top: 10px; }
+        /* --- تصميم نافذة الرسائل الجديد --- */
+        .msg-modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 5000; /* أعلى من كل شيء */
+            align-items: center; justify-content: center; backdrop-filter: blur(5px);
+        }
+        .msg-box {
+            background: #1e293b; padding: 25px; border-radius: 20px; 
+            width: 90%; max-width: 350px; border: 1px solid var(--primary);
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .msg-input {
+            width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; 
+            border: 1px solid #334155; outline: none; font-size: 1rem; 
+            background: #0f172a; color: white; font-family: 'Cairo';
+        }
+        .msg-btn {
+            width: 100%; padding: 12px; border-radius: 12px; border: none; 
+            font-weight: bold; font-size: 1rem; cursor: pointer; font-family: 'Cairo'; 
+            background: var(--primary); color: white; margin-top: 10px; transition: 0.3s;
+        }
+        .msg-btn:active { transform: scale(0.95); }
+        .msg-btn-close { background: transparent; color: #94a3b8; border: 1px solid #334155; margin-top: 8px; }
 
     </style>
 </head>
@@ -170,13 +189,13 @@
         <a id="downloadBtn" href="#" download="image.jpg" class="get-btn" style="width: auto; padding: 8px 30px; margin-top: 20px; background: var(--primary); color: white; border: none;">⬇️ تحميل الصورة</a>
     </div>
 
-    <div id="msgModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="margin-bottom:15px;">ارسل رسالة للمسؤول</h3>
-            <input type="text" id="msgName" placeholder="الاسم الكريم">
-            <textarea id="msgText" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
-            <button onclick="sendMessage()" id="sendBtn" class="btn-send">إرسال 🚀</button>
-            <button onclick="document.getElementById('msgModal').style.display='none'" class="btn-send" style="background:transparent; color:#94a3b8; border:1px solid var(--border);">إغلاق</button>
+    <div id="msgModal" class="msg-modal-overlay">
+        <div class="msg-box">
+            <h3 style="margin-bottom:15px; color:white;">ارسل رسالة للمسؤول</h3>
+            <input type="text" id="msgName" class="msg-input" placeholder="الاسم الكريم">
+            <textarea id="msgText" class="msg-input" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
+            <button onclick="sendMessage()" id="sendBtn" class="msg-btn">إرسال 🚀</button>
+            <button onclick="document.getElementById('msgModal').style.display='none'" class="msg-btn msg-btn-close">إغلاق</button>
         </div>
     </div>
 
@@ -263,8 +282,6 @@
                 } else {
                     linksContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">لا توجد روابط مضافة</div>';
                 }
-            } else {
-                 document.getElementById('sidebarBio').innerText = "نبني الأفكار، وننظم الفوضى التقنية.";
             }
         });
 
@@ -414,7 +431,7 @@
                 alert("تم إرسال رسالتك بنجاح! شكراً لتواصلك.");
             }).catch(e => {
                 btn.innerText = "إرسال 🚀";
-                alert("خطأ في الإرسال: " + e.message);
+                alert("خطأ في الإرسال: تأكد من إعدادات القواعد في فايربيس\n" + e.message);
             });
         };
     </script>
