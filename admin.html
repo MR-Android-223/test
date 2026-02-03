@@ -146,10 +146,13 @@
                 <input type="text" id="appName" placeholder="اكتب اسم التطبيق (مثلاً WhatsApp)" style="flex:1; margin:0;">
                 <button onclick="magicSearch()" id="magicBtn" style="background:var(--primary); color:white; border:none; border-radius:10px; width:40px;"><i class="fas fa-search"></i></button>
             </div>
+            
+            <input type="text" id="packageId" placeholder="Package ID (مثال: com.whatsapp)" style="border: 1px solid var(--primary); background: #1e293b;">
+            
             <div id="searchResults"></div>
 
             <select id="appCat" style="margin-top:10px;"></select>
-            <input type="text" id="appLink" placeholder="رابط التحميل">
+            <input type="text" id="appLink" placeholder="رابط التحميل (اختياري)">
             
             <button onclick="document.getElementById('fileInput').click()" class="btn-full btn-cancel" style="margin:10px 0;">📸 تغيير الصورة</button>
             <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
@@ -244,14 +247,13 @@
             });
         }
 
-        // --- البحث السحري المعدل: يجلب رابط يفتح تطبيق Play Store فوراً ---
+        // --- البحث السحري المعدل: يحاول يجيب الـ ID تلقائياً ---
         window.magicSearch = async () => {
             const q = document.getElementById('appName').value;
             if(!q) return alert("اكتب اسم التطبيق للبحث!");
             const btn = document.getElementById('magicBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             try {
-                // نستخدم أبل فقط لجلب الصورة والاسم لأنها تعطي بيانات نظيفة
                 const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=software&limit=5`);
                 const data = await res.json();
                 const div = document.getElementById('searchResults');
@@ -271,9 +273,13 @@
                         currentImg = imgUrl;
                         document.getElementById('previewImg').src = imgUrl;
                         document.getElementById('previewImg').style.display = 'block';
-                        // 3. تعبئة الرابط: رابط يفتح تطبيق متجر بلاي فوراً ويبحث عن الاسم
-                        // market://search?q=اسم التطبيق&c=apps
-                        document.getElementById('appLink').value = `market://search?q=${encodeURIComponent(item.trackName)}&c=apps`;
+                        
+                        // 3. تعبئة Package ID تلقائياً (توقع)
+                        // أبل بترجع bundleId (مثل com.whatsapp.net)، نحن منستخدمه ونعرضه، وأنت عدله إذا لزم الأمر
+                        document.getElementById('packageId').value = item.bundleId;
+
+                        // 4. تعبئة الرابط التقليدي (احتياط)
+                        document.getElementById('appLink').value = `https://play.google.com/store/apps/details?id=${item.bundleId}`;
                         
                         div.style.display = 'none';
                     };
@@ -326,6 +332,9 @@
             document.getElementById('appModal').style.display='flex';
             document.getElementById('appName').value=v?v.name:"";
             document.getElementById('appLink').value=v?v.link:"";
+            // هنا بنعبي الـ packageId إذا موجود
+            document.getElementById('packageId').value = v && v.packageId ? v.packageId : "";
+
             document.getElementById('appCat').innerHTML = Object.entries(allCats).map(([ki,vi])=>`<option value="${ki}">${vi.name}</option>`).join('');
             if(v) document.getElementById('appCat').value=v.type;
             document.getElementById('previewImg').src=currentImg||"";
@@ -337,9 +346,15 @@
         window.saveApp = () => {
             const name=document.getElementById('appName').value;
             const link=document.getElementById('appLink').value;
+            // المتغير الجديد
+            const packageId = document.getElementById('packageId').value;
             const type=document.getElementById('appCat').value;
+            
             if(!name) return alert("الاسم مطلوب");
-            const d = { name, link, type, img: currentImg||"https://cdn-icons-png.flaticon.com/512/564/564619.png", isHidden: document.getElementById('appHidden').checked };
+            
+            // إضافة packageId للكائن المرسل للداتابيس
+            const d = { name, link, packageId, type, img: currentImg||"https://cdn-icons-png.flaticon.com/512/564/564619.png", isHidden: document.getElementById('appHidden').checked };
+            
             if(editKey) update(ref(db,'apps/'+editKey), d); else push(ref(db,'apps'), {...d, order:0});
             closeModal('appModal');
         };
