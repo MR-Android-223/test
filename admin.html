@@ -143,7 +143,7 @@
             <div class="modal-title">بيانات التطبيق</div>
             
             <div style="display:flex; gap:5px; margin-bottom:5px;">
-                <input type="text" id="appName" placeholder="اكتب اسم التطبيق (مثلاً Telegram)" style="flex:1; margin:0;">
+                <input type="text" id="appName" placeholder="اكتب اسم التطبيق (مثلاً WhatsApp)" style="flex:1; margin:0;">
                 <button onclick="magicSearch()" id="magicBtn" style="background:var(--primary); color:white; border:none; border-radius:10px; width:40px;"><i class="fas fa-search"></i></button>
             </div>
             <div id="searchResults"></div>
@@ -244,13 +244,14 @@
             });
         }
 
-        // --- تعديل ميزة البحث التلقائي لجلب الرابط أيضاً ---
+        // --- البحث السحري المعدل: يجلب رابط يفتح تطبيق Play Store فوراً ---
         window.magicSearch = async () => {
             const q = document.getElementById('appName').value;
             if(!q) return alert("اكتب اسم التطبيق للبحث!");
             const btn = document.getElementById('magicBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             try {
+                // نستخدم أبل فقط لجلب الصورة والاسم لأنها تعطي بيانات نظيفة
                 const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=software&limit=5`);
                 const data = await res.json();
                 const div = document.getElementById('searchResults');
@@ -264,14 +265,15 @@
                     const d = document.createElement('div');
                     d.innerHTML = `<img src="${imgUrl}" style="width:55px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.5);">`;
                     d.onclick = () => {
-                        // تعبئة الاسم
+                        // 1. تعبئة الاسم
                         document.getElementById('appName').value = item.trackName;
-                        // تعبئة الصورة
+                        // 2. تعبئة الصورة
                         currentImg = imgUrl;
                         document.getElementById('previewImg').src = imgUrl;
                         document.getElementById('previewImg').style.display = 'block';
-                        // تعبئة الرابط الرسمي (التعديل الجديد)
-                        document.getElementById('appLink').value = item.trackViewUrl; 
+                        // 3. تعبئة الرابط: رابط يفتح تطبيق متجر بلاي فوراً ويبحث عن الاسم
+                        // market://search?q=اسم التطبيق&c=apps
+                        document.getElementById('appLink').value = `market://search?q=${encodeURIComponent(item.trackName)}&c=apps`;
                         
                         div.style.display = 'none';
                     };
