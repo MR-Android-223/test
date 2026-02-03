@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>M.Al.Boushi Store</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <title>متجر التطبيقات</title>
+    
+    <!-- تحميل جميع الخطوط المحتملة -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;700&family=Almarai:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
+            /* المتغيرات الأساسية */
             --bg-body: #0f172a; 
             --bg-gradient: radial-gradient(circle at top, #1e293b, #0f172a);
             --text-main: #f8fafc; --text-muted: #94a3b8;
@@ -15,216 +19,162 @@
             --card-bg: rgba(30, 41, 59, 0.95);
             --border: rgba(255,255,255,0.08);
             --nav-bg: #0f172a;
+            
+            /* متغير الخط الديناميكي */
+            --body-font: 'Cairo', sans-serif;
+        }
+
+        [data-theme="light"] {
+            --bg-body: #f8fafc;
+            --bg-gradient: radial-gradient(circle at top, #e2e8f0, #f8fafc);
+            --text-main: #1e293b; --text-muted: #64748b;
+            --primary: #2563eb;
+            --card-bg: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --nav-bg: #ffffff;
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background: var(--bg-body); background-image: var(--bg-gradient);
-            color: var(--text-main); font-family: 'Cairo', sans-serif; min-height: 100vh; 
+            color: var(--text-main); font-family: var(--body-font); min-height: 100vh; 
             padding-bottom: 30px; overflow-x: hidden; background-attachment: fixed;
+            transition: font-family 0.3s ease;
         }
         body.no-scroll { overflow: hidden; }
 
+        /* Header */
         header {
             position: sticky; top: 0; z-index: 1000; background: var(--nav-bg);
             border-bottom: 1px solid var(--border); padding: 15px 20px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
         .logo { font-size: 1.3rem; font-weight: 900; letter-spacing: 1px; }
         .logo span { color: var(--primary); }
-        .header-left { display: flex; gap: 25px; align-items: center; } 
+        .header-left { display: flex; gap: 20px; align-items: center; } 
         .icon-btn { font-size: 1.4rem; cursor: pointer; transition: 0.2s; color: var(--text-main); }
 
-        .hero { text-align: center; padding: 25px 20px 5px; }
-        .hero h1 { font-size: 1.8rem; margin-bottom: 5px; color: var(--primary); }
-        .hero p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
+        /* Hero Section */
+        .hero { text-align: center; padding: 30px 20px 10px; }
+        .hero h1 { font-size: 1.8rem; margin-bottom: 8px; color: var(--primary); font-weight: 800; }
+        .hero p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
 
-        .stats { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
-        .stat-item { 
-            background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; 
-            padding: 10px 20px; min-width: 90px; cursor: pointer; user-select: none;
-        }
-        .stat-num { font-weight: 800; color: var(--primary); font-size: 1.2rem; display: block; }
-        .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
-
+        /* Search */
         .search-container { position: relative; max-width: 500px; margin: 0 auto 20px; }
         .search-box {
             width: 100%; background: var(--card-bg); border: 1px solid var(--border);
             padding: 14px 45px 14px 20px; border-radius: 50px; color: var(--text-main);
-            font-family: 'Cairo'; font-size: 1rem; outline: none; 
+            font-family: inherit; font-size: 0.95rem; outline: none; transition: 0.3s;
         }
-        .search-box:focus { border-color: var(--primary); }
+        .search-box:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
         .search-icon { position: absolute; right: 20px; top: 16px; color: var(--text-muted); }
 
-        .tabs-wrapper { position: sticky; top: 73px; z-index: 900; padding: 5px 0; margin-bottom: 15px; background: transparent; }
+        /* Tabs */
+        .tabs-wrapper { position: sticky; top: 73px; z-index: 900; padding: 8px 0; margin-bottom: 10px; background: transparent; backdrop-filter: blur(5px); }
         .tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 5px 20px; scrollbar-width: none; }
         .tabs-container::-webkit-scrollbar { display: none; }
         .tab-btn {
             background: var(--card-bg); color: var(--text-muted); border: 1px solid var(--border);
             padding: 8px 20px; border-radius: 50px; cursor: pointer; transition: 0.2s;
-            font-family: 'Cairo'; font-weight: 700; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0;
+            font-family: inherit; font-weight: 700; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
 
-        /* القائمة العمودية */
-        .grid { display: flex; flex-direction: column; gap: 12px; padding: 10px 20px; max-width: 800px; margin: 0 auto; min-height: 200px; }
+        /* App Grid */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
+        @media (min-width: 768px) { .grid { grid-template-columns: repeat(4, 1fr); gap: 20px; } }
         
         .card {
-            background: var(--card-bg); border-radius: 16px; padding: 12px; 
-            text-decoration: none; color: var(--text-main); display: flex; 
-            flex-direction: row; /* أفقي */
+            background: var(--card-bg); border-radius: 18px; padding: 15px; 
+            text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; 
             align-items: center; border: 1px solid var(--border); position: relative; 
-            transition: transform 0.1s; cursor: pointer;
+            transition: transform 0.2s, background 0.2s; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        .card:active { transform: scale(0.98); background: rgba(59, 130, 246, 0.05); }
+        .card:active { transform: scale(0.97); }
         
         .mod-badge {
-            position: absolute; top: 8px; left: 8px; 
+            position: absolute; top: 10px; left: 10px; 
             background: rgba(59, 130, 246, 0.1); color: var(--primary);
-            font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: bold;
+            font-size: 0.65rem; padding: 3px 8px; border-radius: 6px; font-weight: bold;
         }
         
         .heart-btn {
-            position: absolute; bottom: 8px; left: 8px; font-size: 1.1rem; color: var(--text-muted);
-            cursor: pointer; z-index: 5; background: none; border: none; padding: 5px;
+            position: absolute; top: 10px; right: 10px; font-size: 1.1rem; color: var(--text-muted);
+            cursor: pointer; z-index: 5; background: none; border: none; padding: 5px; transition: 0.2s;
         }
-        .heart-btn.active { color: #ef4444; }
+        .heart-btn.active { color: #ef4444; transform: scale(1.2); }
 
         .card img { 
-            width: 65px; height: 65px; border-radius: 14px; 
-            margin-left: 15px; margin-bottom: 0; 
-            object-fit: cover; background: #334155; flex-shrink: 0;
+            width: 75px; height: 75px; border-radius: 18px; margin-bottom: 12px; 
+            object-fit: cover; background: #334155; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-
-        .card-content-wrapper { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; padding-right: 15px; }
         
         .card-title { 
-            font-size: 1rem; font-weight: 700; text-align: right; margin-bottom: 8px; 
-            line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+            font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 10px; 
+            line-height: 1.3; height: 38px; overflow: hidden; 
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
         }
 
         .get-btn {
-            background: var(--primary); color: white; border: none;
-            font-size: 0.8rem; font-weight: 700; padding: 6px 20px; border-radius: 50px; 
-            width: fit-content; text-align: center; display: inline-block;
+            background: transparent; color: var(--primary); border: 1.5px solid var(--primary);
+            font-size: 0.8rem; font-weight: 700; padding: 6px 0; border-radius: 50px; 
+            width: 100%; text-align: center; display: block; transition: 0.2s;
         }
-        .get-btn.secondary { background: #475569; color: #cbd5e1; } 
+        .card:hover .get-btn { background: var(--primary); color: white; }
 
-        /* Skeleton Loader (التحميل الوهمي) */
-        .skeleton-card {
-            background: var(--card-bg); border-radius: 16px; padding: 12px; height: 90px;
-            display: flex; align-items: center; border: 1px solid var(--border);
-            animation: pulse 1.5s infinite ease-in-out;
-        }
-        .sk-img { width: 65px; height: 65px; border-radius: 14px; background: #334155; margin-left: 15px; }
-        .sk-line { height: 15px; background: #334155; border-radius: 4px; margin-bottom: 8px; width: 60%; }
-        .sk-btn { height: 25px; background: #334155; border-radius: 50px; width: 80px; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-
-        /* Sidebar & Modals */
+        /* Sidebar */
         .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0; background-color: var(--nav-bg); overflow-x: hidden; transition: 0.3s; padding-top: 20px; border-left: 1px solid var(--border); box-shadow: -5px 0 20px rgba(0,0,0,0.5); }
-        .sidebar-header { text-align: center; padding-bottom: 20px; margin-bottom: 10px; }
-        .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 10px; object-fit: cover; }
-        .sidebar-link { margin: 10px 20px; padding: 12px 15px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; text-decoration: none; font-size: 0.95rem; color: var(--text-muted); display: flex; align-items: center; border: 1px solid var(--border); }
+        .sidebar-header { text-align: center; padding-bottom: 20px; margin-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 10px; object-fit: cover; background: #334155; }
+        .sidebar-link { margin: 10px 20px; padding: 12px 15px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; text-decoration: none; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; border: 1px solid var(--border); transition: 0.2s; }
+        .sidebar-link:active { background: rgba(59, 130, 246, 0.1); border-color: var(--primary); }
         .sidebar-link i { width: 30px; color: var(--primary); font-size: 1.1rem; }
-        .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: var(--text-muted); background: none; border: none; }
+        .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: var(--text-muted); background: none; border: none; cursor: pointer; }
         
-        #imgViewer, .msg-modal-overlay {
-            display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.9); justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px);
-        }
-        #imgViewer img { max-width: 100%; max-height: 80vh; object-fit: contain; }
-        .close-viewer { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.6); z-index: 1500; backdrop-filter: blur(3px); }
         
-        #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
+        /* Status & Footer */
+        .status { grid-column: span 2; text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 0.9rem; }
         footer { text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; border-top: 1px solid var(--border); }
-
-        .msg-box {
-            background: #1e293b; padding: 25px; border-radius: 20px; 
-            width: 90%; max-width: 350px; border: 2px solid var(--primary);
-            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            position: relative; z-index: 6000;
-        }
-        .msg-input {
-            width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; 
-            border: 1px solid #334155; outline: none; font-size: 1rem; 
-            background: #0f172a; color: white; font-family: 'Cairo';
-        }
-        .msg-btn {
-            width: 100%; padding: 12px; border-radius: 12px; border: none; 
-            font-weight: bold; font-size: 1rem; cursor: pointer; font-family: 'Cairo'; 
-            background: var(--primary); color: white; margin-top: 10px; transition: 0.3s;
-        }
-        .msg-btn:active { transform: scale(0.95); }
-        .msg-btn-close { background: transparent; color: #94a3b8; border: 1px solid #334155; margin-top: 8px; }
-
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">M<span>.Al.Boushi</span></div>
+        <div class="logo">App<span>Store</span></div>
         <div class="header-left">
             <i class="fas fa-moon icon-btn" id="themeBtn" onclick="toggleTheme()"></i>
             <i class="fas fa-bars icon-btn" onclick="openNav()"></i>
         </div>
     </header>
 
+    <!-- Sidebar -->
     <div id="mySidebar" class="sidebar">
         <button class="close-btn" onclick="closeNav()">&times;</button>
         <div class="sidebar-header">
-            <img src="https://midomido.neocities.org/mohammadalboushi.png" alt="Profile" class="profile-img" id="sidebarProfileImg">
-            <h3 style="margin:10px 0; color:var(--text-main);">Mohammad Al Boushi</h3>
-            <p id="sidebarBio" style="color:var(--text-muted); font-size:0.8rem; padding:0 10px; line-height:1.4;">
-                جاري التحميل...
+            <img src="" alt="Profile" class="profile-img" id="sidebarProfileImg">
+            <h3 style="margin:5px 0; color:var(--text-main);">Admin</h3>
+            <p id="sidebarBio" style="color:var(--text-muted); font-size:0.8rem; padding:0 20px; line-height:1.4;">
+                ...
             </p>
         </div>
-        
-        <a href="#" onclick="openMsgModal()" class="sidebar-link" style="background: rgba(59, 130, 246, 0.15); border-color: var(--primary); color: var(--primary); font-weight: bold;">
-            <i class="fas fa-envelope-open-text"></i> راسـلـنا ✉️
-        </a>
-
         <div id="sidebarLinksContainer"></div>
     </div>
     <div id="overlay" onclick="closeNav()"></div>
 
-    <div id="imgViewer">
-        <span class="close-viewer" onclick="closeViewer()">&times;</span>
-        <img id="fullImage">
-        <a id="downloadBtn" href="#" download="image.jpg" class="get-btn" style="width: auto; padding: 8px 30px; margin-top: 20px; background: var(--primary); color: white; border: none;">⬇️ تحميل الصورة</a>
-    </div>
-
-    <div id="msgModal" class="msg-modal-overlay">
-        <div class="msg-box">
-            <h3 style="margin-bottom:15px; color:white;">ارسل رسالة للمسؤول</h3>
-            <input type="text" id="msgName" class="msg-input" placeholder="الاسم الكريم">
-            <textarea id="msgText" class="msg-input" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
-            <button onclick="sendMessage()" id="sendBtn" class="msg-btn">إرسال 🚀</button>
-            <button onclick="document.getElementById('msgModal').style.display='none'" class="msg-btn msg-btn-close">إغلاق</button>
-        </div>
-    </div>
-
+    <!-- Main Content -->
     <div class="hero">
-        <h1>متجر التطبيقات</h1>
-        <p>وجهتك الأولى للتطبيقات المعدلة والحلول الذكية</p>
-        
-        <div class="stats">
-            <div class="stat-item">
-                <span class="stat-num" id="appCount">0</span><span class="stat-lbl">تطبيق</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-num">5K+</span><span class="stat-lbl">تنزيل</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-num">4.9</span><span class="stat-lbl">تقييم</span>
-            </div>
-        </div>
+        <h1 id="heroTitle">متجر التطبيقات</h1>
+        <p id="heroDesc">جاري التحميل...</p>
 
         <div class="search-container">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="searchInput" class="search-box" placeholder="ابحث عن تطبيق، لعبة، أو ملف...">
+            <input type="text" id="searchInput" class="search-box" placeholder="ابحث هنا...">
         </div>
     </div>
 
@@ -233,16 +183,14 @@
     </div>
 
     <div class="grid" id="container">
-        <div class="skeleton-card"><div class="sk-img"></div><div style="flex:1"><div class="sk-line"></div><div class="sk-btn"></div></div></div>
-        <div class="skeleton-card"><div class="sk-img"></div><div style="flex:1"><div class="sk-line"></div><div class="sk-btn"></div></div></div>
-        <div class="skeleton-card"><div class="sk-img"></div><div style="flex:1"><div class="sk-line"></div><div class="sk-btn"></div></div></div>
+        <div class="status"><i class="fas fa-circle-notch fa-spin"></i> جاري الاتصال...</div>
     </div>
 
-    <footer>&copy; 2026 M.Al.Boushi Store - جميع الحقوق محفوظة</footer>
+    <footer id="footerText">&copy; 2026 جميع الحقوق محفوظة</footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC_iEb4UhUREVJ2mfj00BounPVaeGQr7wI",
@@ -258,75 +206,92 @@
         let allAppsData = [];
         let currentCategory = 'ALL';
         let allCats = {};
-        let isFirstLoad = true;
 
-        onValue(ref(db, 'categories'), (snapshot) => {
-            const val = snapshot.val();
-            if(val) { allCats = val; renderTabs(); if(allAppsData.length > 0) renderApps(); } 
-        });
-
+        // 1. جلب الإعدادات (النصوص، الخطوط، السايدبار)
         onValue(ref(db, 'settings'), (snapshot) => {
             const val = snapshot.val();
             if(val) {
-                if(val.profileImg) document.getElementById('sidebarProfileImg').src = val.profileImg;
-                const bioText = val.bio || "نبني الأفكار، وننظم الفوضى التقنية.";
-                document.getElementById('sidebarBio').innerText = bioText;
+                // تطبيق نوع الخط
+                if(val.fontFamily) {
+                    document.documentElement.style.setProperty('--body-font', `'${val.fontFamily}', sans-serif`);
+                }
+
+                // تطبيق النصوص
+                if(val.texts) {
+                    if(val.texts.heroTitle) document.getElementById('heroTitle').innerText = val.texts.heroTitle;
+                    if(val.texts.heroDesc) document.getElementById('heroDesc').innerText = val.texts.heroDesc;
+                    if(val.texts.searchPlaceholder) document.getElementById('searchInput').placeholder = val.texts.searchPlaceholder;
+                    if(val.texts.footer) document.getElementById('footerText').innerText = val.texts.footer;
+                }
+
+                // تطبيق بيانات السايدبار
+                document.getElementById('sidebarProfileImg').src = val.profileImg || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+                document.getElementById('sidebarBio').innerText = val.bio || "";
                 
                 const linksContainer = document.getElementById('sidebarLinksContainer');
                 linksContainer.innerHTML = '';
                 if(val.links && Array.isArray(val.links)) {
                     val.links.forEach(link => {
                         let url = link.url;
-                        if(url && !url.startsWith('http') && !url.startsWith('tel:') && !url.startsWith('mailto:') && !url.startsWith('fb:') && !url.startsWith('intent:') && !url.startsWith('vnd.youtube:')) {
-                             if (!url.match(/^[0-9]+$/)) url = 'https://' + url;
+                        // إضافة بروتوكول اذا لم يوجد
+                        if(url && !url.match(/^[a-zA-Z]+:/)) {
+                             url = 'https://' + url;
                         }
+
                         const a = document.createElement('a');
                         a.className = 'sidebar-link';
                         a.href = url;
-                        if(!url.startsWith('tel:') && !url.startsWith('fb:') && !url.startsWith('intent:') && !url.startsWith('vnd.youtube:')) {
-                            a.target = "_blank"; 
-                        }
-                        a.innerHTML = `<i class="${link.icon}"></i> ${link.name}`;
+                        a.target = "_blank";
+                        a.innerHTML = `<i class="${link.icon || 'fas fa-link'}"></i> ${link.name}`;
                         linksContainer.appendChild(a);
                     });
-                } else {
-                    linksContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">لا توجد روابط مضافة</div>';
                 }
+            }
+        });
+
+        // 2. جلب الأقسام
+        onValue(ref(db, 'categories'), (snapshot) => {
+            const val = snapshot.val();
+            if(val) { allCats = val; renderTabs(); renderApps(); } 
+        });
+
+        // 3. جلب التطبيقات
+        onValue(ref(db, 'apps'), (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // تحويل البيانات لمصفوفة + فلترة المخفي
+                allAppsData = Object.values(data).filter(app => !app.isHidden);
+                
+                // الترتيب: حسب تاريخ التعديل (الأحدث أولاً) - كما طلبت في الأدمن
+                allAppsData.sort((a, b) => (b.lastModified || 0) - (a.lastModified || 0));
+                
+                renderApps();
+            } else {
+                allAppsData = [];
+                renderApps();
             }
         });
 
         function renderTabs() {
             const container = document.getElementById('tabsList');
-            const sortedCats = Object.entries(allCats).sort(([,a], [,b]) => a.order - b.order);
+            const sortedCats = Object.entries(allCats).sort(([,a], [,b]) => (a.order || 0) - (b.order || 0));
+            
             let html = `<button class="tab-btn ${currentCategory === 'ALL' ? 'active' : ''}" onclick="filterApps('ALL', this)">🌟 الكل</button>`;
+            
             sortedCats.forEach(([key, val]) => {
+                // إظهار القسم فقط إذا لم يكن مخفياً
                 if (!val.isHidden) {
                     html += `<button class="tab-btn ${currentCategory === key ? 'active' : ''}" onclick="filterApps('${key}', this)">${val.icon} ${val.name}</button>`;
                 }
             });
+            
             container.innerHTML = html;
         }
-
-        onValue(ref(db, 'apps'), (snapshot) => {
-            const data = snapshot.val();
-            // إخفاء الـ Skeleton Loader عند وصول البيانات
-            if(isFirstLoad) {
-                document.getElementById('container').innerHTML = ''; 
-                isFirstLoad = false;
-            }
-            if (data) {
-                allAppsData = Object.values(data)
-                    .filter(app => !app.isHidden)
-                    .sort((a, b) => (a.order || 0) - (b.order || 0));
-                renderApps();
-            } else {
-                document.getElementById('container').innerHTML = "<div class='status'>لا توجد تطبيقات حتى الآن</div>";
-            }
-        });
 
         window.filterApps = (cat, btn) => {
             currentCategory = cat;
             renderTabs(); 
+            // تمرير الشريط تلقائياً للزر النشط
             setTimeout(() => {
                 const activeBtn = document.querySelector('.tab-btn.active');
                 if(activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
@@ -336,63 +301,58 @@
 
         function renderApps(searchTerm = "") {
             const container = document.getElementById('container');
+            container.innerHTML = '';
             const favs = JSON.parse(localStorage.getItem('favorites')) || [];
+
             const filtered = allAppsData.filter(app => {
+                // التحقق من أن قسم التطبيق غير مخفي
                 const parentCat = allCats[app.type];
                 if (parentCat && parentCat.isHidden) return false;
+
                 const matchCat = (currentCategory === 'ALL') || (app.type === currentCategory);
                 const matchSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase());
                 return matchCat && matchSearch;
             });
-            
-            document.getElementById('appCount').innerText = filtered.length;
-            
+
             if (filtered.length === 0) {
                 container.innerHTML = "<div class='status'>لا توجد نتائج</div>";
                 return;
             }
 
-            const fragment = document.createDocumentFragment();
-            
             filtered.forEach(app => {
                 let badgeTxt = "APP"; 
                 if(allCats[app.type]) badgeTxt = allCats[app.type].name;
+                
                 const isFav = favs.includes(app.name);
                 const heartClass = isFav ? "fa-solid active" : "fa-regular";
-                let actionText = "تحميل";
-                let clickAction = `window.open('${app.link}', '_blank')`;
-                if (app.type === 'WEBSITE') { actionText = "زيارة"; } 
-                else if (app.type === 'FILE') { actionText = "👁️ مشاهدة"; clickAction = `viewImage('${app.img}')`; }
                 
+                // تحديد نص الزر
+                let actionBtnText = "تحميل";
+                if(app.link && app.link.includes('http')) {
+                    // إذا كان رابط
+                    actionBtnText = "فتح";
+                }
+
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.setAttribute('onclick', clickAction);
+                card.onclick = () => window.open(app.link, '_blank');
+                
                 card.innerHTML = `
                     <span class="mod-badge">${badgeTxt}</span>
-                    <img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'" loading="lazy">
-                    <div class="card-content-wrapper">
-                        <div class="card-title">${app.name}</div>
-                        <div class="get-btn ${app.type === 'FILE' ? 'secondary' : ''}">${actionText}</div>
-                    </div>
-                    <button class="heart-btn" onclick="toggleFavorite(this, '${app.name}')"><i class="${heartClass} fa-heart"></i></button>
+                    <button class="heart-btn" onclick="toggleFavorite(this, '${app.name}')">
+                        <i class="${heartClass} fa-heart"></i>
+                    </button>
+                    <img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'" loading="lazy" alt="${app.name}">
+                    <div class="card-title">${app.name}</div>
+                    <div class="get-btn">${actionBtnText}</div>
                 `;
-                fragment.appendChild(card);
+                container.appendChild(card);
             });
-            
-            container.innerHTML = ''; 
-            container.appendChild(fragment); 
         }
 
         document.getElementById('searchInput').addEventListener('input', (e) => renderApps(e.target.value));
 
-        window.viewImage = (url) => {
-            if(window.event) window.event.stopPropagation();
-            document.getElementById('fullImage').src = url;
-            document.getElementById('downloadBtn').href = url;
-            document.getElementById('imgViewer').style.display = 'flex';
-        }
-        
-        window.closeViewer = () => { document.getElementById('imgViewer').style.display = 'none'; }
+        // --- UI Interactions ---
 
         window.toggleTheme = () => {
             const btn = document.getElementById('themeBtn');
@@ -406,6 +366,7 @@
                 localStorage.setItem('theme', 'light');
             }
         };
+        // Load Saved Theme
         if (localStorage.getItem('theme') === 'light') {
             document.body.setAttribute('data-theme', 'light');
             document.getElementById('themeBtn').classList.replace('fa-moon', 'fa-sun');
@@ -427,38 +388,6 @@
                 btn.classList.replace('fa-regular', 'fa-solid');
             }
             localStorage.setItem('favorites', JSON.stringify(favs));
-        };
-
-        window.openMsgModal = () => {
-            closeNav();
-            document.getElementById('msgModal').style.display = 'flex';
-        };
-
-        window.sendMessage = () => {
-            const name = document.getElementById('msgName').value;
-            const text = document.getElementById('msgText').value;
-            const btn = document.getElementById('sendBtn');
-
-            if(!name || !text) {
-                alert("يرجى كتابة الاسم والرسالة!");
-                return;
-            }
-
-            btn.innerText = "جاري الإرسال...";
-            push(ref(db, 'messages'), {
-                name: name,
-                text: text,
-                timestamp: Date.now()
-            }).then(() => {
-                document.getElementById('msgModal').style.display = 'none';
-                document.getElementById('msgName').value = '';
-                document.getElementById('msgText').value = '';
-                btn.innerText = "إرسال 🚀";
-                alert("تم إرسال رسالتك بنجاح! شكراً لتواصلك.");
-            }).catch(e => {
-                btn.innerText = "إرسال 🚀";
-                alert("لم يتم الإرسال. تأكد من اتصالك بالإنترنت.");
-            });
         };
     </script>
 </body>
