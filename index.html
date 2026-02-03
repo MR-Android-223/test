@@ -260,6 +260,28 @@
         let allCats = {};
         let isFirstLoad = true;
 
+        // --- الدالة الذكية لفتح التطبيقات (تستخدم Package ID) ---
+        window.openAppSmart = (packageId, fallbackLink) => {
+            if(window.event) window.event.stopPropagation(); // منع تعارض الضغط مع الأزرار الأخرى
+            
+            // 1. إذا وجد Package ID (الميزة الجديدة)
+            if (packageId && packageId.trim() !== "") {
+                // تحديد الرابط البديل (إما الرابط المدخل أو رابط المتجر)
+                const fallback = fallbackLink || `https://play.google.com/store/apps/details?id=${packageId}`;
+                
+                // رابط الـ Intent
+                const intentUrl = `intent://#Intent;package=${packageId};scheme=package;S.browser_fallback_url=${fallback};end;`;
+                
+                // التنفيذ
+                window.location.href = intentUrl;
+            } 
+            // 2. إذا لم يوجد Package ID، نفتح الرابط العادي
+            else if (fallbackLink) {
+                window.open(fallbackLink, '_blank');
+            }
+        };
+
+
         onValue(ref(db, 'categories'), (snapshot) => {
             const val = snapshot.val();
             if(val) { allCats = val; renderTabs(); if(allAppsData.length > 0) renderApps(); } 
@@ -309,7 +331,6 @@
 
         onValue(ref(db, 'apps'), (snapshot) => {
             const data = snapshot.val();
-            // إخفاء الـ Skeleton Loader عند وصول البيانات
             if(isFirstLoad) {
                 document.getElementById('container').innerHTML = ''; 
                 isFirstLoad = false;
@@ -359,10 +380,23 @@
                 if(allCats[app.type]) badgeTxt = allCats[app.type].name;
                 const isFav = favs.includes(app.name);
                 const heartClass = isFav ? "fa-solid active" : "fa-regular";
-                let actionText = "تحميل";
-                let clickAction = `window.open('${app.link}', '_blank')`;
-                if (app.type === 'WEBSITE') { actionText = "زيارة"; } 
-                else if (app.type === 'FILE') { actionText = "👁️ مشاهدة"; clickAction = `viewImage('${app.img}')`; }
+                
+                let actionText = "فتح / تحميل";
+                let clickAction = "";
+
+                // التحقق من نوع التطبيق لتحديد السلوك
+                if (app.type === 'FILE') { 
+                    actionText = "👁️ مشاهدة"; 
+                    clickAction = `viewImage('${app.img}')`; 
+                } else {
+                    // هنا نستخدم الدالة الذكية ونمرر لها الـ ID والـ Link
+                    // استخدام replace لحماية الكود من الرموز الغريبة بالنصوص
+                    const safePkg = (app.packageId || "").replace(/'/g, "\\'");
+                    const safeLink = (app.link || "").replace(/'/g, "\\'");
+                    clickAction = `openAppSmart('${safePkg}', '${safeLink}')`;
+                    
+                    if(app.type === 'WEBSITE') actionText = "زيارة";
+                }
                 
                 const card = document.createElement('div');
                 card.className = 'card';
