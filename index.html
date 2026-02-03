@@ -69,7 +69,6 @@
         }
         .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* --- New List View Styles --- */
         .grid { 
             display: flex; flex-direction: column; gap: 12px; 
             padding: 10px 20px; max-width: 800px; margin: 0 auto; 
@@ -78,7 +77,7 @@
         .card {
             background: var(--card-bg); border-radius: 16px; padding: 12px; 
             text-decoration: none; color: var(--text-main); display: flex; 
-            flex-direction: row; /* Horizontal layout */
+            flex-direction: row; 
             align-items: center; border: 1px solid var(--border); position: relative; 
             transition: transform 0.1s; cursor: pointer;
         }
@@ -116,8 +115,6 @@
         }
         .get-btn.secondary { background: #475569; color: #cbd5e1; } 
 
-        /* --- End List View Styles --- */
-
         .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; right: 0; background-color: var(--nav-bg); overflow-x: hidden; transition: 0.3s; padding-top: 20px; border-left: 1px solid var(--border); box-shadow: -5px 0 20px rgba(0,0,0,0.5); }
         .sidebar-header { text-align: center; padding-bottom: 20px; margin-bottom: 10px; }
         .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 10px; object-fit: cover; }
@@ -125,7 +122,7 @@
         .sidebar-link i { width: 30px; color: var(--primary); font-size: 1.1rem; }
         .close-btn { position: absolute; top: 15px; left: 20px; font-size: 25px; color: var(--text-muted); background: none; border: none; }
         
-        #imgViewer, .msg-modal-overlay {
+        #imgViewer {
             display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.9); justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px);
         }
@@ -135,25 +132,6 @@
         #overlay { position: fixed; display: none; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
         .status { width: 100%; text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 0.9rem; }
         footer { text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; border-top: 1px solid var(--border); }
-
-        .msg-box {
-            background: #1e293b; padding: 25px; border-radius: 20px; 
-            width: 90%; max-width: 350px; border: 2px solid var(--primary);
-            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            position: relative; z-index: 6000;
-        }
-        .msg-input {
-            width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; 
-            border: 1px solid #334155; outline: none; font-size: 1rem; 
-            background: #0f172a; color: white; font-family: 'Cairo';
-        }
-        .msg-btn {
-            width: 100%; padding: 12px; border-radius: 12px; border: none; 
-            font-weight: bold; font-size: 1rem; cursor: pointer; font-family: 'Cairo'; 
-            background: var(--primary); color: white; margin-top: 10px; transition: 0.3s;
-        }
-        .msg-btn:active { transform: scale(0.95); }
-        .msg-btn-close { background: transparent; color: #94a3b8; border: 1px solid #334155; margin-top: 8px; }
 
     </style>
 </head>
@@ -176,11 +154,6 @@
                 جاري التحميل...
             </p>
         </div>
-        
-        <a href="#" onclick="openMsgModal()" class="sidebar-link" style="background: rgba(59, 130, 246, 0.15); border-color: var(--primary); color: var(--primary); font-weight: bold;">
-            <i class="fas fa-envelope-open-text"></i> راسـلـنا ✉️
-        </a>
-
         <div id="sidebarLinksContainer"></div>
     </div>
     <div id="overlay" onclick="closeNav()"></div>
@@ -189,16 +162,6 @@
         <span class="close-viewer" onclick="closeViewer()">&times;</span>
         <img id="fullImage">
         <a id="downloadBtn" href="#" download="image.jpg" class="get-btn" style="width: auto; padding: 8px 30px; margin-top: 20px; background: var(--primary); color: white; border: none;">⬇️ تحميل الصورة</a>
-    </div>
-
-    <div id="msgModal" class="msg-modal-overlay">
-        <div class="msg-box">
-            <h3 style="margin-bottom:15px; color:white;">ارسل رسالة للمسؤول</h3>
-            <input type="text" id="msgName" class="msg-input" placeholder="الاسم الكريم">
-            <textarea id="msgText" class="msg-input" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
-            <button onclick="sendMessage()" id="sendBtn" class="msg-btn">إرسال 🚀</button>
-            <button onclick="document.getElementById('msgModal').style.display='none'" class="msg-btn msg-btn-close">إغلاق</button>
-        </div>
     </div>
 
     <div class="hero">
@@ -306,6 +269,8 @@
                     .filter(app => !app.isHidden)
                     .sort((a, b) => (a.order || 0) - (b.order || 0));
                 renderApps();
+            } else {
+                document.getElementById('container').innerHTML = "<div class='status'>لا توجد تطبيقات بعد</div>";
             }
         });
 
@@ -344,12 +309,9 @@
                 let clickAction = `window.open('${app.link}', '_blank')`;
                 if (app.type === 'WEBSITE') { actionText = "زيارة"; } 
                 else if (app.type === 'FILE') { actionText = "👁️ مشاهدة"; clickAction = `viewImage('${app.img}')`; }
-                
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.setAttribute('onclick', clickAction);
-                
-                // --- Updated HTML Structure for List View ---
                 card.innerHTML = `
                     <span class="mod-badge">${badgeTxt}</span>
                     <img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'" loading="lazy">
@@ -359,8 +321,6 @@
                     </div>
                     <button class="heart-btn" onclick="toggleFavorite(this, '${app.name}')"><i class="${heartClass} fa-heart"></i></button>
                 `;
-                // ---------------------------------------------
-                
                 container.appendChild(card);
             });
         }
@@ -409,38 +369,6 @@
                 btn.classList.replace('fa-regular', 'fa-solid');
             }
             localStorage.setItem('favorites', JSON.stringify(favs));
-        };
-
-        window.openMsgModal = () => {
-            closeNav();
-            document.getElementById('msgModal').style.display = 'flex';
-        };
-
-        window.sendMessage = () => {
-            const name = document.getElementById('msgName').value;
-            const text = document.getElementById('msgText').value;
-            const btn = document.getElementById('sendBtn');
-
-            if(!name || !text) {
-                alert("يرجى كتابة الاسم والرسالة!");
-                return;
-            }
-
-            btn.innerText = "جاري الإرسال...";
-            push(ref(db, 'messages'), {
-                name: name,
-                text: text,
-                timestamp: Date.now()
-            }).then(() => {
-                document.getElementById('msgModal').style.display = 'none';
-                document.getElementById('msgName').value = '';
-                document.getElementById('msgText').value = '';
-                btn.innerText = "إرسال 🚀";
-                alert("تم إرسال رسالتك بنجاح! شكراً لتواصلك.");
-            }).catch(e => {
-                btn.innerText = "إرسال 🚀";
-                alert("لم يتم الإرسال. تأكد من تحديث قواعد البيانات (Rules) في فايربيس.");
-            });
         };
     </script>
 </body>
