@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Panel V10 | Ultimate Fix</title>
+    <title>Admin Panel V11 | Final</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     
     <style>
         :root {
             --bg-body: #0f172a; 
-            --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b, #0f172a);
-            --card-glass: rgba(30, 41, 59, 0.95); 
+            --card-bg: #1e293b; 
             --text-main: #f8fafc; 
             --text-muted: #94a3b8;
             --primary: #3b82f6; 
             --danger: #ef4444; 
-            --success: #10b981;
-            --warning: #f59e0b;
             --border: rgba(255,255,255,0.08);
             --grid-cols: 2;
         }
@@ -28,7 +24,6 @@
         
         body { 
             background: var(--bg-body); 
-            background-image: var(--bg-gradient); 
             color: var(--text-main); 
             font-family: 'Cairo', sans-serif; 
             min-height: 100vh; 
@@ -36,153 +31,184 @@
             overflow-y: auto;
         }
 
-        /* Header */
+        /* --- Header --- */
         header {
             position: sticky; top: 0; z-index: 1000; 
             background: rgba(15, 23, 42, 0.98);
             border-bottom: 1px solid var(--border); 
-            padding: 15px 20px;
+            padding: 12px 15px;
             display: flex; justify-content: space-between; align-items: center; 
-            backdrop-filter: blur(10px);
-        }
-        .header-btn {
-            background: rgba(255,255,255,0.05); color: white; 
-            border: 1px solid var(--border);
-            width: 40px; height: 40px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem; cursor: pointer;
         }
 
-        /* Grid */
+        .logo { font-weight: 900; font-size: 1.1rem; }
+        .logo span { color: var(--primary); }
+
+        .header-actions { display: flex; gap: 8px; }
+
+        .header-btn {
+            background: #334155; color: white; 
+            border: 1px solid var(--border);
+            padding: 0 15px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.9rem; cursor: pointer; font-weight: bold;
+        }
+        .header-btn.active { background: var(--primary); border-color: var(--primary); }
+        .header-btn i { font-size: 1rem; }
+
+        .icon-only { width: 40px; padding: 0; justify-content: center; }
+
+        /* --- Tabs --- */
+        .tabs-wrapper { position: sticky; top: 65px; z-index: 900; padding: 10px 0; background: var(--bg-body); }
+        .tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 0 15px; scrollbar-width: none; }
+        .tab-btn {
+            background: var(--card-bg); color: #94a3b8; border: 1px solid var(--border);
+            padding: 8px 16px; border-radius: 50px; cursor: pointer; white-space: nowrap; font-size: 0.85rem;
+        }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* --- Grid & Cards --- */
         .grid { 
             display: grid; 
             grid-template-columns: repeat(var(--grid-cols), 1fr); 
-            gap: 15px; 
-            padding: 15px 20px; 
-            max-width: 800px; 
-            margin: 0 auto; 
+            gap: 12px; padding: 10px 15px; 
         }
         
         .card {
-            background: var(--card-glass); 
-            border-radius: 18px; 
+            background: var(--card-bg); 
+            border-radius: 16px; 
             padding: 15px; 
             border: 1px solid var(--border);
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            position: relative; 
-            height: 100%;
+            display: flex; flex-direction: column; align-items: center; 
+            position: relative;
         }
-        
+
+        /* شارة التعديل الصفراء */
+        .edit-badge {
+            position: absolute; top: 10px; left: 10px;
+            background: #f59e0b; color: white;
+            padding: 4px 8px; border-radius: 6px;
+            font-size: 0.7rem; font-weight: bold; display: flex; gap: 4px; align-items: center;
+            cursor: pointer; z-index: 5;
+        }
+
+        /* زر القائمة في الكرت */
+        .card-menu-btn {
+            position: absolute; top: 10px; right: 10px;
+            color: #94a3b8; font-size: 1.1rem; padding: 5px; cursor: pointer; z-index: 5;
+        }
+
+        /* Checkbox for Select Mode */
+        .card-select-check {
+            position: absolute; top: 10px; right: 10px;
+            width: 25px; height: 25px; border-radius: 6px;
+            border: 2px solid #cbd5e1; background: #1e293b;
+            display: none; z-index: 10; cursor: pointer;
+            align-items: center; justify-content: center; color: transparent;
+        }
+        .card.selected .card-select-check { background: var(--primary); border-color: var(--primary); color: white; }
+        .select-mode .card-menu-btn { display: none; } /* إخفاء القائمة عند التحديد */
+        .select-mode .card-select-check { display: flex; }
+
         .card img { 
-            width: 65px; height: 65px; 
-            border-radius: 16px; 
-            margin-bottom: 12px; 
-            object-fit: cover; 
-            background: #1e293b; 
+            width: 60px; height: 60px; border-radius: 14px; 
+            margin-bottom: 10px; object-fit: cover; background: #334155; 
+            pointer-events: none;
         }
         
         .card-title { 
             font-size: 0.85rem; font-weight: 700; text-align: center; 
-            line-height: 1.4; color: #e2e8f0;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
-            overflow: hidden; width: 100%;
+            color: white; line-height: 1.3;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
+        .cat-label { font-size: 0.7rem; color: #64748b; margin-top: 5px; text-transform: uppercase; }
 
-        /* زر الخيارات (ثلاث نقاط) */
-        .card-options-btn {
-            position: absolute; top: 10px; right: 10px;
-            color: #94a3b8; padding: 5px; cursor: pointer;
-            z-index: 10; font-size: 1rem;
+        /* --- Bottom Action Bar (For Selection) --- */
+        .bottom-actions {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #1e293b; padding: 15px; border-top: 1px solid var(--border);
+            display: none; justify-content: space-around; z-index: 2000;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
-        
-        /* القائمة المنسدلة داخل الكرت */
-        .card-dropdown {
-            display: none; position: absolute; top: 35px; right: 10px;
-            background: #1e293b; border: 1px solid var(--border);
-            border-radius: 12px; width: 140px; z-index: 20;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden;
+        .bottom-btn {
+            background: transparent; border: none; color: #94a3b8;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            font-size: 0.8rem; cursor: pointer;
         }
-        .card-dropdown.show { display: block; animation: fadeIn 0.2s; }
-        
-        .dropdown-item {
-            padding: 10px 15px; font-size: 0.85rem; color: #cbd5e1;
-            cursor: pointer; display: flex; align-items: center; gap: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .dropdown-item:last-child { border-bottom: none; }
-        .dropdown-item:hover { background: rgba(255,255,255,0.05); }
-        .dropdown-item.danger { color: #ef4444; }
+        .bottom-btn.danger { color: var(--danger); }
 
-        /* Tabs */
-        .tabs-wrapper { position: sticky; top: 72px; z-index: 900; padding: 10px 0; background: #0f172a; }
-        .tabs-container { display: flex; gap: 10px; overflow-x: auto; padding: 0 20px; scrollbar-width: none; }
-        .tab-btn {
-            background: #1e293b; color: #94a3b8; border: 1px solid var(--border);
-            padding: 8px 18px; border-radius: 12px; cursor: pointer; white-space: nowrap;
-        }
-        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        /* FAB */
-        .fab-btn {
-            position: fixed; bottom: 30px; left: 30px; width: 55px; height: 55px;
-            background: var(--primary); color: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
-            cursor: pointer; z-index: 2000; border: none;
-        }
-
-        /* Modals */
+        /* --- Modals --- */
         .modal-overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); z-index: 3000; 
+            background: rgba(0,0,0,0.8); z-index: 3000; 
             align-items: center; justify-content: center; backdrop-filter: blur(5px);
         }
         .modal-box { 
-            background: #1e293b; padding: 25px; border-radius: 20px; 
-            width: 90%; max-width: 380px; border: 1px solid var(--border); 
-            text-align: center; max-height: 85vh; overflow-y: auto;
+            background: #1e293b; padding: 20px; border-radius: 20px; 
+            width: 90%; max-width: 350px; border: 1px solid var(--border); 
+            text-align: center; max-height: 80vh; overflow-y: auto;
         }
-        .btn-full { 
-            width: 100%; padding: 12px; border-radius: 12px; border: none; 
-            font-weight: bold; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: center; gap: 8px;
-        }
-        .btn-confirm { background: var(--primary); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-cancel { background: #334155; color: white; }
         
+        .modal-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 20px; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        .full-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; margin-bottom: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-blue { background: var(--primary); color: white; }
+        .btn-red { background: var(--danger); color: white; }
+        .btn-gray { background: transparent; border: 1px solid #334155; color: #cbd5e1; }
+
         input, select { 
-            width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; 
-            border: 1px solid #334155; outline: none; background: #0f172a; color: white; 
-            text-align: center; font-family: inherit;
+            width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 12px; 
+            border: 1px solid #334155; background: #0f172a; color: white; 
+            text-align: center; outline: none; font-family: inherit;
         }
 
-        /* Settings List */
-        .cat-manage-item {
-            background: #0f172a; padding: 12px; margin-bottom: 8px; border-radius: 12px;
+        /* --- Toggle Switch (للقفل) --- */
+        .toggle-row {
             display: flex; justify-content: space-between; align-items: center;
+            background: #0f172a; padding: 12px; border-radius: 12px; margin-bottom: 8px;
             border: 1px solid #334155;
         }
-        
-        /* Search Result */
-        .search-result-item { 
-            display: flex; align-items: center; gap: 12px; padding: 10px; 
-            background: #334155; margin-bottom: 8px; border-radius: 12px; 
-            cursor: pointer; text-align: right; 
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #334155; transition: .4s; border-radius: 34px;
         }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px;
+            left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
-        @keyframes fadeIn { from{opacity:0; transform:translateY(-5px);} to{opacity:1; transform:translateY(0);} }
+        /* --- Search Results --- */
+        .search-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px;
+            background: #334155; margin-bottom: 8px; border-radius: 10px; cursor: pointer; text-align: right;
+        }
+        
+        .fab-add {
+            position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px;
+            background: var(--primary); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; color: white; font-size: 2rem;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4); cursor: pointer; border: none;
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <div style="font-weight:900;">Admin<span style="color:var(--primary)">Panel</span></div>
-        <div style="display:flex; gap:8px;">
-            <div class="header-btn" onclick="toggleLayout()"><i class="fas fa-columns"></i></div>
-            <div class="header-btn" onclick="openSettingsModal()"><i class="fas fa-cog"></i></div>
-            <button onclick="login()" id="loginBtn" class="header-btn" style="background:#ea4335; width:auto; padding:0 15px; display:none; font-size:0.9rem;">دخول</button>
+        <div class="header-actions">
+            <button class="header-btn" id="selectBtn" onclick="toggleSelectMode()">
+                <i class="fas fa-check-circle"></i> تحديد
+            </button>
+            <button class="header-btn" onclick="openCategoriesModal()">
+                <i class="fas fa-folder"></i> الأقسام
+            </button>
+        </div>
+        
+        <div class="header-actions">
+            <button class="header-btn icon-only" onclick="toggleLayout()"><i class="fas fa-columns"></i></button>
+            <button class="header-btn icon-only" onclick="openSettingsModal()"><i class="fas fa-cog"></i></button>
         </div>
     </header>
 
@@ -192,80 +218,77 @@
 
     <div class="grid" id="appsContainer"></div>
 
-    <button class="fab-btn" onclick="openAddChoiceModal()">+</button>
+    <button class="fab-add" onclick="openAddModal()">+</button>
+    
+    <div class="bottom-actions" id="selectionBar">
+        <button class="bottom-btn danger" onclick="deleteSelected()">
+            <i class="fas fa-trash fa-lg"></i> حذف المحدد
+        </button>
+        <button class="bottom-btn" onclick="hideSelected()">
+            <i class="fas fa-eye-slash fa-lg"></i> إخفاء/إظهار
+        </button>
+        <button class="bottom-btn" onclick="cancelSelectMode()">
+            <i class="fas fa-times fa-lg"></i> إلغاء
+        </button>
+        <div style="color:white; font-weight:bold; align-self:center;">
+            <span id="selectedCount">0</span> محدد
+        </div>
+    </div>
 
-
-    <div id="addChoiceModal" class="modal-overlay">
+    <div id="addModal" class="modal-overlay">
         <div class="modal-box">
-            <h3 style="color:white; margin-bottom:20px;">إضافة تطبيق</h3>
-            <button onclick="openStoreSearch()" class="btn-full" style="background:#10b981; color:white;">
+            <div class="modal-header">إضافة تطبيق</div>
+            <button onclick="openSearchModal()" class="full-btn btn-blue">
                 <i class="fab fa-google-play"></i> بحث في المتجر
             </button>
-            <button onclick="openEditModal()" class="btn-full" style="background:#3b82f6; color:white;">
+            <button onclick="openEditAppModal()" class="full-btn btn-gray">
                 <i class="fas fa-pen"></i> إضافة يدوية
             </button>
-            <button onclick="closeModal('addChoiceModal')" class="btn-full btn-cancel">إلغاء</button>
+            <button onclick="closeModal('addModal')" class="full-btn btn-red">إلغاء</button>
         </div>
     </div>
 
-    <div id="storeSearchModal" class="modal-overlay">
+    <div id="searchModal" class="modal-overlay">
         <div class="modal-box">
-            <h3 style="color:white; margin-bottom:15px;">بحث في المتجر</h3>
+            <div class="modal-header">بحث في المتجر</div>
             <div style="position:relative;">
-                <input type="text" id="storeSearchInput" placeholder="اكتب اسم اللعبة أو التطبيق...">
-                <i class="fas fa-search" onclick="searchStore()" style="position:absolute; left:15px; top:15px; color:var(--primary);"></i>
+                <input type="text" id="storeSearchInput" placeholder="اكتب اسم التطبيق (واتساب...)">
+                <i class="fas fa-search" onclick="doSearch()" style="position:absolute; left:15px; top:12px; color:#3b82f6;"></i>
             </div>
-            <div id="storeSearchResults" style="max-height:300px; overflow-y:auto; margin-top:10px;"></div>
-            <button onclick="closeModal('storeSearchModal')" class="btn-full btn-cancel" style="margin-top:10px;">إغلاق</button>
+            <div id="searchResults" style="height:250px; overflow-y:auto; margin-bottom:10px;"></div>
+            <button onclick="closeModal('searchModal')" class="full-btn btn-gray">إغلاق</button>
         </div>
     </div>
 
-    <div id="appModal" class="modal-overlay">
+    <div id="editAppModal" class="modal-overlay">
         <div class="modal-box">
-            <h3 style="color:white; margin-bottom:15px;">بيانات التطبيق</h3>
-            <select id="appCat"></select>
-            <input type="text" id="appName" placeholder="الاسم">
-            <input type="text" id="appImgUrl" placeholder="رابط الصورة" style="direction:ltr;">
-            <input type="text" id="appLink" placeholder="رابط التحميل" style="direction:ltr;">
-            <button onclick="saveApp()" class="btn-full btn-confirm">حفظ</button>
-            <button onclick="closeModal('appModal')" class="btn-full btn-cancel">إغلاق</button>
+            <div class="modal-header">بيانات التطبيق</div>
+            <select id="appCatSelect"></select>
+            <input type="text" id="appNameIn" placeholder="اسم التطبيق">
+            <input type="text" id="appImgIn" placeholder="رابط الصورة" style="direction:ltr;">
+            <input type="text" id="appLinkIn" placeholder="رابط التحميل" style="direction:ltr;">
+            <button onclick="saveApp()" class="full-btn btn-blue">حفظ</button>
+            <button onclick="closeModal('editAppModal')" class="full-btn btn-gray">إلغاء</button>
         </div>
     </div>
 
-    <div id="moveAppModal" class="modal-overlay">
+    <div id="catsModal" class="modal-overlay">
         <div class="modal-box">
-            <h3 style="color:white; margin-bottom:15px;">نقل التطبيق</h3>
-            <p style="color:#94a3b8; margin-bottom:10px;">اختر القسم الجديد:</p>
-            <select id="moveCatSelect"></select>
-            <button onclick="confirmMoveApp()" class="btn-full btn-confirm">نقل</button>
-            <button onclick="closeModal('moveAppModal')" class="btn-full btn-cancel">إلغاء</button>
-        </div>
-    </div>
-
-    <div id="settingsModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 style="color:white; margin-bottom:20px;">الإعدادات</h3>
-            <div id="catLockList" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div>
-            <div style="border-top:1px solid #334155; padding-top:10px;">
-                <input type="text" id="newCatName" placeholder="اسم قسم جديد">
-                <button onclick="addNewCategory()" class="btn-full btn-confirm">إضافة قسم</button>
+            <div class="modal-header"><i class="fas fa-cog"></i> إدارة الأقسام</div>
+            <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:15px;">اضغط للقفل/الفتح (سيتم الحفظ تلقائياً)</div>
+            
+            <div id="catsListToggles" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div>
+            
+            <div style="border-top:1px solid #334155; padding-top:15px;">
+                <input type="text" id="newCatInput" placeholder="اسم قسم جديد">
+                <button onclick="addNewCat()" class="full-btn btn-blue">إضافة قسم</button>
             </div>
-            <button onclick="closeModal('settingsModal')" class="btn-full btn-cancel" style="margin-top:10px;">إغلاق</button>
-        </div>
-    </div>
-
-    <div id="alertModal" class="modal-overlay" style="z-index:4000;">
-        <div class="modal-box">
-            <div id="alertIcon" style="font-size:3rem; margin-bottom:10px;"></div>
-            <h3 id="alertTitle" style="color:white; margin-bottom:10px;"></h3>
-            <p id="alertMsg" style="color:#94a3b8; margin-bottom:20px;"></p>
-            <button onclick="closeModal('alertModal')" class="btn-full btn-confirm">حسناً</button>
+            <button onclick="closeModal('catsModal')" class="full-btn btn-gray">رجوع</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, push, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
@@ -277,261 +300,255 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getDatabase(app);
-        const myUID = "eBOYmcmDI5S6l4NQd36bEa5kEcZ2";
 
+        // Variables
         let allApps = {};
         let allCats = {};
         let currentFilter = 'ALL';
+        let isSelectMode = false;
+        let selectedKeys = new Set();
         let editKey = null;
-        let moveKey = null; // Key of app to move
         let gridCols = 2;
 
-        onAuthStateChanged(auth, (user) => {
-            if (user && user.uid === myUID) {
-                document.getElementById('loginBtn').style.display = 'none';
-                initData();
-            } else {
-                document.getElementById('loginBtn').style.display = 'flex';
-                document.getElementById('appsContainer').innerHTML = "<div style='grid-column:span 2; text-align:center; color:white;'>يرجى تسجيل الدخول</div>";
-            }
+        // Init Data
+        onValue(ref(db, 'categories'), (s) => {
+            allCats = s.val() || { 'DEF': { name: 'تطبيقات', order: 1 } };
+            renderTabs();
+            renderCatsModal(); // Update toggles if open
         });
 
-        window.login = () => signInWithPopup(auth, new GoogleAuthProvider());
+        onValue(ref(db, 'apps'), (s) => {
+            allApps = s.val() || {};
+            renderApps();
+        });
 
-        function initData() {
-            onValue(ref(db, 'categories'), (s) => {
-                const val = s.val();
-                if(!val) update(ref(db, 'categories'), {'PROGRAM': {name:'تطبيقات', order:1}});
-                else { allCats = val; renderTabs(); if(document.getElementById('settingsModal').style.display=='flex') renderCatLockList(); }
-            });
-            
-            onValue(ref(db, 'apps'), (s) => {
-                allApps = s.val() || {};
-                renderApps();
-            });
-        }
-
-        // ============ RENDER APPS (With Menu) ============
+        // ================== RENDER LOGIC ==================
         function renderApps() {
             const container = document.getElementById('appsContainer');
-            let sorted = Object.entries(allApps);
+            let list = Object.entries(allApps);
+
+            // Filter
+            if(currentFilter !== 'ALL') list = list.filter(([,v]) => v.type === currentFilter);
             
-            if(currentFilter !== 'ALL') sorted = sorted.filter(([,v]) => v.type === currentFilter);
-            sorted.sort(([,a], [,b]) => (b.lastModified || 0) - (a.lastModified || 0));
+            // Sort (Newest first)
+            list.sort(([,a], [,b]) => (b.lastModified || 0) - (a.lastModified || 0));
 
             let html = '';
-            if(sorted.length === 0) html = `<div style="grid-column:span 2; text-align:center; color:#64748b; padding:40px;">فارغ</div>`;
-            
-            sorted.forEach(([k, v]) => {
-                const opacity = v.isHidden ? '0.5' : '1';
-                const lockIcon = v.isHidden ? '<i class="fas fa-eye-slash" style="color:#f59e0b; margin-left:5px;"></i>' : '';
+            list.forEach(([k, v]) => {
+                const isSel = selectedKeys.has(k) ? 'selected' : '';
+                const isHidden = v.isHidden ? 'opacity:0.5;' : '';
                 
+                // Card HTML
                 html += `
-                    <div class="card" style="opacity:${opacity}">
-                        <div class="card-options-btn" onclick="toggleCardMenu(event, '${k}')">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </div>
+                    <div class="card ${isSel}" style="${isHidden}" onclick="cardClick('${k}')">
+                        <div class="card-select-check"><i class="fas fa-check"></i></div>
                         
-                        <div id="menu-${k}" class="card-dropdown">
-                            <div class="dropdown-item" onclick="openEditModal('${k}')">
-                                <i class="fas fa-pen" style="color:#3b82f6;"></i> تعديل
-                            </div>
-                            <div class="dropdown-item" onclick="toggleHideApp('${k}')">
-                                <i class="fas ${v.isHidden ? 'fa-eye' : 'fa-eye-slash'}" style="color:#f59e0b;"></i> ${v.isHidden ? 'إظهار' : 'إخفاء'}
-                            </div>
-                            <div class="dropdown-item" onclick="openMoveModal('${k}')">
-                                <i class="fas fa-exchange-alt" style="color:#10b981;"></i> نقل
-                            </div>
-                            <div class="dropdown-item danger" onclick="deleteApp('${k}')">
-                                <i class="fas fa-trash"></i> حذف
-                            </div>
+                        <div class="edit-badge" onclick="event.stopPropagation(); openEditAppModal('${k}')">
+                            <i class="fas fa-pen"></i> تعديل
                         </div>
 
                         <img src="${v.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'">
-                        <div class="card-title">${lockIcon} ${v.name}</div>
+                        <div class="card-title">${v.name}</div>
+                        <div class="cat-label">${allCats[v.type]?.name || 'عام'}</div>
+                    </div>
+                `;
+            });
+
+            if(list.length === 0) html = `<div style="grid-column:span 2; text-align:center; color:#64748b; padding:20px;">لا يوجد عناصر</div>`;
+            container.innerHTML = html;
+        }
+
+        window.cardClick = (key) => {
+            if (isSelectMode) {
+                if (selectedKeys.has(key)) selectedKeys.delete(key);
+                else selectedKeys.add(key);
+                renderApps(); // Re-render to show selection
+                document.getElementById('selectedCount').innerText = selectedKeys.size;
+            }
+        };
+
+        // ================== SELECT MODE (Batch Actions) ==================
+        window.toggleSelectMode = () => {
+            isSelectMode = !isSelectMode;
+            selectedKeys.clear();
+            const btn = document.getElementById('selectBtn');
+            const bar = document.getElementById('selectionBar');
+            
+            if(isSelectMode) {
+                btn.classList.add('active');
+                bar.style.display = 'flex';
+                document.body.classList.add('select-mode');
+            } else {
+                btn.classList.remove('active');
+                bar.style.display = 'none';
+                document.body.classList.remove('select-mode');
+            }
+            document.getElementById('selectedCount').innerText = '0';
+            renderApps();
+        };
+
+        window.cancelSelectMode = () => toggleSelectMode();
+
+        window.deleteSelected = () => {
+            if(selectedKeys.size === 0) return alert('لم تحدد أي تطبيق');
+            if(confirm(`هل أنت متأكد من حذف ${selectedKeys.size} تطبيق؟`)) {
+                const updates = {};
+                selectedKeys.forEach(k => updates[`apps/${k}`] = null);
+                update(ref(db), updates);
+                toggleSelectMode(); // Exit mode
+            }
+        };
+
+        window.hideSelected = () => {
+            if(selectedKeys.size === 0) return;
+            const updates = {};
+            selectedKeys.forEach(k => {
+                updates[`apps/${k}/isHidden`] = !allApps[k].isHidden;
+            });
+            update(ref(db), updates);
+            toggleSelectMode();
+        };
+
+        // ================== CATEGORIES & LOCKING (The Switches) ==================
+        window.renderCatsModal = () => {
+            const container = document.getElementById('catsListToggles');
+            let html = '';
+            Object.entries(allCats).forEach(([k, v]) => {
+                const isLocked = v.isHidden === true; // true = Locked/Hidden from user
+                // Logic: In "Settings", Switch ON usually means "Visible". 
+                // So if isHidden=true, Switch should be OFF (unchecked).
+                // If isHidden=false (default), Switch should be ON (checked).
+                const isChecked = !isLocked ? 'checked' : '';
+                
+                html += `
+                    <div class="toggle-row">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <i class="fas fa-trash" style="color:#ef4444; cursor:pointer;" onclick="delCat('${k}')"></i>
+                            <span>${v.name}</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" ${isChecked} onchange="toggleCat('${k}', this.checked)">
+                            <span class="slider"></span>
+                        </label>
                     </div>
                 `;
             });
             container.innerHTML = html;
-        }
-
-        // ============ MENUS & ACTIONS ============
-        
-        // إظهار/إخفاء قائمة الكرت
-        window.toggleCardMenu = (e, key) => {
-            e.stopPropagation();
-            // أغلق أي قائمة مفتوحة أولاً
-            document.querySelectorAll('.card-dropdown').forEach(el => el.classList.remove('show'));
-            // افتح القائمة المطلوبة
-            const menu = document.getElementById(`menu-${key}`);
-            if(menu) menu.classList.add('show');
         };
 
-        // إغلاق القوائم عند النقر في أي مكان
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.card-dropdown').forEach(el => el.classList.remove('show'));
-        });
-
-        // إخفاء/إظهار التطبيق
-        window.toggleHideApp = (key) => {
-            const current = allApps[key].isHidden || false;
-            update(ref(db, `apps/${key}`), { isHidden: !current });
+        window.toggleCat = (key, isVisible) => {
+            // isVisible = true (Switch ON) -> isHidden = false
+            update(ref(db, `categories/${key}/isHidden`), !isVisible);
         };
 
-        // حذف التطبيق
-        window.deleteApp = (key) => {
-            if(confirm('هل أنت متأكد من الحذف؟')) {
-                remove(ref(db, `apps/${key}`));
+        window.addNewCat = () => {
+            const name = document.getElementById('newCatInput').value;
+            if(name) {
+                update(ref(db, `categories/CAT_${Date.now()}`), { name: name, order: 99 });
+                document.getElementById('newCatInput').value = '';
             }
         };
-
-        // نقل التطبيق - فتح المودال
-        window.openMoveModal = (key) => {
-            moveKey = key;
-            const select = document.getElementById('moveCatSelect');
-            let opts = '';
-            Object.entries(allCats).forEach(([k, v]) => {
-                opts += `<option value="${k}">${v.name}</option>`;
-            });
-            select.innerHTML = opts;
-            document.getElementById('moveAppModal').style.display = 'flex';
-        };
-
-        // تنفيذ النقل
-        window.confirmMoveApp = () => {
-            if(!moveKey) return;
-            const newCat = document.getElementById('moveCatSelect').value;
-            update(ref(db, `apps/${moveKey}`), { type: newCat });
-            closeModal('moveAppModal');
-        };
-
-        // ============ CATEGORIES & LOCK FIX ============
         
-        window.renderCatLockList = () => {
-            const list = document.getElementById('catLockList');
-            list.innerHTML = '';
-            
-            Object.entries(allCats).forEach(([k, v]) => {
-                // منطق الأيقونة واللون
-                const isLocked = v.isHidden === true;
-                const iconClass = isLocked ? 'fa-lock' : 'fa-lock-open';
-                const color = isLocked ? '#ef4444' : '#10b981'; // أحمر للمقفل، أخضر للمفتوح
-
-                const div = document.createElement('div');
-                div.className = 'cat-manage-item';
-                div.innerHTML = `
-                    <span>${v.name}</span>
-                    <div style="display:flex; gap:15px; align-items:center;">
-                        <i class="fas fa-trash" style="color:#94a3b8; cursor:pointer;" onclick="deleteCat('${k}')"></i>
-                        <i class="fas ${iconClass}" style="color:${color}; cursor:pointer; font-size:1.2rem;" onclick="toggleCatLock('${k}')"></i>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
+        window.delCat = (k) => {
+            if(confirm('حذف القسم؟')) remove(ref(db, `categories/${k}`));
         };
 
-        // إصلاح القفل: القراءة مباشرة من الداتا بيس
-        window.toggleCatLock = (key) => {
-            const currentStatus = allCats[key].isHidden || false;
-            update(ref(db, `categories/${key}`), { isHidden: !currentStatus });
-            // الـ listener رح يعيد رسم القائمة تلقائياً
-        };
-
-        window.addNewCategory = () => {
-            const n = document.getElementById('newCatName').value;
-            if(n) update(ref(db, `categories/CAT_${Date.now()}`), {name:n, order:99});
-            document.getElementById('newCatName').value = '';
-        };
-
-        window.deleteCat = (k) => {
-            if(confirm("حذف القسم؟")) remove(ref(db, `categories/${k}`));
-        };
-
-        // ============ SEARCH FIX (Important) ============
-        window.searchStore = async () => {
+        // ================== SEARCH (FIXED) ==================
+        window.doSearch = async () => {
             const q = document.getElementById('storeSearchInput').value;
-            const resDiv = document.getElementById('storeSearchResults');
-            resDiv.innerHTML = '<div style="text-align:center; color:white;">جاري البحث...</div>';
-
+            const res = document.getElementById('searchResults');
+            res.innerHTML = '<div style="text-align:center; padding:20px;">جاري البحث...</div>';
+            
             try {
-                // نستخدم iTunes API للبيانات فقط
-                const url = `https://corsproxy.io/?` + encodeURIComponent(`https://itunes.apple.com/search?term=${q}&entity=software&limit=10&country=SA`);
+                // استخدام AllOrigins Raw لجلب البيانات كنص JSON صافي
+                // هذا السيرفر أقوى بكثير من corsproxy
+                const url = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://itunes.apple.com/search?term='+q+'&entity=software&limit=10&country=SA')}`;
+                
                 const req = await fetch(url);
+                if(!req.ok) throw new Error("Network");
                 const data = await req.json();
 
-                resDiv.innerHTML = '';
-                data.results.forEach(app => {
-                    // الحل الجذري للرابط: استخدام رابط البحث في جوجل بلاي بدلاً من المعرف المباشر
-                    // هذا يضمن أن الرابط يعمل دائماً ويفتح التطبيق في المتجر
-                    const safePlayLink = `https://play.google.com/store/search?q=${encodeURIComponent(app.trackName)}&c=apps`;
+                res.innerHTML = '';
+                if(data.results.length === 0) {
+                    res.innerHTML = '<div style="text-align:center;">لم يتم العثور على نتائج</div>';
+                    return;
+                }
 
+                data.results.forEach(app => {
+                    const safeLink = `https://play.google.com/store/search?q=${encodeURIComponent(app.trackName)}&c=apps`;
                     const item = document.createElement('div');
-                    item.className = 'search-result-item';
+                    item.className = 'search-item';
                     item.onclick = () => {
-                        closeModal('storeSearchModal');
-                        openEditModal(null);
-                        document.getElementById('appName').value = app.trackName;
-                        document.getElementById('appImgUrl').value = app.artworkUrl100; // صورة أفضل
-                        document.getElementById('appLink').value = safePlayLink; // الرابط الآمن
+                        closeModal('searchModal');
+                        openEditAppModal(null); // New App
+                        document.getElementById('appNameIn').value = app.trackName;
+                        document.getElementById('appImgIn').value = app.artworkUrl100;
+                        document.getElementById('appLinkIn').value = safeLink;
                     };
                     item.innerHTML = `
-                        <img src="${app.artworkUrl60}" style="border-radius:10px;">
+                        <img src="${app.artworkUrl60}" style="width:40px; border-radius:8px;">
                         <div style="flex-grow:1; color:white;">
-                            <div style="font-weight:bold;">${app.trackName}</div>
-                            <div style="font-size:0.8rem; color:#94a3b8;">${app.artistName}</div>
+                            <div style="font-weight:bold; font-size:0.9rem;">${app.trackName}</div>
+                            <div style="font-size:0.7rem; color:#94a3b8;">${app.artistName}</div>
                         </div>
-                        <i class="fas fa-plus-circle" style="color:#10b981; font-size:1.5rem;"></i>
+                        <i class="fas fa-plus" style="color:#10b981;"></i>
                     `;
-                    resDiv.appendChild(item);
+                    res.appendChild(item);
                 });
+
             } catch(e) {
-                resDiv.innerHTML = '<div style="color:red; text-align:center;">خطأ في الاتصال</div>';
+                res.innerHTML = '<div style="color:#ef4444; text-align:center;">خطأ في الاتصال بالسيرفر. تأكد من الانترنت.</div>';
             }
         };
 
-        // ============ Helpers ============
-        window.openEditModal = (key) => {
-            closeModal('addChoiceModal');
-            document.getElementById('appModal').style.display = 'flex';
-            const catSelect = document.getElementById('appCat');
+        // ================== EDIT / ADD LOGIC ==================
+        window.openEditAppModal = (key) => {
+            closeModal('addModal');
+            document.getElementById('editAppModal').style.display = 'flex';
             
+            // Populate Cats
             let opts = '';
-            Object.entries(allCats).forEach(([k,v]) => opts += `<option value="${k}">${v.name}</option>`);
-            catSelect.innerHTML = opts;
+            Object.entries(allCats).forEach(([k,v])=> opts+=`<option value="${k}">${v.name}</option>`);
+            document.getElementById('appCatSelect').innerHTML = opts;
 
             if(key) {
                 editKey = key;
                 const d = allApps[key];
-                document.getElementById('appName').value = d.name;
-                document.getElementById('appImgUrl').value = d.img;
-                document.getElementById('appLink').value = d.link;
-                catSelect.value = d.type;
+                document.getElementById('appNameIn').value = d.name;
+                document.getElementById('appImgIn').value = d.img;
+                document.getElementById('appLinkIn').value = d.link;
+                document.getElementById('appCatSelect').value = d.type;
             } else {
                 editKey = null;
-                document.getElementById('appName').value = '';
-                document.getElementById('appImgUrl').value = '';
-                document.getElementById('appLink').value = '';
+                document.getElementById('appNameIn').value = '';
+                document.getElementById('appImgIn').value = '';
+                document.getElementById('appLinkIn').value = '';
             }
         };
 
         window.saveApp = () => {
             const d = {
-                name: document.getElementById('appName').value,
-                img: document.getElementById('appImgUrl').value,
-                link: document.getElementById('appLink').value,
-                type: document.getElementById('appCat').value,
+                name: document.getElementById('appNameIn').value,
+                img: document.getElementById('appImgIn').value,
+                link: document.getElementById('appLinkIn').value,
+                type: document.getElementById('appCatSelect').value,
                 lastModified: Date.now()
             };
+            
             if(!d.name) return;
-            
-            if(editKey) update(ref(db, `apps/${editKey}`), d);
-            else push(ref(db, 'apps'), d);
-            
-            closeModal('appModal');
+
+            if(editKey) {
+                // Keep existing props like isHidden
+                d.isHidden = allApps[editKey].isHidden || false;
+                update(ref(db, `apps/${editKey}`), d);
+            } else {
+                push(ref(db, 'apps'), d);
+            }
+            closeModal('editAppModal');
         };
 
+        // ================== HELPERS ==================
         window.renderTabs = () => {
             const c = document.getElementById('tabsList');
             let h = `<button class="tab-btn ${currentFilter=='ALL'?'active':''}" onclick="currentFilter='ALL';renderApps();renderTabs()">الكل</button>`;
@@ -541,11 +558,12 @@
             c.innerHTML = h;
         };
 
-        window.openSettingsModal = () => { document.getElementById('settingsModal').style.display='flex'; renderCatLockList(); };
+        window.openCategoriesModal = () => { document.getElementById('catsModal').style.display='flex'; renderCatsModal(); };
+        window.openAddModal = () => document.getElementById('addModal').style.display = 'flex';
+        window.openSearchModal = () => { closeModal('addModal'); document.getElementById('searchModal').style.display = 'flex'; };
         window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-        window.openAddChoiceModal = () => document.getElementById('addChoiceModal').style.display = 'flex';
-        window.openStoreSearch = () => { closeModal('addChoiceModal'); document.getElementById('storeSearchModal').style.display='flex'; };
-        window.toggleLayout = () => { gridCols = gridCols===2?1:2; document.documentElement.style.setProperty('--grid-cols', gridCols); };
+        window.toggleLayout = () => { gridCols=gridCols===2?1:2; document.documentElement.style.setProperty('--grid-cols', gridCols); };
+        window.openSettingsModal = () => alert('صفحة الإعدادات (قيد التطوير)');
 
     </script>
 </body>
