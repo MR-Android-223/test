@@ -480,10 +480,9 @@
             });
         }
         
-        window.toggleCat = (key, isChecked) => {
-            // isChecked = true (ON) -> Visible -> isHidden = false
-            // isChecked = false (OFF) -> Hidden -> isHidden = true
-            update(ref(db, `categories/${key}/isHidden`), !isChecked);
+                window.toggleCat = (key, isChecked) => {
+            // تم التعديل لاستخدام set ليتم الحفظ في قاعدة البيانات فوراً
+            set(ref(db, `categories/${key}/isHidden`), !isChecked);
         };
         
         function renderCatManageList() {
