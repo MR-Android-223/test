@@ -390,20 +390,7 @@
         window.openNav = () => { document.getElementById("mySidebar").style.width = "280px"; document.getElementById("overlay").style.display = "block"; document.body.classList.add("no-scroll"); };
         window.closeNav = () => { document.getElementById("mySidebar").style.width = "0"; document.getElementById("overlay").style.display = "none"; document.body.classList.remove("no-scroll"); };
         
-        window.toggleFavorite = (btn, appName) => {
-            event.stopPropagation(); 
-            let favs = JSON.parse(localStorage.getItem('favorites')) || [];
-            if (favs.includes(appName)) {
-                favs = favs.filter(i => i !== appName);
-                btn.classList.remove('active');
-                btn.classList.replace('fa-solid', 'fa-regular');
-            } else {
-                favs.push(appName);
-                btn.classList.add('active');
-                btn.classList.replace('fa-regular', 'fa-solid');
-            }
-            localStorage.setItem('favorites', JSON.stringify(favs));
-        };
-    </script>
+        
 </body>
 </html>
+
