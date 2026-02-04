@@ -607,36 +607,40 @@
         };
 
         // ============ SEARCH (UPDATED to fill URL input) ============
+        // ============ SEARCH (VERSION 53 - FAST & DIRECT) ============
         window.doStoreSearch = async () => {
             const q = document.getElementById('storeSearchInput').value;
             const res = document.getElementById('searchResults');
             if(!q) return;
             
-            res.innerHTML = '<div style="text-align:center; padding:20px; color:#3b82f6;"><i class="fas fa-spinner fa-spin"></i> جاري البحث...</div>';
+            res.innerHTML = '<div style="text-align:center; padding:20px; color:#3b82f6;"><i class="fas fa-spinner fa-spin"></i> جاري البحث بسرعة...</div>';
             
             try {
-                const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://itunes.apple.com/search?term='+q+'&entity=software&limit=10&country=SA')}`;
-                const response = await fetch(url);
-                const dataWrapper = await response.json();
-                const data = JSON.parse(dataWrapper.contents);
+                // استخدام وسيط corsproxy.io لتفادي البطء الشديد
+                const targetUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=software&limit=10&country=SA`;
+                const proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(targetUrl);
+                
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
 
                 res.innerHTML = '';
-                if(data.results.length === 0) { res.innerHTML = '<div style="text-align:center;">لا توجد نتائج</div>'; return; }
+                if(data.resultCount === 0) { 
+                    res.innerHTML = '<div style="text-align:center;">لا توجد نتائج</div>'; 
+                    return; 
+                }
 
                 data.results.forEach(app => {
                     const safeLink = `https://play.google.com/store/search?q=${encodeURIComponent(app.trackName)}&c=apps`;
-                    const imgUrl = app.artworkUrl512 || app.artworkUrl100; // الرابط من المتجر
+                    const imgUrl = app.artworkUrl512 || app.artworkUrl100;
                     
                     const item = document.createElement('div');
                     item.className = 'search-item';
                     item.onclick = () => {
-                        closeModal('searchModal'); openEditModal(null);
+                        closeModal('searchModal'); 
+                        openEditModal(null);
                         document.getElementById('appName').value = app.trackName;
-                        
-                        // هنا نضع الرابط في الحقل بدلاً من متغير
                         document.getElementById('appImgUrl').value = imgUrl; 
-                        window.updatePreview(imgUrl); // تحديث العرض
-                        
+                        window.updatePreview(imgUrl);
                         document.getElementById('appLink').value = safeLink;
                     };
                     item.innerHTML = `
@@ -649,7 +653,10 @@
                     `;
                     res.appendChild(item);
                 });
-            } catch(e) { res.innerHTML = '<div style="text-align:center; color:#ef4444;">خطأ في الاتصال</div>'; }
+            } catch(e) { 
+                console.error(e);
+                res.innerHTML = '<div style="text-align:center; color:#ef4444;">حدث خطأ، يرجى المحاولة مرة أخرى</div>'; 
+            }
         };
 
         // ============ HELPERS ============
