@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V50 | Pro Edition</title>
+    <title>Admin V51 | Fixed Lock</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -23,7 +23,6 @@
             overflow-y: auto; touch-action: pan-y; 
         }
 
-        /* تأثير الضغط */
         button:active, .header-btn:active, .fab-btn:active, .cat-action:active { transform: scale(0.94); transition: 0.1s; }
 
         header {
@@ -69,7 +68,6 @@
         .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 5px; height: 40px; overflow: hidden; pointer-events: none; }
         .edit-badge { position: absolute; top: 10px; left: 10px; background: #f59e0b; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; }
         
-        /* مقبض السحب */
         .drag-handle { 
             position: absolute; top: 0; right: 0; color: #94a3b8; cursor: grab; 
             padding: 15px; width: 50px; height: 50px; z-index: 10; font-size: 1.4rem; 
@@ -108,7 +106,6 @@
 
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; background: #334155; color: white; font-family: 'Cairo'; text-align: center; }
         
-        /* عناصر القوائم (الأقسام والروابط) */
         .cat-item, .link-item { display: flex; gap: 8px; align-items: center; background: #334155; padding: 10px; margin-bottom: 8px; border-radius: 10px; border: 1px solid transparent;}
         
         .cat-drag { cursor: grab; font-size: 1.2rem; color: #94a3b8; padding: 5px; touch-action: none; }
@@ -118,14 +115,16 @@
         .cat-action { padding: 8px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; color: white; }
         
         /* زر القفل */
-        .toggle-btn {
-            width: 50px; height: 28px; background: #475569; border-radius: 50px; position: relative; cursor: pointer; transition: 0.3s;
+        .toggle-row {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #0f172a; padding: 12px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #334155;
         }
-        .toggle-btn.on { background: var(--primary); }
-        .toggle-btn::after {
-            content: ''; position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: 0.3s;
-        }
-        .toggle-btn.on::after { left: 26px; }
+        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
         .settings-menu-btn {
             display: flex; align-items: center; justify-content: space-between;
@@ -135,13 +134,10 @@
         .settings-section { display: none; text-align: right; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
 
-        /* نتائج البحث */
         .search-item {
             display: flex; align-items: center; gap: 10px; padding: 10px;
             background: #334155; margin-bottom: 8px; border-radius: 12px; cursor: pointer; text-align: right;
         }
-
-        /* قائمة اختيار الأيقونة */
         .icon-select {
             background: #1e293b; color: white; border: 1px solid #475569;
             padding: 5px; border-radius: 8px; font-size: 0.8rem; width: 100%;
@@ -464,22 +460,29 @@
             const list = document.getElementById('catLockList');
             list.innerHTML = '';
             Object.entries(allCats).sort(([,a],[,b]) => (a.order||0)-(b.order||0)).forEach(([k, v]) => {
-                const isLocked = v.isHidden === true;
+                const isHidden = v.isHidden === true; 
+                // إذا كان القسم مخفي (isHidden=true) -> الزر طافي (unchecked)
+                // إذا كان القسم ظاهر (isHidden=false) -> الزر شغال (checked)
+                const isChecked = isHidden ? '' : 'checked'; 
+                const statusText = isHidden ? '<span style="color:#94a3b8">(مخفي)</span>' : '<span style="color:#10b981">(ظاهر)</span>';
+
                 const div = document.createElement('div');
-                div.className = 'cat-item';
+                div.className = 'toggle-row';
                 div.innerHTML = `
-                    <div style="flex-grow:1; display:flex; gap:10px; align-items:center;">
-                        <span>${v.icon||'📁'}</span>
-                        <strong>${v.name}</strong>
-                    </div>
-                    <div id="toggle-${k}" class="toggle-btn ${!isLocked?'on':''}" onclick="toggleCat('${k}', ${isLocked})"></div>
+                    <div style="font-weight:bold;">${v.icon||''} ${v.name} ${statusText}</div>
+                    <label class="switch">
+                        <input type="checkbox" ${isChecked} onchange="toggleCat('${k}', this.checked)">
+                        <span class="slider"></span>
+                    </label>
                 `;
                 list.appendChild(div);
             });
         }
         
-        window.toggleCat = (key, isLocked) => {
-            update(ref(db, `categories/${key}/isHidden`), !isLocked); // عكس الحالة
+        window.toggleCat = (key, isChecked) => {
+            // isChecked = true (ON) -> Visible -> isHidden = false
+            // isChecked = false (OFF) -> Hidden -> isHidden = true
+            update(ref(db, `categories/${key}/isHidden`), !isChecked);
         };
         
         function renderCatManageList() {
@@ -768,7 +771,7 @@
         
         window.openAddChoiceModal = () => document.getElementById('addChoiceModal').style.display='flex';
         window.openSearchModal = () => { closeModal('addChoiceModal'); document.getElementById('searchModal').style.display='flex'; };
-        window.openCatModal = () => document.getElementById('catModal').style.display='flex'; // تم إزالته واستبداله بالإعدادات
+        window.openCatModal = () => { document.getElementById('settingsModal').style.display='flex'; openSettingsSection('manageCats'); }; 
         window.closeModal = (id) => document.getElementById(id).style.display='none';
         window.showAlert = (t, m, i) => { document.getElementById('alertTitle').innerText=t; document.getElementById('alertMsg').innerText=m; document.getElementById('alertIcon').innerText=i; document.getElementById('alertModal').style.display='flex'; };
 
