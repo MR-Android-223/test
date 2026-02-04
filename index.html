@@ -213,13 +213,18 @@
         // 1. جلب الأقسام
         onValue(ref(db, 'categories'), (snapshot) => {
             const val = snapshot.val();
-            if(val) { allCats = val; renderTabs(); renderApps(); } 
+            if(val) { 
+                allCats = val; 
+                renderTabs(); 
+                renderApps(); // إعادة الرندرة عند تغير الأقسام (للقفل)
+            } 
         });
 
-        // 2. جلب إعدادات السايدبار
+        // 2. جلب إعدادات السايدبار (مع دعم الروابط)
         onValue(ref(db, 'settings'), (snapshot) => {
             const val = snapshot.val();
             if(val) {
+                // استخدام الرابط المباشر
                 if(val.profileImg) document.getElementById('sidebarProfileImg').src = val.profileImg;
                 document.getElementById('sidebarBio').innerText = val.bio || "نبني الأفكار، وننظم الفوضى التقنية.";
 
@@ -251,9 +256,9 @@
             let html = `<button class="tab-btn ${currentCategory === 'ALL' ? 'active' : ''}" onclick="filterApps('ALL', this)">🌟 الكل</button>`;
             
             sortedCats.forEach(([key, val]) => {
-                // =============== التعديل الوحيد هنا ===============
-                // إذا كان القسم مقفلاً (isHidden = true)، لا يتم عرضه في الشريط
-                if (val.isHidden !== true) {
+                // إخفاء الزر إذا كان القسم مقفلاً
+                const isLocked = val.isHidden === true || val.isHidden === "true";
+                if (!isLocked) {
                     html += `<button class="tab-btn ${currentCategory === key ? 'active' : ''}" onclick="filterApps('${key}', this)">${val.icon || ''} ${val.name}</button>`;
                 }
             });
@@ -264,8 +269,9 @@
         onValue(ref(db, 'apps'), (snapshot) => {
             const data = snapshot.val();
             if (data) {
+                // تنقية البيانات وترتيبها
                 allAppsData = Object.values(data)
-                    .filter(app => !app.isHidden)
+                    .filter(app => !(app.isHidden === true || app.isHidden === "true")) // تأكد من إخفاء التطبيقات المخفية
                     .sort((a, b) => (a.order || 0) - (b.order || 0));
                 renderApps();
             } else {
@@ -287,15 +293,21 @@
             const container = document.getElementById('container');
             container.innerHTML = '';
             const favs = JSON.parse(localStorage.getItem('favorites')) || [];
+            
+            // استخدام قيمة مربع البحث إذا لم يتم تمرير قيمة
+            const term = searchTerm || document.getElementById('searchInput').value;
 
             const filtered = allAppsData.filter(app => {
-                // =============== التعديل الثاني هنا ===============
-                // التحقق من حالة القسم الأب، إذا كان مقفلاً يتم استبعاد التطبيق
+                // 1. التحقق من قفل القسم الأم
                 const parentCat = allCats[app.type];
-                if (parentCat && parentCat.isHidden === true) return false;
+                if (parentCat) {
+                    const isCatLocked = parentCat.isHidden === true || parentCat.isHidden === "true";
+                    if (isCatLocked) return false;
+                }
 
+                // 2. التحقق من البحث والقسم الحالي
                 const matchCat = (currentCategory === 'ALL') || (app.type === currentCategory);
-                const matchSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchSearch = app.name.toLowerCase().includes(term.toLowerCase());
                 return matchCat && matchSearch;
             });
 
@@ -316,23 +328,28 @@
                 let actionText = "تحميل";
                 let clickAction = `window.open('${app.link}', '_blank')`;
                 
-                if (app.type === 'WEBSITE') {
-                    actionText = "زيارة";
-                } else if (app.type === 'FILE') {
+                // منطق الصور والملفات
+                if (app.link && (app.link.match(/\.(jpeg|jpg|gif|png)$/) != null)) {
                     actionText = "👁️ مشاهدة";
-                    clickAction = `viewImage('${app.img}')`; 
+                    clickAction = `viewImage('${app.link}')`; 
+                } else if (app.type === 'WEBSITE') {
+                    actionText = "زيارة";
                 }
+
+                // استخدام رابط الصورة مباشرة (بدون معالجة Base64)
+                const imgUrl = app.img || 'https://cdn-icons-png.flaticon.com/512/564/564619.png';
 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.setAttribute('onclick', clickAction);
                 
+                // نفس هيكل الكرت القديم الخاص بك بالضبط
                 card.innerHTML = `
                     <span class="mod-badge">${badgeTxt}</span>
                     <button class="heart-btn" onclick="toggleFavorite(this, '${app.name}')">
                         <i class="${heartClass} fa-heart"></i>
                     </button>
-                    <img src="${app.img}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'" loading="lazy">
+                    <img src="${imgUrl}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'" loading="lazy">
                     <div class="card-title">${app.name}</div>
                     <div class="get-btn ${app.type === 'FILE' ? 'secondary' : ''}">${actionText}</div>
                 `;
