@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V52 | Fixed Lock</title>
+    <title>Admin V53 | Link Mode</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -108,6 +108,9 @@
 
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; background: #334155; color: white; font-family: 'Cairo'; text-align: center; }
         
+        /* جعل مدخلات الروابط من اليسار لليمين */
+        input.url-input { direction: ltr; text-align: left; }
+
         .cat-item, .link-item { display: flex; gap: 8px; align-items: center; background: #334155; padding: 10px; margin-bottom: 8px; border-radius: 10px; border: 1px solid transparent;}
         
         .cat-drag { cursor: grab; font-size: 1.2rem; color: #94a3b8; padding: 5px; touch-action: none; }
@@ -116,7 +119,6 @@
         .cat-name-input { flex-grow: 1; margin: 0; background: transparent; text-align: right; padding: 8px; }
         .cat-action { padding: 8px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; color: white; }
         
-        /* زر القفل */
         .toggle-row {
             display: flex; justify-content: space-between; align-items: center;
             background: #0f172a; padding: 12px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #334155;
@@ -253,8 +255,9 @@
             <div id="sidebarEditSection" class="settings-section">
                 <div style="border-bottom:1px solid #334155; padding-bottom:15px; margin-bottom:15px;">
                     <img id="profilePreview" src="" style="width:80px; height:80px; border-radius:50%; border:2px solid #3b82f6; object-fit:cover; margin-bottom:10px;">
-                    <button onclick="document.getElementById('profileImgInput').click()" class="btn-full btn-cancel" style="font-size:0.8rem;">تغيير الصورة</button>
-                    <input type="file" id="profileImgInput" hidden accept="image/*" onchange="processProfileImage()">
+                    
+                    <label style="color:#94a3b8; font-size:0.8rem; display:block; text-align:right;">رابط الصورة الشخصية:</label>
+                    <input type="text" id="profileImgUrl" class="url-input" placeholder="https://..." oninput="document.getElementById('profilePreview').src=this.value">
                     
                     <div style="margin-top:10px; text-align:right;">
                         <label style="color:#94a3b8; font-size:0.8rem;">البايو:</label>
@@ -276,10 +279,12 @@
             <div class="modal-title">بيانات التطبيق</div>
             <select id="appCat"></select>
             <input type="text" id="appName" placeholder="الاسم">
-            <input type="text" id="appLink" placeholder="الرابط">
-            <button onclick="document.getElementById('fileInput').click()" class="btn-full btn-cancel">📸 صورة</button>
-            <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
+            <input type="text" id="appLink" class="url-input" placeholder="رابط التطبيق/الموقع">
+            
+            <input type="text" id="appImgUrl" class="url-input" placeholder="رابط الأيقونة (Image URL)" oninput="updatePreview(this.value)">
+            
             <img id="previewImg" style="width:80px; height:80px; object-fit:cover; display:none; margin:10px auto; border-radius:12px;">
+            
             <div style="display:flex; justify-content:space-between; margin:15px 0; background:#0f172a; padding:10px; border-radius:10px;">
                 <span>إخفاء؟</span>
                 <input type="checkbox" id="appHidden" style="width:20px;">
@@ -333,13 +338,11 @@
         let isSelectMode = false;
         let selectedApps = new Set();
         let editKey = null;
-        let currentImg = "";
         
         let appSortable = null;
         let catSortable = null;
         let linkSortable = null;
         let sidebarData = { profileImg: "", bio: "", links: [] };
-        let newProfileImg = "";
 
         const ICON_OPTIONS = [
             {val: "fab fa-whatsapp", label: "واتساب"},
@@ -480,8 +483,7 @@
             });
         }
         
-                window.toggleCat = (key, isChecked) => {
-            // تم التعديل لاستخدام set ليتم الحفظ في قاعدة البيانات فوراً
+        window.toggleCat = (key, isChecked) => {
             set(ref(db, `categories/${key}/isHidden`), !isChecked);
         };
         
@@ -534,10 +536,13 @@
             if(confirm("حذف القسم؟")) remove(ref(db, `categories/${k}`));
         };
 
-        // ============ SIDEBAR EDIT ============
+        // ============ SIDEBAR EDIT (UPDATED for URL) ============
         function renderSidebarEdit() {
-            newProfileImg = sidebarData.profileImg || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-            document.getElementById('profilePreview').src = newProfileImg;
+            // استخدام رابط الصورة مباشرة
+            const profileUrl = sidebarData.profileImg || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+            document.getElementById('profilePreview').src = profileUrl;
+            document.getElementById('profileImgUrl').value = sidebarData.profileImg || ""; // تعبئة الحقل
+            
             document.getElementById('profileBioInput').value = sidebarData.bio || "";
             
             const list = document.getElementById('linksList');
@@ -560,12 +565,11 @@
                         <select class="icon-select" onchange="this.parentElement.dataset.icon=this.value">${opts}</select>
                         <div style="display:flex; gap:5px; margin-top:5px;">
                             <input type="text" class="link-name" value="${link.name}" placeholder="الاسم" style="margin:0; padding:5px; font-size:0.8rem;">
-                            <input type="text" class="link-url" value="${link.url}" placeholder="الرابط" style="margin:0; padding:5px; font-size:0.8rem; direction:ltr;">
+                            <input type="text" class="link-url url-input" value="${link.url}" placeholder="الرابط" style="margin:0; padding:5px; font-size:0.8rem;">
                         </div>
                     </div>
                     <i class="fas fa-trash cat-action" style="color:#ef4444" onclick="removeLink(${idx})"></i>
                 `;
-                // تخزين القيمة الحالية للأيقونة
                 div.querySelector('.icon-select').parentElement.dataset.icon = link.icon;
                 list.appendChild(div);
             });
@@ -575,6 +579,9 @@
         
         window.saveSidebarSettings = () => {
             const bio = document.getElementById('profileBioInput').value;
+            // أخذ الرابط مباشرة من الحقل
+            const pImg = document.getElementById('profileImgUrl').value;
+            
             const links = [];
             document.querySelectorAll('.link-item').forEach(item => {
                 const iconVal = item.querySelector('div[style="flex-grow:1;"]').dataset.icon || item.querySelector('.icon-select').value;
@@ -584,7 +591,7 @@
                     url: item.querySelector('.link-url').value
                 });
             });
-            set(ref(db, 'settings'), { profileImg: newProfileImg, bio: bio, links: links })
+            set(ref(db, 'settings'), { profileImg: pImg, bio: bio, links: links })
             .then(() => showAlert("تم", "تم حفظ الملف الشخصي", "✅"));
         };
         
@@ -598,26 +605,8 @@
             sidebarData.links.splice(i, 1);
             renderSidebarEdit();
         };
-        
-        window.processProfileImage = () => {
-             const f = document.getElementById('profileImgInput').files[0]; 
-            if(f){ 
-                const r=new FileReader(); r.readAsDataURL(f); 
-                r.onload=(e)=>{ 
-                    const i=new Image(); i.src=e.target.result; 
-                    i.onload=()=>{ 
-                        const canvas=document.createElement("canvas"); 
-                        const max=400; let w=i.width; let h=i.height;
-                        if(w>max){ h*=max/w; w=max; } canvas.width=w; canvas.height=h; 
-                        canvas.getContext("2d").drawImage(i,0,0,w,h);
-                        newProfileImg=canvas.toDataURL("image/jpeg",0.9); 
-                        document.getElementById('profilePreview').src=newProfileImg; 
-                    }
-                }
-            }
-        };
 
-        // ============ SEARCH ============
+        // ============ SEARCH (UPDATED to fill URL input) ============
         window.doStoreSearch = async () => {
             const q = document.getElementById('storeSearchInput').value;
             const res = document.getElementById('searchResults');
@@ -636,14 +625,18 @@
 
                 data.results.forEach(app => {
                     const safeLink = `https://play.google.com/store/search?q=${encodeURIComponent(app.trackName)}&c=apps`;
+                    const imgUrl = app.artworkUrl512 || app.artworkUrl100; // الرابط من المتجر
+                    
                     const item = document.createElement('div');
                     item.className = 'search-item';
                     item.onclick = () => {
                         closeModal('searchModal'); openEditModal(null);
                         document.getElementById('appName').value = app.trackName;
-                        currentImg = app.artworkUrl512 || app.artworkUrl100;
-                        document.getElementById('previewImg').src = currentImg;
-                        document.getElementById('previewImg').style.display = 'block';
+                        
+                        // هنا نضع الرابط في الحقل بدلاً من متغير
+                        document.getElementById('appImgUrl').value = imgUrl; 
+                        window.updatePreview(imgUrl); // تحديث العرض
+                        
                         document.getElementById('appLink').value = safeLink;
                     };
                     item.innerHTML = `
@@ -700,24 +693,40 @@
             update(ref(db),u); closeModal('moveModal'); toggleSelectMode();
         };
 
+        // [NEW] Helper to show preview from URL
+        window.updatePreview = (url) => {
+            const img = document.getElementById('previewImg');
+            if(url) {
+                img.src = url;
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+            }
+        };
+
         window.openEditModal = (key, data) => {
             closeModal('addChoiceModal'); document.getElementById('appModal').style.display = 'flex';
             if(key) {
-                editKey = key; currentImg = data.img;
+                editKey = key;
                 document.getElementById('appName').value = data.name;
                 document.getElementById('appLink').value = data.link;
                 document.getElementById('appCat').value = data.type;
                 document.getElementById('appHidden').checked = data.isHidden || false;
-                document.getElementById('previewImg').src = data.img;
-                document.getElementById('previewImg').style.display = 'block';
+                
+                // تعبئة حقل الرابط
+                document.getElementById('appImgUrl').value = data.img || "";
+                updatePreview(data.img);
+
                 document.getElementById('saveBtn').innerText = 'حفظ التعديلات';
                 document.getElementById('delBtn').style.display = 'block';
             } else {
-                editKey = null; currentImg = "";
+                editKey = null;
                 document.getElementById('appName').value = "";
                 document.getElementById('appLink').value = "";
+                document.getElementById('appImgUrl').value = ""; // تفريغ
+                updatePreview("");
+                
                 document.getElementById('appHidden').checked = false;
-                document.getElementById('previewImg').style.display = 'none';
                 document.getElementById('saveBtn').innerText = 'إضافة';
                 document.getElementById('delBtn').style.display = 'none';
             }
@@ -725,13 +734,16 @@
 
         window.saveApp = () => {
             const name = document.getElementById('appName').value;
+            const imgUrl = document.getElementById('appImgUrl').value;
+            
             if(!name) return showAlert("خطأ", "الاسم مطلوب", "❌");
+            
             const d = { 
                 name, 
                 link: document.getElementById('appLink').value, 
                 type: document.getElementById('appCat').value, 
                 isHidden: document.getElementById('appHidden').checked,
-                img: currentImg || "https://cdn-icons-png.flaticon.com/512/564/564619.png",
+                img: imgUrl || "https://cdn-icons-png.flaticon.com/512/564/564619.png", // استخدام الرابط
                 order: editKey ? allApps[editKey].order : 9999
             };
             if(editKey) update(ref(db, `apps/${editKey}`), d); else push(ref(db, 'apps'), d);
@@ -739,25 +751,6 @@
         };
 
         window.deleteSingleApp = () => { remove(ref(db, 'apps/'+editKey)); closeModal('appModal'); };
-
-        window.processImage = () => { 
-            const f=document.getElementById('fileInput').files[0]; 
-            if(f){ 
-                const r=new FileReader(); r.readAsDataURL(f); 
-                r.onload=(e)=>{ 
-                    const i=new Image(); i.src=e.target.result; 
-                    i.onload=()=>{ 
-                        const c=document.createElement("canvas"); 
-                        const m=600; let w=i.width; let h=i.height;
-                        if(w>m){ h*=m/w; w=m; } c.width=w; c.height=h; 
-                        c.getContext("2d").drawImage(i,0,0,w,h);
-                        currentImg=c.toDataURL("image/jpeg",0.85); 
-                        document.getElementById('previewImg').src=currentImg; 
-                        document.getElementById('previewImg').style.display='block'; 
-                    }
-                }
-            }
-        };
 
         window.openSettingsModal = () => { document.getElementById('settingsModal').style.display='flex'; backToSettingsMain(); };
         window.openSettingsSection = (s) => {
