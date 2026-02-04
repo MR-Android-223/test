@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin V52 | Stable Lock</title>
+    <title>Admin V52 | Fixed Lock</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    
     <style>
         :root {
             --bg-body: #0f172a; --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b, #0f172a);
@@ -396,8 +398,8 @@
             let opts = '';
             
             sorted.forEach(([k, v]) => {
-                const isLocked = (v.isHidden === true || v.isHidden === "true");
-                const hiddenIcon = isLocked ? '🔒 ' : '';
+                const isHidden = (v.isHidden === true || v.isHidden === "true");
+                const hiddenIcon = isHidden ? '🔒 ' : '';
                 html += `<button class="tab-btn ${currentFilter===k?'active':''}" onclick="setFilter('${k}')">${hiddenIcon}${v.icon||''} ${v.name}</button>`;
                 opts += `<option value="${k}">${v.name}</option>`;
             });
@@ -479,6 +481,8 @@
         }
         
         window.toggleCat = (key, isChecked) => {
+            // isChecked = true (ON) -> Visible -> isHidden = false
+            // isChecked = false (OFF) -> Hidden -> isHidden = true
             update(ref(db, `categories/${key}/isHidden`), !isChecked);
         };
         
