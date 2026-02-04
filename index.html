@@ -251,9 +251,10 @@
             let html = `<button class="tab-btn ${currentCategory === 'ALL' ? 'active' : ''}" onclick="filterApps('ALL', this)">🌟 الكل</button>`;
             
             sortedCats.forEach(([key, val]) => {
-                // النقطة الحاسمة: إذا كان القسم مخفياً (isHidden = true) لا ترسم الزر
+                // =============== التعديل الوحيد هنا ===============
+                // إذا كان القسم مقفلاً (isHidden = true)، لا يتم عرضه في الشريط
                 if (val.isHidden !== true) {
-                    html += `<button class="tab-btn ${currentCategory === key ? 'active' : ''}" onclick="filterApps('${key}', this)">${val.icon || '📁'} ${val.name}</button>`;
+                    html += `<button class="tab-btn ${currentCategory === key ? 'active' : ''}" onclick="filterApps('${key}', this)">${val.icon || ''} ${val.name}</button>`;
                 }
             });
             
@@ -268,7 +269,7 @@
                     .sort((a, b) => (a.order || 0) - (b.order || 0));
                 renderApps();
             } else {
-                renderApps(); // تفريغ إذا لم يكن هناك بيانات
+                renderApps(); 
             }
         });
 
@@ -288,9 +289,9 @@
             const favs = JSON.parse(localStorage.getItem('favorites')) || [];
 
             const filtered = allAppsData.filter(app => {
-                // التحقق من حالة قفل القسم
+                // =============== التعديل الثاني هنا ===============
+                // التحقق من حالة القسم الأب، إذا كان مقفلاً يتم استبعاد التطبيق
                 const parentCat = allCats[app.type];
-                // إذا كان القسم موجوداً ومخفياً، لا تعرض التطبيق
                 if (parentCat && parentCat.isHidden === true) return false;
 
                 const matchCat = (currentCategory === 'ALL') || (app.type === currentCategory);
