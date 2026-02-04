@@ -606,58 +606,65 @@
             renderSidebarEdit();
         };
 
-        // ============ SEARCH (UPDATED to fill URL input) ============
-        // --- دالة البحث السحري (Magic Search) ---
+        // --- دالة البحث السحري (المعدلة والمضمونة مع الوسيط) ---
         window.magicSearch = async () => {
             const q = document.getElementById('appName').value;
-            if(!q) return alert("اكتب اسم التطبيق للبحث!");
+            if(!q) return showAlert("تنبيه", "اكتب اسم التطبيق للبحث!", "⚠️");
             
             const btn = document.getElementById('magicBtn');
             const oldIcon = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; // مؤشر التحميل
             
             try {
-                // نستخدم iTunes لأنه يعطي صور عالية الدقة (512x512) وروابط مباشرة
-                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=software&limit=5`);
-                const data = await res.json();
+                // استخدام الوسيط (allorigins) مثل الكود القديم لضمان العمل 100%
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://itunes.apple.com/search?term='+q+'&entity=software&limit=5')}`;
+                
+                const response = await fetch(proxyUrl);
+                const dataWrapper = await response.json();
+                const data = JSON.parse(dataWrapper.contents); // فك تشفير البيانات من الوسيط
                 
                 const div = document.getElementById('searchResults');
                 div.innerHTML = '';
-                div.style.display = 'flex';
+                div.style.display = 'flex'; // إظهار القائمة
                 
-                if(data.results.length === 0) alert("لم يتم العثور على نتائج، جرب اسماً آخر");
-
-                data.results.forEach(item => {
-                    // تحويل دقة الصورة من 100x100 إلى 512x512
-                    const imgUrl = item.artworkUrl100.replace('100x100', '512x512');
-                    
-                    const d = document.createElement('div');
-                    d.innerHTML = `<img src="${imgUrl}" style="width:60px; height:60px; border-radius:12px; cursor:pointer; margin:2px;">`;
-                    
-                    // عند الضغط على الصورة
-                    d.onclick = () => {
-                        // 1. تعبئة الاسم
-                        document.getElementById('appName').value = item.trackName;
+                if(data.results.length === 0) {
+                    div.innerHTML = '<div style="text-align:center; width:100%; color:#94a3b8; padding:10px;">لا توجد نتائج</div>';
+                } else {
+                    data.results.forEach(item => {
+                        // جلب الصورة بدقة عالية 512
+                        const imgUrl = item.artworkUrl100.replace('100x100', '512x512');
                         
-                        // 2. تعبئة الصورة (حفظ الرابط كنص URL لتقليل حجم البيانات)
-                        currentImg = imgUrl; 
-                        const prev = document.getElementById('previewImg');
-                        prev.src = imgUrl;
-                        prev.style.display = 'block';
+                        const d = document.createElement('div');
+                        d.style.cssText = "min-width:65px; margin:0 5px; cursor:pointer; text-align:center;";
+                        d.innerHTML = `<img src="${imgUrl}" style="width:60px; height:60px; border-radius:12px; border:1px solid #475569; object-fit:cover; background:#000;">`;
                         
-                        // 3. تعبئة الرابط (ليفتح تطبيق متجر بلاي فوراً)
-                        document.getElementById('appLink').value = `market://search?q=${encodeURIComponent(item.trackName)}&c=apps`;
-                        
-                        // إخفاء القائمة
-                        div.style.display = 'none';
-                    };
-                    div.appendChild(d);
-                });
+                        // عند الضغط على الصورة
+                        d.onclick = () => {
+                            // 1. تعبئة الاسم
+                            document.getElementById('appName').value = item.trackName;
+                            
+                            // 2. تعبئة رابط الصورة في الحقل المخصص (V53)
+                            const imgInput = document.getElementById('appImgUrl');
+                            imgInput.value = imgUrl;
+                            
+                            // تحديث العرض المسبق فوراً
+                            window.updatePreview(imgUrl);
+                            
+                            // 3. تعبئة رابط التحميل (ليفتح تطبيق المتجر)
+                            document.getElementById('appLink').value = `market://search?q=${encodeURIComponent(item.trackName)}&c=apps`;
+                            
+                            // إخفاء نتائج البحث
+                            div.style.display = 'none';
+                        };
+                        div.appendChild(d);
+                    });
+                }
             } catch(e) { 
-                alert("خطأ في البحث، تأكد من الإنترنت"); 
+                console.error(e);
+                showAlert("خطأ", "فشل الاتصال، تأكد من الإنترنت", "❌"); 
             }
             btn.innerHTML = oldIcon;
-        };        
+        };
         
         // ============ HELPERS ============
         window.toggleSelectMode = () => {
