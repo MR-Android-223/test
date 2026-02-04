@@ -3,25 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Panel V40 | Final Fixed</title>
-    
+    <title>Admin V50 | Pro Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    
     <style>
         :root {
-            --bg-body: #0f172a; 
-            --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b, #0f172a);
-            --card-glass: rgba(30, 41, 59, 0.98); 
-            --text-main: #f8fafc; 
-            --text-muted: #94a3b8;
-            --primary: #3b82f6; 
-            --danger: #ef4444; 
+            --bg-body: #0f172a; --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b, #0f172a);
+            --card-glass: rgba(30, 41, 59, 0.98); --text-main: #f8fafc; --text-muted: #94a3b8;
+            --primary: #3b82f6; --danger: #ef4444; --border: rgba(255,255,255,0.08);
             --success: #10b981;
-            --border: rgba(255,255,255,0.08);
         }
-        
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
         body { 
@@ -31,140 +23,145 @@
             overflow-y: auto; touch-action: pan-y; 
         }
 
-        /* --- Header --- */
+        /* تأثير الضغط */
+        button:active, .header-btn:active, .fab-btn:active, .cat-action:active { transform: scale(0.94); transition: 0.1s; }
+
         header {
             position: sticky; top: 0; z-index: 1000; background: rgba(15, 23, 42, 0.98);
-            border-bottom: 1px solid var(--border); padding: 12px 15px;
+            border-bottom: 1px solid var(--border); padding: 15px 20px;
             display: flex; justify-content: space-between; align-items: center;
         }
         .header-btn {
-            background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--border);
-            padding: 0 12px; height: 38px; border-radius: 10px; font-size: 0.9rem; 
-            cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+            background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--border);
+            padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px;
         }
-        .header-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+        .header-btn.active { background: var(--primary); border-color: var(--primary); }
 
-        /* --- Tabs --- */
-        .tabs-wrapper { position: sticky; top: 63px; z-index: 900; padding: 10px 0; background: #0f172a; }
-        .tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 0 15px; scrollbar-width: none; }
+        .tabs-wrapper { position: sticky; top: 68px; z-index: 900; padding: 10px 0; background: #0f172a; }
+        .tabs-container { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px; scrollbar-width: none; }
         .tab-btn {
             background: var(--card-glass); color: var(--text-muted); border: 1px solid var(--border);
-            padding: 8px 18px; border-radius: 50px; cursor: pointer; transition: 0.3s;
+            padding: 8px 20px; border-radius: 50px; cursor: pointer; transition: 0.3s;
             font-family: 'Cairo'; font-weight: 700; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0;
         }
-        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
 
-        /* --- Grid & Cards --- */
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 15px; }
-        
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px 20px; max-width: 1000px; margin: 0 auto; }
         .card {
-            background: var(--card-glass); border-radius: 16px; padding: 15px; border: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; position: relative; transition: 0.2s;
+            background: var(--card-glass); border-radius: 18px; padding: 15px; border: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; position: relative; transition: transform 0.1s;
         }
-        .card.selected { border: 2px solid var(--primary); background: rgba(59, 130, 246, 0.1); }
         
-        /* دائرة التحديد */
+        .sortable-ghost { opacity: 0.4; background: var(--primary); }
+        .sortable-drag { cursor: grabbing; opacity: 1; background: #1e293b; transform: scale(1.05); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+
+        .card.selected { border: 2px solid var(--primary); background: rgba(59, 130, 246, 0.15); }
         .check-circle { 
-            position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; 
-            border-radius: 50%; border: 2px solid #64748b; background: rgba(0,0,0,0.3); 
-            display: none; align-items: center; justify-content: center; z-index: 10;
+            position: absolute; top: 10px; left: 10px; width: 22px; height: 22px; 
+            border-radius: 50%; border: 2px solid #94a3b8; background: transparent; transition: 0.2s;
+            display: none;
         }
-        .card.select-mode .check-circle { display: flex; }
-        .card.selected .check-circle { background: var(--primary); border-color: var(--primary); }
-        .card.selected .check-circle::after { content: '✓'; color: white; font-size: 0.8rem; font-weight: bold; }
+        .card.select-mode .check-circle { display: block; }
+        .card.selected .check-circle { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .card.selected .check-circle::after { content: '✓'; color: white; font-size: 0.8rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-        .card img { width: 65px; height: 65px; border-radius: 14px; margin-bottom: 10px; object-fit: cover; pointer-events: none; background: #334155; }
-        .card-title { font-size: 0.85rem; font-weight: 700; text-align: center; height: 36px; overflow: hidden; line-height: 1.3; pointer-events: none; }
+        .card img { width: 60px; height: 60px; border-radius: 14px; margin-bottom: 10px; object-fit: cover; pointer-events: none; }
+        .card-title { font-size: 0.9rem; font-weight: 700; text-align: center; margin-bottom: 5px; height: 40px; overflow: hidden; pointer-events: none; }
+        .edit-badge { position: absolute; top: 10px; left: 10px; background: #f59e0b; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; }
         
-        .edit-badge { 
-            position: absolute; top: 10px; left: 10px; 
-            background: #f59e0b; color: white; font-size: 0.7rem; 
-            padding: 4px 8px; border-radius: 6px; font-weight: bold; display: flex; gap: 4px;
-        }
-        .card.select-mode .edit-badge { display: none; } /* إخفاء زر التعديل عند التحديد */
-
-        /* زر السحب */
-        .drag-handle {
-            position: absolute; top: 0; right: 0; width: 40px; height: 40px;
+        /* مقبض السحب */
+        .drag-handle { 
+            position: absolute; top: 0; right: 0; color: #94a3b8; cursor: grab; 
+            padding: 15px; width: 50px; height: 50px; z-index: 10; font-size: 1.4rem; 
             display: flex; align-items: center; justify-content: center;
-            color: #64748b; cursor: grab; z-index: 5; touch-action: none;
+            touch-action: none; 
         }
         .card.select-mode .drag-handle { display: none; }
+        .card.select-mode .edit-badge { display: none; }
 
-        /* --- Bulk Action Bar --- */
-        #bulkBar {
-            position: fixed; bottom: -100px; left: 0; width: 100%; 
-            background: #1e293b; border-top: 1px solid var(--primary);
-            padding: 15px; z-index: 2000; display: flex; gap: 10px; 
-            transition: 0.3s; box-shadow: 0 -5px 30px rgba(0,0,0,0.5);
-            justify-content: center;
-        }
-        #bulkBar.visible { bottom: 0; }
-        .bulk-btn { 
-            flex: 1; padding: 10px; border-radius: 12px; border: none; 
-            font-weight: bold; cursor: pointer; color: white; 
-            display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 0.8rem; 
-        }
-
-        /* --- FAB --- */
         .fab-btn {
-            position: fixed; bottom: 30px; left: 30px; width: 55px; height: 55px;
+            position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px;
             background: var(--primary); color: white; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
-            cursor: pointer; z-index: 1500; border: none; transition: 0.2s;
+            font-size: 2rem; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+            cursor: pointer; z-index: 2000; border: none; transition: 0.3s;
         }
-        .fab-btn:active { transform: scale(0.9); }
 
-        /* --- Modals --- */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-box { background: #1e293b; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; max-height: 85vh; overflow-y: auto;}
+        #bulkBar {
+            position: fixed; bottom: -120px; left: 0; width: 100%; 
+            background: #1e293b; border-top: 1px solid var(--primary);
+            padding: 15px 20px; z-index: 2500; display: flex; gap: 10px; 
+            transition: 0.3s; box-shadow: 0 -5px 30px rgba(0,0,0,0.8);
+        }
+        #bulkBar.visible { bottom: 0; }
+        .bulk-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; color: white; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 0.8rem; }
+
+        /* Modals */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-box { background: #1e293b; padding: 25px; border-radius: 20px; width: 90%; max-width: 380px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; max-height: 85vh; overflow-y: auto;}
+        .modal-title { font-size: 1.2rem; color: white; margin-bottom: 20px; font-weight: bold; }
         
-        .btn-full { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: bold; font-size: 0.95rem; cursor: pointer; font-family: 'Cairo'; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-full { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; font-family: 'Cairo'; margin-bottom: 8px; transition: 0.1s;}
         .btn-confirm { background: var(--primary); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-cancel { background: transparent; color: #94a3b8; border: 1px solid #334155; }
 
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #334155; outline: none; font-size: 1rem; background: #0f172a; color: white; font-family: 'Cairo'; text-align: center; }
-
-        /* --- Toggle Switch (للقفل) --- */
-        .toggle-row {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #0f172a; padding: 12px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #334155;
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: none; outline: none; font-size: 1rem; background: #334155; color: white; font-family: 'Cairo'; text-align: center; }
+        
+        /* عناصر القوائم (الأقسام والروابط) */
+        .cat-item, .link-item { display: flex; gap: 8px; align-items: center; background: #334155; padding: 10px; margin-bottom: 8px; border-radius: 10px; border: 1px solid transparent;}
+        
+        .cat-drag { cursor: grab; font-size: 1.2rem; color: #94a3b8; padding: 5px; touch-action: none; }
+        
+        .cat-icon-input { width: 45px; margin: 0; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px; font-size: 1.2rem; }
+        .cat-name-input { flex-grow: 1; margin: 0; background: transparent; text-align: right; padding: 8px; }
+        .cat-action { padding: 8px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; color: white; }
+        
+        /* زر القفل */
+        .toggle-btn {
+            width: 50px; height: 28px; background: #475569; border-radius: 50px; position: relative; cursor: pointer; transition: 0.3s;
         }
-        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-        /* --- Search Results --- */
-        .search-item {
-            display: flex; align-items: center; gap: 10px; padding: 10px;
-            background: #334155; margin-bottom: 8px; border-radius: 12px; cursor: pointer; text-align: right;
+        .toggle-btn.on { background: var(--primary); }
+        .toggle-btn::after {
+            content: ''; position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: 0.3s;
         }
-        .search-item img { width: 45px; height: 45px; border-radius: 10px; background: #000; }
+        .toggle-btn.on::after { left: 26px; }
 
         .settings-menu-btn {
             display: flex; align-items: center; justify-content: space-between;
             background: #334155; color: white; padding: 15px; border-radius: 12px; margin-bottom: 10px;
             cursor: pointer; border: 1px solid rgba(255,255,255,0.05); font-weight: 600;
         }
-        .settings-section { display: none; animation: fadeIn 0.3s; }
+        .settings-section { display: none; text-align: right; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
+
+        /* نتائج البحث */
+        .search-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px;
+            background: #334155; margin-bottom: 8px; border-radius: 12px; cursor: pointer; text-align: right;
+        }
+
+        /* قائمة اختيار الأيقونة */
+        .icon-select {
+            background: #1e293b; color: white; border: 1px solid #475569;
+            padding: 5px; border-radius: 8px; font-size: 0.8rem; width: 100%;
+        }
+
     </style>
 </head>
 <body>
 
     <header>
-        <div style="font-weight:900; font-size:1.1rem;">Admin<span style="color:var(--primary)">Panel</span></div>
+        <div style="font-weight:900; font-size:1.2rem;">Admin<span style="color:#3b82f6">Panel</span></div>
         <div style="display:flex; gap:8px;">
             <button onclick="openSettingsModal()" class="header-btn">
-                <i class="fas fa-cog"></i>
+                <i class="fas fa-cog"></i> 
             </button>
             <button onclick="toggleSelectMode()" id="selectBtn" class="header-btn">
                 <i class="fas fa-check-square"></i> تحديد
+            </button>
+            <button onclick="openCatModal()" class="header-btn">
+                <i class="fas fa-folder"></i>
             </button>
             <button onclick="login()" id="loginBtn" class="header-btn" style="background:#ea4335; border-color:#ea4335;">Login</button>
         </div>
@@ -175,9 +172,7 @@
     </div>
 
     <div class="grid" id="appsContainer">
-        <div style="grid-column: span 2; text-align: center; color: #94a3b8; margin-top: 50px;">
-            <i class="fas fa-circle-notch fa-spin"></i> جاري التحميل...
-        </div>
+        <div style="grid-column: span 2; text-align: center; color: #94a3b8; margin-top: 50px;">جاري التحميل...</div>
     </div>
 
     <button class="fab-btn" id="addBtn" onclick="openAddChoiceModal()">+</button>
@@ -187,7 +182,7 @@
             <i class="fas fa-exchange-alt"></i> نقل
         </button>
         <button class="bulk-btn" onclick="bulkHide()" style="background: #f59e0b;">
-            <i class="fas fa-eye-slash"></i> إخفاء
+            <i class="fas fa-eye-slash"></i> حالة
         </button>
         <button class="bulk-btn" onclick="bulkDelete()" style="background: #ef4444;">
             <i class="fas fa-trash"></i> حذف
@@ -211,7 +206,7 @@
         <div class="modal-box">
             <div class="modal-title">بحث المتجر</div>
             <div style="position:relative; margin-bottom:10px;">
-                <input type="text" id="storeSearchInput" placeholder="اكتب اسم التطبيق (واتساب, فيسبوك..)" style="padding-right:40px;">
+                <input type="text" id="storeSearchInput" placeholder="اكتب اسم التطبيق..." style="padding-right:40px;">
                 <i class="fas fa-search" onclick="doStoreSearch()" style="position:absolute; right:12px; top:12px; color:var(--primary); cursor:pointer;"></i>
             </div>
             <div id="searchResults" style="max-height:300px; overflow-y:auto; margin-bottom:10px;"></div>
@@ -219,32 +214,9 @@
         </div>
     </div>
 
-    <div id="appModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-title">بيانات التطبيق</div>
-            <select id="appCat"></select>
-            <input type="text" id="appName" placeholder="الاسم">
-            <input type="text" id="appLink" placeholder="الرابط">
-            
-            <button onclick="document.getElementById('fileInput').click()" class="btn-full btn-cancel" style="font-size:0.85rem;">
-                <i class="fas fa-image"></i> تغيير الصورة
-            </button>
-            <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
-            <img id="previewImg" style="width:80px; height:80px; object-fit:cover; border-radius:15px; display:none; margin:10px auto; border:1px solid #334155;">
-
-            <div style="display:flex; justify-content:space-between; margin:15px 0; color:#cbd5e1; align-items:center; background:#0f172a; padding:10px; border-radius:12px;">
-                <span>إخفاء التطبيق؟</span>
-                <input type="checkbox" id="appHidden" style="width:20px; margin:0;">
-            </div>
-
-            <button onclick="saveApp()" id="saveBtn" class="btn-full btn-confirm">حفظ</button>
-            <button onclick="closeModal('appModal')" class="btn-full btn-cancel">إغلاق</button>
-        </div>
-    </div>
-
     <div id="settingsModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-title">الإعدادات</div>
+        <div class="modal-box" style="max-width: 450px;">
+            <div class="modal-title" style="margin-bottom:20px;">⚙️ الإعدادات</div>
             
             <div id="settingsMain">
                 <div class="settings-menu-btn" onclick="openSettingsSection('catLock')">
@@ -255,36 +227,72 @@
                     <span><i class="fas fa-folder" style="margin-left:10px; color:#3b82f6;"></i> إدارة الأقسام</span>
                     <i class="fas fa-chevron-left"></i>
                 </div>
+                <div class="settings-menu-btn" onclick="openSettingsSection('sidebarEdit')">
+                    <span><i class="fas fa-user-edit" style="margin-left:10px; color:#10b981;"></i> تعديل الملف الشخصي</span>
+                    <i class="fas fa-chevron-left"></i>
+                </div>
                 <button onclick="closeModal('settingsModal')" class="btn-full btn-cancel" style="margin-top:20px;">إغلاق</button>
             </div>
 
             <div id="catLockSection" class="settings-section">
-                <div style="margin-bottom:15px; color:#94a3b8; font-size:0.8rem;">تحكم بظهور الأقسام للزوار:</div>
-                <div id="catLockList" style="max-height:350px; overflow-y:auto;"></div>
+                <div style="margin-bottom:15px; color:#94a3b8; font-size:0.85rem;">اضغط للقفل/الفتح:</div>
+                <div id="catLockList" style="max-height:300px; overflow-y:auto;"></div>
                 <button onclick="backToSettingsMain()" class="btn-full btn-cancel" style="margin-top:15px;">رجوع</button>
             </div>
-            
-             <div id="manageCatsSection" class="settings-section">
-                <div id="catManageList" style="max-height:250px; overflow-y:auto; margin-bottom:10px;"></div>
+
+            <div id="manageCatsSection" class="settings-section">
+                 <div style="margin-bottom:10px; color:#94a3b8; font-size:0.8rem;">اسحب للترتيب | اضغط أيقونة الحفظ للتعديل</div>
+                <div id="catManageList" style="max-height:300px; overflow-y:auto; margin-bottom:10px;"></div>
+                
                 <div style="border-top:1px solid #334155; padding-top:10px;">
-                    <input type="text" id="newCatName" placeholder="اسم قسم جديد" style="width:100%;">
-                    <button onclick="addNewCategory()" class="btn-full btn-confirm" style="margin-top:5px;">إضافة</button>
+                    <input type="text" id="newCatIcon" placeholder="رمز" style="width:20%; display:inline-block;">
+                    <input type="text" id="newCatName" placeholder="اسم القسم" style="width:75%; display:inline-block;">
+                    <button onclick="addCategory()" class="btn-full btn-confirm" style="margin-top:5px;">+ إضافة قسم</button>
                 </div>
                 <button onclick="backToSettingsMain()" class="btn-full btn-cancel" style="margin-top:10px;">رجوع</button>
             </div>
+
+            <div id="sidebarEditSection" class="settings-section">
+                <div style="border-bottom:1px solid #334155; padding-bottom:15px; margin-bottom:15px;">
+                    <img id="profilePreview" src="" style="width:80px; height:80px; border-radius:50%; border:2px solid #3b82f6; object-fit:cover; margin-bottom:10px;">
+                    <button onclick="document.getElementById('profileImgInput').click()" class="btn-full btn-cancel" style="font-size:0.8rem;">تغيير الصورة</button>
+                    <input type="file" id="profileImgInput" hidden accept="image/*" onchange="processProfileImage()">
+                    
+                    <div style="margin-top:10px; text-align:right;">
+                        <label style="color:#94a3b8; font-size:0.8rem;">البايو:</label>
+                        <input type="text" id="profileBioInput" placeholder="الوصف..." style="width:100%; margin-top:5px; background:#0f172a;">
+                    </div>
+                </div>
+                
+                <div id="linksList" style="max-height:200px; overflow-y:auto; margin-bottom:10px;"></div>
+                
+                <button onclick="addNewLink()" class="btn-full" style="background:#334155; border:1px dashed #94a3b8; margin-bottom:10px;">+ إضافة رابط</button>
+                <button onclick="saveSidebarSettings()" id="saveSidebarBtn" class="btn-full btn-confirm">حفظ</button>
+                <button onclick="backToSettingsMain()" class="btn-full btn-cancel">رجوع</button>
+            </div>
         </div>
     </div>
 
-    <div id="moveModal" class="modal-overlay">
+    <div id="appModal" class="modal-overlay">
         <div class="modal-box">
-            <div class="modal-title">نقل التطبيقات المحددة</div>
-            <select id="moveTargetCat"></select>
-            <button onclick="confirmBulkMove()" class="btn-full btn-confirm">نقل</button>
-            <button onclick="closeModal('moveModal')" class="btn-full btn-cancel">إلغاء</button>
+            <div class="modal-title">بيانات التطبيق</div>
+            <select id="appCat"></select>
+            <input type="text" id="appName" placeholder="الاسم">
+            <input type="text" id="appLink" placeholder="الرابط">
+            <button onclick="document.getElementById('fileInput').click()" class="btn-full btn-cancel">📸 صورة</button>
+            <input type="file" id="fileInput" hidden accept="image/*" onchange="processImage()">
+            <img id="previewImg" style="width:80px; height:80px; object-fit:cover; display:none; margin:10px auto; border-radius:12px;">
+            <div style="display:flex; justify-content:space-between; margin:15px 0; background:#0f172a; padding:10px; border-radius:10px;">
+                <span>إخفاء؟</span>
+                <input type="checkbox" id="appHidden" style="width:20px;">
+            </div>
+            <button onclick="saveApp()" id="saveBtn" class="btn-full btn-confirm">حفظ</button>
+            <button onclick="deleteSingleApp()" id="delBtn" class="btn-full btn-danger" style="display:none;">حذف</button>
+            <button onclick="closeModal('appModal')" class="btn-full btn-cancel">إغلاق</button>
         </div>
     </div>
 
-    <div id="alertModal" class="modal-overlay" style="z-index:4000;">
+    <div id="alertModal" class="modal-overlay" style="z-index: 5000;">
         <div class="modal-box">
             <div id="alertIcon" style="font-size:3rem; margin-bottom:10px;"></div>
             <div id="alertTitle" class="modal-title"></div>
@@ -293,12 +301,20 @@
         </div>
     </div>
 
+    <div id="moveModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">نقل التطبيقات</div>
+            <select id="moveTargetCat"></select>
+            <button onclick="confirmBulkMove()" class="btn-full btn-confirm">نقل</button>
+            <button onclick="closeModal('moveModal')" class="btn-full btn-cancel">إلغاء</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, push, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, update, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // إعدادات الفايربيس (كما أرسلتها)
         const firebaseConfig = {
             apiKey: "AIzaSyC_iEb4UhUREVJ2mfj00BounPVaeGQr7wI",
             authDomain: "mohammadalboushi-e9231.firebaseapp.com",
@@ -320,7 +336,27 @@
         let selectedApps = new Set();
         let editKey = null;
         let currentImg = "";
+        
         let appSortable = null;
+        let catSortable = null;
+        let linkSortable = null;
+        let sidebarData = { profileImg: "", bio: "", links: [] };
+        let newProfileImg = "";
+
+        const ICON_OPTIONS = [
+            {val: "fab fa-whatsapp", label: "واتساب"},
+            {val: "fab fa-facebook", label: "فيسبوك"},
+            {val: "fab fa-instagram", label: "انستغرام"},
+            {val: "fab fa-tiktok", label: "تيك توك"},
+            {val: "fab fa-youtube", label: "يوتيوب"},
+            {val: "fab fa-telegram", label: "تيليجرام"},
+            {val: "fab fa-twitter", label: "تويتر"},
+            {val: "fas fa-globe", label: "موقع ويب"},
+            {val: "fas fa-phone", label: "اتصال"},
+            {val: "fas fa-envelope", label: "ايميل"},
+            {val: "fas fa-map-marker-alt", label: "موقع"},
+            {val: "fas fa-link", label: "رابط عام"}
+        ];
 
         onAuthStateChanged(auth, (user) => {
             if (user && user.uid === myUID) {
@@ -331,13 +367,12 @@
                 document.getElementById('appsContainer').innerHTML = "<div style='grid-column:span 2; text-align:center;'>يرجى تسجيل الدخول</div>";
             }
         });
-
         window.login = () => signInWithPopup(auth, provider);
 
         function initData() {
             onValue(ref(db, 'categories'), (s) => {
                 const val = s.val();
-                if(!val) update(ref(db, 'categories'), {'DEF': {name: 'تطبيقات', order: 1}});
+                if(!val) update(ref(db, 'categories'), {'DEF': {name: 'تطبيقات', icon:'📱', order: 1}});
                 else { 
                     allCats = val; 
                     renderTabs(); 
@@ -350,9 +385,13 @@
                 allApps = s.val() || {};
                 renderApps();
             });
+
+            onValue(ref(db, 'settings'), (s) => {
+                sidebarData = s.val() || {links:[]};
+                if(document.getElementById('sidebarEditSection').style.display==='block') renderSidebarEdit();
+            });
         }
 
-        // ============ RENDER LOGIC ============
         window.renderTabs = () => {
             const list = document.getElementById('tabsList');
             const sorted = Object.entries(allCats).sort(([,a],[,b]) => (a.order||0)-(b.order||0));
@@ -362,7 +401,7 @@
             
             sorted.forEach(([k, v]) => {
                 const hiddenIcon = v.isHidden ? '🔒 ' : '';
-                html += `<button class="tab-btn ${currentFilter===k?'active':''}" onclick="setFilter('${k}')">${hiddenIcon}${v.name}</button>`;
+                html += `<button class="tab-btn ${currentFilter===k?'active':''}" onclick="setFilter('${k}')">${hiddenIcon}${v.icon||''} ${v.name}</button>`;
                 opts += `<option value="${k}">${v.name}</option>`;
             });
             list.innerHTML = html;
@@ -391,7 +430,7 @@
                 card.setAttribute('data-key', k);
                 
                 card.onclick = (e) => {
-                    if(e.target.classList.contains('drag-handle') || e.target.parentElement?.classList.contains('drag-handle')) return;
+                    if(e.target.closest('.drag-handle')) return;
                     if(isSelectMode) toggleSelection(k);
                     else openEditModal(k, v);
                 };
@@ -406,7 +445,6 @@
                 container.appendChild(card);
             });
 
-            // تفعيل السحب فقط في وضع "الكل" وعدم التحديد
             if(currentFilter === 'ALL' && !isSelectMode) {
                 appSortable = new Sortable(container, {
                     handle: '.drag-handle', animation: 150,
@@ -421,133 +459,162 @@
             }
         }
 
-        // ============ SELECTION MODE ============
-        window.toggleSelectMode = () => {
-            isSelectMode = !isSelectMode;
-            selectedApps.clear();
-            
-            const btn = document.getElementById('selectBtn');
-            const bulkBar = document.getElementById('bulkBar');
-            const addBtn = document.getElementById('addBtn');
-
-            if(isSelectMode) {
-                btn.classList.add('active');
-                bulkBar.classList.add('visible');
-                addBtn.style.display = 'none';
-            } else {
-                btn.classList.remove('active');
-                bulkBar.classList.remove('visible');
-                addBtn.style.display = 'flex';
-            }
-            renderApps();
-        };
-
-        window.toggleSelection = (key) => {
-            if(selectedApps.has(key)) selectedApps.delete(key);
-            else selectedApps.add(key);
-            renderApps();
-        };
-
-        window.bulkDelete = () => {
-            if(selectedApps.size === 0) return showAlert("تنبيه", "اختر عناصر أولاً");
-            if(confirm(`حذف ${selectedApps.size} تطبيق؟`)) {
-                const updates = {};
-                selectedApps.forEach(k => updates[`apps/${k}`] = null);
-                update(ref(db), updates);
-                toggleSelectMode();
-            }
-        };
-
-        window.bulkHide = () => {
-            if(selectedApps.size === 0) return showAlert("تنبيه", "اختر عناصر أولاً");
-            const updates = {};
-            selectedApps.forEach(k => updates[`apps/${k}/isHidden`] = !allApps[k].isHidden);
-            update(ref(db), updates);
-            toggleSelectMode();
-        };
-
-        window.bulkMove = () => {
-            if(selectedApps.size === 0) return showAlert("تنبيه", "اختر عناصر أولاً");
-            document.getElementById('moveModal').style.display = 'flex';
-        };
-
-        window.confirmBulkMove = () => {
-            const target = document.getElementById('moveTargetCat').value;
-            const updates = {};
-            selectedApps.forEach(k => updates[`apps/${k}/type`] = target);
-            update(ref(db), updates);
-            closeModal('moveModal');
-            toggleSelectMode();
-        };
-
-        // ============ SETTINGS (Toggles) ============
-        window.openSettingsModal = () => {
-            document.getElementById('settingsModal').style.display = 'flex';
-            backToSettingsMain();
-        };
-        window.openSettingsSection = (sec) => {
-            document.getElementById('settingsMain').style.display = 'none';
-            document.getElementById(sec+'Section').style.display = 'block';
-            if(sec === 'catLock') renderCatLockList();
-            if(sec === 'manageCats') renderCatManageList();
-        };
-        window.backToSettingsMain = () => {
-            document.querySelectorAll('.settings-section').forEach(el=>el.style.display='none');
-            document.getElementById('settingsMain').style.display = 'block';
-        };
-
+        // ============ CATEGORIES & SETTINGS ============
         function renderCatLockList() {
             const list = document.getElementById('catLockList');
             list.innerHTML = '';
-            Object.entries(allCats).forEach(([k, v]) => {
-                const isLocked = v.isHidden === true; // true = Locked/Hidden
-                // Logic: Switch ON (Blue) = Visible (isHidden: false)
-                // Switch OFF (Gray) = Hidden (isHidden: true)
-                const isChecked = !isLocked ? 'checked' : '';
-                
+            Object.entries(allCats).sort(([,a],[,b]) => (a.order||0)-(b.order||0)).forEach(([k, v]) => {
+                const isLocked = v.isHidden === true;
                 const div = document.createElement('div');
-                div.className = 'toggle-row';
+                div.className = 'cat-item';
                 div.innerHTML = `
-                    <div style="font-weight:bold;">${v.name}</div>
-                    <label class="switch">
-                        <input type="checkbox" ${isChecked} onchange="toggleCat('${k}', this.checked)">
-                        <span class="slider"></span>
-                    </label>
+                    <div style="flex-grow:1; display:flex; gap:10px; align-items:center;">
+                        <span>${v.icon||'📁'}</span>
+                        <strong>${v.name}</strong>
+                    </div>
+                    <div id="toggle-${k}" class="toggle-btn ${!isLocked?'on':''}" onclick="toggleCat('${k}', ${isLocked})"></div>
                 `;
                 list.appendChild(div);
             });
         }
         
-        window.toggleCat = (key, isVisible) => {
-            // If switch is ON (Visible), isHidden should be false
-            update(ref(db, `categories/${key}/isHidden`), !isVisible);
+        window.toggleCat = (key, isLocked) => {
+            update(ref(db, `categories/${key}/isHidden`), !isLocked); // عكس الحالة
         };
         
         function renderCatManageList() {
             const list = document.getElementById('catManageList');
             list.innerHTML = '';
-            Object.entries(allCats).forEach(([k,v]) => {
+            if(catSortable) { catSortable.destroy(); catSortable = null; }
+            
+            const sorted = Object.entries(allCats).sort(([,a],[,b]) => (a.order||0)-(b.order||0));
+            sorted.forEach(([k, v]) => {
                 const div = document.createElement('div');
-                div.className = 'toggle-row';
+                div.className = 'cat-item';
+                div.setAttribute('data-key', k);
                 div.innerHTML = `
-                    <span>${v.name}</span>
-                    <i class="fas fa-trash" style="color:#ef4444; cursor:pointer;" onclick="deleteCat('${k}')"></i>
+                    <div class="cat-drag"><i class="fas fa-bars"></i></div>
+                    <input type="text" class="cat-icon-input" id="icon-${k}" value="${v.icon||''}">
+                    <input type="text" class="cat-name-input" id="name-${k}" value="${v.name}">
+                    <i class="fas fa-save cat-action" style="color:#3b82f6" onclick="saveCat('${k}')"></i>
+                    <i class="fas fa-trash cat-action" style="color:#ef4444" onclick="deleteCat('${k}')"></i>
                 `;
                 list.appendChild(div);
             });
+            
+            catSortable = new Sortable(list, {
+                handle: '.cat-drag', animation: 150,
+                onEnd: () => {
+                    const updates = {};
+                    [...list.children].forEach((el, idx) => {
+                        updates[`categories/${el.getAttribute('data-key')}/order`] = idx;
+                    });
+                    update(ref(db), updates);
+                }
+            });
         }
+        
+        window.saveCat = (key) => {
+            const n = document.getElementById(`name-${key}`).value;
+            const i = document.getElementById(`icon-${key}`).value;
+            update(ref(db, `categories/${key}`), {name: n, icon: i})
+            .then(() => showAlert("تم", "تم تحديث القسم", "✅"));
+        };
         
         window.addNewCategory = () => {
             const n = document.getElementById('newCatName').value;
-            if(n) update(ref(db, `categories/CAT_${Date.now()}`), {name:n, order:99});
-            document.getElementById('newCatName').value = '';
+            const i = document.getElementById('newCatIcon').value;
+            if(n) update(ref(db, `categories/CAT_${Date.now()}`), {name: n, icon: i||'📁', order: 99});
         };
         
         window.deleteCat = (k) => {
-             if(confirm("حذف القسم؟")) remove(ref(db, `categories/${k}`));
+            if(confirm("حذف القسم؟")) remove(ref(db, `categories/${k}`));
         };
 
-        // ============ SEARCH FIX ============
+        // ============ SIDEBAR EDIT ============
+        function renderSidebarEdit() {
+            newProfileImg = sidebarData.profileImg || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+            document.getElementById('profilePreview').src = newProfileImg;
+            document.getElementById('profileBioInput').value = sidebarData.bio || "";
+            
+            const list = document.getElementById('linksList');
+            list.innerHTML = '';
+            if(linkSortable) { linkSortable.destroy(); linkSortable = null; }
+            
+            const links = sidebarData.links || [];
+            links.forEach((link, idx) => {
+                const div = document.createElement('div');
+                div.className = 'link-item';
+                
+                let opts = '';
+                ICON_OPTIONS.forEach(opt => {
+                    opts += `<option value="${opt.val}" ${link.icon === opt.val ? 'selected' : ''}>${opt.label}</option>`;
+                });
+                
+                div.innerHTML = `
+                    <div class="cat-drag"><i class="fas fa-bars"></i></div>
+                    <div style="flex-grow:1;">
+                        <select class="icon-select" onchange="this.parentElement.dataset.icon=this.value">${opts}</select>
+                        <div style="display:flex; gap:5px; margin-top:5px;">
+                            <input type="text" class="link-name" value="${link.name}" placeholder="الاسم" style="margin:0; padding:5px; font-size:0.8rem;">
+                            <input type="text" class="link-url" value="${link.url}" placeholder="الرابط" style="margin:0; padding:5px; font-size:0.8rem; direction:ltr;">
+                        </div>
+                    </div>
+                    <i class="fas fa-trash cat-action" style="color:#ef4444" onclick="removeLink(${idx})"></i>
+                `;
+                // تخزين القيمة الحالية للأيقونة
+                div.querySelector('.icon-select').parentElement.dataset.icon = link.icon;
+                list.appendChild(div);
+            });
+            
+            linkSortable = new Sortable(list, { handle: '.cat-drag', animation: 150 });
+        }
+        
+        window.saveSidebarSettings = () => {
+            const bio = document.getElementById('profileBioInput').value;
+            const links = [];
+            document.querySelectorAll('.link-item').forEach(item => {
+                const iconVal = item.querySelector('div[style="flex-grow:1;"]').dataset.icon || item.querySelector('.icon-select').value;
+                links.push({
+                    icon: iconVal,
+                    name: item.querySelector('.link-name').value,
+                    url: item.querySelector('.link-url').value
+                });
+            });
+            set(ref(db, 'settings'), { profileImg: newProfileImg, bio: bio, links: links })
+            .then(() => showAlert("تم", "تم حفظ الملف الشخصي", "✅"));
+        };
+        
+        window.addNewLink = () => {
+            if(!sidebarData.links) sidebarData.links = [];
+            sidebarData.links.push({name: '', url: '', icon: 'fab fa-whatsapp'});
+            renderSidebarEdit();
+        };
+        
+        window.removeLink = (i) => {
+            sidebarData.links.splice(i, 1);
+            renderSidebarEdit();
+        };
+        
+        window.processProfileImage = () => {
+             const f = document.getElementById('profileImgInput').files[0]; 
+            if(f){ 
+                const r=new FileReader(); r.readAsDataURL(f); 
+                r.onload=(e)=>{ 
+                    const i=new Image(); i.src=e.target.result; 
+                    i.onload=()=>{ 
+                        const canvas=document.createElement("canvas"); 
+                        const max=400; let w=i.width; let h=i.height;
+                        if(w>max){ h*=max/w; w=max; } canvas.width=w; canvas.height=h; 
+                        canvas.getContext("2d").drawImage(i,0,0,w,h);
+                        newProfileImg=canvas.toDataURL("image/jpeg",0.9); 
+                        document.getElementById('profilePreview').src=newProfileImg; 
+                    }
+                }
+            }
+        };
+
+        // ============ SEARCH ============
         window.doStoreSearch = async () => {
             const q = document.getElementById('storeSearchInput').value;
             const res = document.getElementById('searchResults');
@@ -556,33 +623,24 @@
             res.innerHTML = '<div style="text-align:center; padding:20px; color:#3b82f6;"><i class="fas fa-spinner fa-spin"></i> جاري البحث...</div>';
             
             try {
-                // استخدام AllOrigins كبروكسي موثوق جداً
                 const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://itunes.apple.com/search?term='+q+'&entity=software&limit=10&country=SA')}`;
-                
                 const response = await fetch(url);
                 const dataWrapper = await response.json();
                 const data = JSON.parse(dataWrapper.contents);
 
                 res.innerHTML = '';
-                if(data.results.length === 0) {
-                    res.innerHTML = '<div style="text-align:center;">لا توجد نتائج</div>'; return;
-                }
+                if(data.results.length === 0) { res.innerHTML = '<div style="text-align:center;">لا توجد نتائج</div>'; return; }
 
                 data.results.forEach(app => {
-                    // الرابط الآمن: بحث جوجل بلاي بالاسم
                     const safeLink = `https://play.google.com/store/search?q=${encodeURIComponent(app.trackName)}&c=apps`;
-                    
                     const item = document.createElement('div');
                     item.className = 'search-item';
                     item.onclick = () => {
-                        closeModal('searchModal');
-                        openEditModal(null);
+                        closeModal('searchModal'); openEditModal(null);
                         document.getElementById('appName').value = app.trackName;
-                        // تحميل صورة عالية الدقة
-                        const bigImg = app.artworkUrl512 || app.artworkUrl100;
-                        document.getElementById('previewImg').src = bigImg;
+                        currentImg = app.artworkUrl512 || app.artworkUrl100;
+                        document.getElementById('previewImg').src = currentImg;
                         document.getElementById('previewImg').style.display = 'block';
-                        currentImg = bigImg; // حفظ الصورة للمتغير
                         document.getElementById('appLink').value = safeLink;
                     };
                     item.innerHTML = `
@@ -595,22 +653,54 @@
                     `;
                     res.appendChild(item);
                 });
+            } catch(e) { res.innerHTML = '<div style="text-align:center; color:#ef4444;">خطأ في الاتصال</div>'; }
+        };
 
-            } catch(e) {
-                res.innerHTML = '<div style="text-align:center; color:#ef4444;">خطأ في الاتصال، حاول مجدداً</div>';
+        // ============ HELPERS ============
+        window.toggleSelectMode = () => {
+            isSelectMode = !isSelectMode; selectedApps.clear();
+            const btn = document.getElementById('selectBtn');
+            const bulkBar = document.getElementById('bulkBar');
+            const addBtn = document.getElementById('addBtn');
+            if(isSelectMode) { btn.classList.add('active'); bulkBar.classList.add('visible'); addBtn.style.display='none'; }
+            else { btn.classList.remove('active'); bulkBar.classList.remove('visible'); addBtn.style.display='flex'; }
+            renderApps();
+        };
+
+        window.toggleSelection = (k) => {
+            if(selectedApps.has(k)) selectedApps.delete(k); else selectedApps.add(k);
+            renderApps();
+        };
+
+        window.bulkDelete = () => {
+            if(selectedApps.size===0) return showAlert("تنبيه","حدد عناصر");
+            if(confirm("حذف المحدد؟")) {
+                const u={}; selectedApps.forEach(k=>u[`apps/${k}`]=null);
+                update(ref(db),u); toggleSelectMode();
             }
         };
 
-        // ============ MODAL LOGIC ============
-        window.openAddChoiceModal = () => document.getElementById('addChoiceModal').style.display='flex';
-        window.openSearchModal = () => { closeModal('addChoiceModal'); document.getElementById('searchModal').style.display='flex'; };
-        
+        window.bulkHide = () => {
+            if(selectedApps.size===0) return showAlert("تنبيه","حدد عناصر");
+            const u={}; selectedApps.forEach(k=>u[`apps/${k}/isHidden`]=!allApps[k].isHidden);
+            update(ref(db),u); toggleSelectMode();
+        };
+
+        window.bulkMove = () => {
+            if(selectedApps.size===0) return showAlert("تنبيه","حدد عناصر");
+            document.getElementById('moveModal').style.display='flex';
+        };
+
+        window.confirmBulkMove = () => {
+            const t=document.getElementById('moveTargetCat').value;
+            const u={}; selectedApps.forEach(k=>u[`apps/${k}/type`]=t);
+            update(ref(db),u); closeModal('moveModal'); toggleSelectMode();
+        };
+
         window.openEditModal = (key, data) => {
-            closeModal('addChoiceModal');
-            document.getElementById('appModal').style.display = 'flex';
+            closeModal('addChoiceModal'); document.getElementById('appModal').style.display = 'flex';
             if(key) {
-                editKey = key;
-                currentImg = data.img;
+                editKey = key; currentImg = data.img;
                 document.getElementById('appName').value = data.name;
                 document.getElementById('appLink').value = data.link;
                 document.getElementById('appCat').value = data.type;
@@ -618,67 +708,70 @@
                 document.getElementById('previewImg').src = data.img;
                 document.getElementById('previewImg').style.display = 'block';
                 document.getElementById('saveBtn').innerText = 'حفظ التعديلات';
+                document.getElementById('delBtn').style.display = 'block';
             } else {
-                editKey = null;
-                currentImg = "";
+                editKey = null; currentImg = "";
                 document.getElementById('appName').value = "";
                 document.getElementById('appLink').value = "";
                 document.getElementById('appHidden').checked = false;
                 document.getElementById('previewImg').style.display = 'none';
                 document.getElementById('saveBtn').innerText = 'إضافة';
+                document.getElementById('delBtn').style.display = 'none';
             }
         };
 
         window.saveApp = () => {
             const name = document.getElementById('appName').value;
-            const link = document.getElementById('appLink').value;
-            const type = document.getElementById('appCat').value;
-            const isHidden = document.getElementById('appHidden').checked;
-            
             if(!name) return showAlert("خطأ", "الاسم مطلوب", "❌");
-            
             const d = { 
-                name, link, type, isHidden, 
+                name, 
+                link: document.getElementById('appLink').value, 
+                type: document.getElementById('appCat').value, 
+                isHidden: document.getElementById('appHidden').checked,
                 img: currentImg || "https://cdn-icons-png.flaticon.com/512/564/564619.png",
                 order: editKey ? allApps[editKey].order : 9999
             };
-            
-            if(editKey) update(ref(db, `apps/${editKey}`), d);
-            else push(ref(db, 'apps'), d);
+            if(editKey) update(ref(db, `apps/${editKey}`), d); else push(ref(db, 'apps'), d);
             closeModal('appModal');
         };
 
+        window.deleteSingleApp = () => { remove(ref(db, 'apps/'+editKey)); closeModal('appModal'); };
+
         window.processImage = () => { 
-            const f = document.getElementById('fileInput').files[0];
-            if(f) {
-                const r = new FileReader();
-                r.readAsDataURL(f);
-                r.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        const cvs = document.createElement('canvas');
-                        const max = 600; 
-                        let w = img.width, h = img.height;
-                        if(w > max) { h *= max/w; w = max; }
-                        cvs.width = w; cvs.height = h;
-                        cvs.getContext('2d').drawImage(img,0,0,w,h);
-                        currentImg = cvs.toDataURL("image/jpeg", 0.85);
-                        document.getElementById('previewImg').src = currentImg;
-                        document.getElementById('previewImg').style.display = 'block';
+            const f=document.getElementById('fileInput').files[0]; 
+            if(f){ 
+                const r=new FileReader(); r.readAsDataURL(f); 
+                r.onload=(e)=>{ 
+                    const i=new Image(); i.src=e.target.result; 
+                    i.onload=()=>{ 
+                        const c=document.createElement("canvas"); 
+                        const m=600; let w=i.width; let h=i.height;
+                        if(w>m){ h*=m/w; w=m; } c.width=w; c.height=h; 
+                        c.getContext("2d").drawImage(i,0,0,w,h);
+                        currentImg=c.toDataURL("image/jpeg",0.85); 
+                        document.getElementById('previewImg').src=currentImg; 
+                        document.getElementById('previewImg').style.display='block'; 
                     }
                 }
             }
         };
 
-        window.showAlert = (t, m, i='✨') => {
-            document.getElementById('alertTitle').innerText = t;
-            document.getElementById('alertMsg').innerText = m;
-            document.getElementById('alertIcon').innerText = i;
-            document.getElementById('alertModal').style.display = 'flex';
+        window.openSettingsModal = () => { document.getElementById('settingsModal').style.display='flex'; backToSettingsMain(); };
+        window.openSettingsSection = (s) => {
+            document.getElementById('settingsMain').style.display='none';
+            document.getElementById(s+'Section').style.display='block';
+            if(s==='catLock') renderCatLockList();
+            if(s==='manageCats') renderCatManageList();
+            if(s==='sidebarEdit') renderSidebarEdit();
         };
+        window.backToSettingsMain = () => { document.querySelectorAll('.settings-section').forEach(e=>e.style.display='none'); document.getElementById('settingsMain').style.display='block'; };
+        
+        window.openAddChoiceModal = () => document.getElementById('addChoiceModal').style.display='flex';
+        window.openSearchModal = () => { closeModal('addChoiceModal'); document.getElementById('searchModal').style.display='flex'; };
+        window.openCatModal = () => document.getElementById('catModal').style.display='flex'; // تم إزالته واستبداله بالإعدادات
+        window.closeModal = (id) => document.getElementById(id).style.display='none';
+        window.showAlert = (t, m, i) => { document.getElementById('alertTitle').innerText=t; document.getElementById('alertMsg').innerText=m; document.getElementById('alertIcon').innerText=i; document.getElementById('alertModal').style.display='flex'; };
 
-        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
     </script>
 </body>
 </html>
