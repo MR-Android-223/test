@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>خزنة أسراري (سحابي)</title>
+    <title>خزنة أسراري (حسابي)</title>
     
-    <!-- مكتبة جوجل -->
-    <!-- الخطوط -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
@@ -37,7 +35,7 @@
         #loginOverlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-color: #f0f2f5;
-            z-index: 6000; display: none; /* مخفي افتراضياً ويظهر بالجافاسكريبت إذا لزم الأمر */
+            z-index: 6000; display: flex; /* يظهر افتراضياً */
             flex-direction: column;
             align-items: center; justify-content: center;
             padding: 20px;
@@ -259,16 +257,21 @@
             animation: spin 0.8s linear infinite; margin-right: 10px;
         }
         @keyframes spin { 0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);} }
+        
+        .status-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background-color: #ccc; display: inline-block; margin-left: 5px;
+        }
+        .status-online { background-color: #22c55e; box-shadow: 0 0 5px #22c55e; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<!-- واجهة تسجيل الدخول (Google Overlay) -->
 <div id="loginOverlay">
     <div class="login-card">
         <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" class="google-logo">
-        <h2 style="font-size:24px; font-weight:400; margin:0 0 8px 0; color:#202124;">سحابي فقط</h2>
-        <p style="color:#5f6368; margin-bottom:30px;">يجب تسجيل الدخول لاستخدام الخزنة</p>
+        <h2 style="font-size:24px; font-weight:400; margin:0 0 8px 0; color:#202124;">خزنتي السحابية</h2>
+        <p style="color:#5f6368; margin-bottom:30px;">سجل دخول لفتح الخزنة الخاصة بك</p>
 
         <a href="#" class="google-btn-auth" onclick="event.preventDefault(); startGoogleLogin()">
             <div class="google-icon-wrapper">
@@ -276,7 +279,7 @@
             </div>
             <span class="btn-text">الدخول باستخدام Google</span>
         </a>
-        <div id="loginStatus" style="margin-top:20px; font-size:13px; color:var(--primary); display:none;">جاري الاتصال بالسحابة...</div>
+        <div id="loginStatus" style="margin-top:20px; font-size:13px; color:var(--primary); display:none;">جاري الاتصال...</div>
     </div>
 </div>
 
@@ -287,12 +290,11 @@
     
     <h1>
         خزنة أسراري 
-        <div id="syncLoader" class="sync-loader"></div>
+        <div id="connectionStatus" class="status-dot"></div>
     </h1>
     
     <div style="width: 45px;"></div>
     
-    <!-- القائمة الرئيسية -->
     <div id="mainMenu" class="main-menu" onclick="event.stopPropagation()">
 
         <div class="menu-item" id="menuSetPass" onclick="handleAppLockSettings()">
@@ -320,6 +322,15 @@
             <svg style="width:20px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
         </div>
         <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importDataWrapper(event)">
+        
+        <div id="googleLogoutContainer" style="border-top:1px solid #f0f0f0;">
+            <div class="menu-item delete-item" onclick="handleGoogleLogout()">
+                <span>تسجيل خروج Google</span>
+                <div id="googleLogoutIcon">🚪</div>
+            </div>
+        </div>
+
+    </div>
 </header>
 
 <div class="container">
@@ -343,7 +354,6 @@
     </button>
 </div>
 
-<!-- Vault Page -->
 <div id="vaultPage">
     <div class="vault-fixed-top">
         <div class="vault-header">
@@ -385,7 +395,6 @@
     </div>
 </div>
 
-<!-- Context Menu -->
 <div id="contextModal" class="overlay" onclick="goBack()">
     <div class="modal-clean" onclick="event.stopPropagation()">
         <div style="text-align: center; padding: 20px 0 10px 0; color: var(--primary); font-weight: 700;">خيارات</div>
@@ -406,7 +415,6 @@
     </div>
 </div>
 
-<!-- Modals -->
 <div id="confirmModal" class="overlay">
     <div class="modal">
         <h3 id="confirmTitle">تنبيه</h3>
