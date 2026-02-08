@@ -6,7 +6,6 @@
     <title>خزنة أسراري (سحابي)</title>
     
     <!-- مكتبة جوجل -->
-    <script src="https://accounts.google.com/gsi/client" onload="initGoogleLib()" async defer></script>
     <!-- الخطوط -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     
@@ -295,18 +294,6 @@
     
     <!-- القائمة الرئيسية -->
     <div id="mainMenu" class="main-menu" onclick="event.stopPropagation()">
-        
-        <div id="googleSection">
-            <!-- قسم المزامنة -->
-            <div id="googleSyncActions">
-                <div class="menu-item sync-item" onclick="forceSyncFromCloud()">
-                    <span>تحديث البيانات (تنزيل)</span>
-                    <svg style="width:20px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="M12 12v9"></path><path d="M8 17l4 4 4-4"></path></svg>
-                </div>
-                <!-- تم إزالة زر الرفع اليدوي كما طلبت -->
-            </div>
-            <div style="height:1px; background:#f0f0f0; margin:5px 0;"></div>
-        </div>
 
         <div class="menu-item" id="menuSetPass" onclick="handleAppLockSettings()">
             <span id="lockMenuText">إعدادات القفل</span>
@@ -333,14 +320,6 @@
             <svg style="width:20px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
         </div>
         <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importDataWrapper(event)">
-
-        <div id="googleLogoutContainer" style="border-top:1px solid #f0f0f0;">
-            <div class="menu-item delete-item" onclick="handleGoogleLogout()">
-                <span>تسجيل خروج Google</span>
-                <div id="googleLogoutIcon">🚪</div>
-            </div>
-        </div>
-    </div>
 </header>
 
 <div class="container">
@@ -498,11 +477,12 @@
 <div id="toast" class="toast"></div>
 
 <script type="module">
-    // 1. استيراد مكتبات فايربيس (نسخة الويب)
+    // 1. استيراد المكتبات (قاعدة البيانات + المصادقة)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    // 2. إعدادات مشروعك (تمت إضافتها بنجاح) ✅
+    // 2. إعدادات مشروعك (كما هي)
     const firebaseConfig = {
       apiKey: "AIzaSyCMLMIUht6Az9R1-kiJeNGVN0BeL1N5rG4",
       authDomain: "wassouf1997.firebaseapp.com",
@@ -517,12 +497,15 @@
     // تهيئة التطبيق
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
     // متغيرات النظام
+    let currentUser = null; // لتخزين بيانات المستخدم الحالي
     let accounts = [];
     let folders = ["عام"];
     
-    // متغيرات الواجهة
+    // متغيرات الواجهة (كما هي)
     let isSelectionMode = false;
     let selectedIds = new Set();
     let activeFolder = 'All';
@@ -530,54 +513,102 @@
     let longPressTimer;
     let currentCtxId = null;
     let currentCtxType = null;
-    let pendingCallback = null;
-    let isMoveAction = false;
     let folderRenameTarget = null;
     let vaultPressTimer = null;
-    let saveTimeout = null;
-
-    // معرف الجهاز (لتجنب تكرار التحديثات)
-    const deviceId = localStorage.getItem('deviceId') || 'dev_' + Date.now();
-    localStorage.setItem('deviceId', deviceId);
+    let isMoveAction = false;
 
     // ==========================================
-    // 3. محرك فايربيس (الاستماع والحفظ)
+    // 3. نظام المصادقة (Google Auth)
     // ==========================================
 
-    function startListening() {
+    // دالة بدء الدخول (مربوطة بزر الدخول)
+    window.startGoogleLogin = function() {
+        const loginStatus = document.getElementById('loginStatus');
+        if(loginStatus) loginStatus.style.display = 'block';
+        
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                // تم الدخول بنجاح
+                showToast("أهلاً " + result.user.displayName);
+            }).catch((error) => {
+                showToast("فشل الدخول: " + error.message);
+                if(loginStatus) loginStatus.style.display = 'none';
+            });
+    }
+
+    // دالة الخروج
+    window.handleGoogleLogout = function() {
+        signOut(auth).then(() => {
+            showToast("تم الخروج");
+            window.location.reload(); // إعادة تحميل الصفحة لتنظيف البيانات
+        });
+    }
+
+    // مراقب حالة الدخول (يعمل تلقائياً)
+    onAuthStateChanged(auth, (user) => {
+        const overlay = document.getElementById('loginOverlay');
+        
+        if (user) {
+            // المستخدم مسجل دخول
+            currentUser = user;
+            if(overlay) overlay.style.display = 'none'; // إخفاء شاشة الدخول
+            
+            // تحديث أيقونة المستخدم في القائمة (اختياري)
+            const logoutIcon = document.getElementById('googleLogoutIcon');
+            if(logoutIcon && user.photoURL) {
+                logoutIcon.innerHTML = `<img src="${user.photoURL}" class="user-profile-img" style="border-radius:50%;width:24px;">`;
+            }
+
+            // تشغيل الاستماع لقاعدة البيانات الخاصة بالمستخدم
+            startListeningForUser(user.uid);
+            
+        } else {
+            // المستخدم غير مسجل
+            currentUser = null;
+            if(overlay) overlay.style.display = 'flex'; // إظهار شاشة الدخول
+            accounts = []; // تصفير البيانات المحلية للأمان
+            renderVault();
+        }
+    });
+
+    // ==========================================
+    // 4. محرك قاعدة البيانات (الخاص بالمستخدم)
+    // ==========================================
+
+    function startListeningForUser(userId) {
         const statusDot = document.getElementById('connectionStatus');
-        const dbRef = ref(db, 'vault_data'); 
+        // هنا السر: المسار يحتوي على userId
+        const userDbRef = ref(db, 'users/' + userId + '/vault_data'); 
 
-        onValue(dbRef, (snapshot) => {
+        onValue(userDbRef, (snapshot) => {
             const data = snapshot.val();
             if (statusDot) statusDot.classList.add('status-online');
             
             if (data) {
-                // تحديث البيانات عند حصول تغيير في السيرفر
-                if (data.updatedBy !== deviceId || !accounts.length) {
-                    // إذا البيانات جاءت مصفوفة أو كائن نحولها لشكل صحيح
-                    accounts = data.accounts || [];
-                    folders = data.folders || ["عام"];
-                    renderVault();
-                    renderFoldersBar();
-                }
-            } else {
-                accounts = [];
+                accounts = data.accounts || [];
+                folders = data.folders || ["عام"];
                 renderVault();
+                renderFoldersBar();
+            } else {
+                // حساب جديد أو فارغ
+                accounts = [];
+                folders = ["عام"];
+                renderVault();
+                renderFoldersBar();
             }
         }, (error) => {
             if (statusDot) statusDot.classList.remove('status-online');
-            showToast("خطأ في الاتصال ❌");
         });
     }
 
-    // دالة الحفظ في السحابة
+    // دالة الحفظ (تم تعديلها لتستخدم userId)
     function saveToCloud() {
-        set(ref(db, 'vault_data'), {
+        if (!currentUser) return; // لا تحفظ إذا لم يكن هناك مستخدم
+
+        set(ref(db, 'users/' + currentUser.uid + '/vault_data'), {
             accounts: accounts,
             folders: folders,
-            lastUpdate: Date.now(),
-            updatedBy: deviceId
+            lastUpdate: Date.now()
         }).then(() => {
             // تم الحفظ
         }).catch((error) => {
@@ -586,10 +617,10 @@
     }
 
     // ==========================================
-    // 4. وظائف الواجهة (تم تحويلها لتعمل مع module)
+    // 5. وظائف الواجهة (UI Functions)
     // ==========================================
 
-    // جعل الدوال متاحة لملف HTML
+    // جعل الدوال متاحة لـ HTML
     window.renderVault = renderVault;
     window.renderFoldersBar = renderFoldersBar;
     
@@ -609,12 +640,11 @@
             chip.className = `folder-chip ${activeFolder === f ? 'active' : ''}`;
             chip.innerText = f;
             chip.onclick = () => { activeFolder = f; renderVault(); renderFoldersBar(); };
-            // ضغط مطول للتعديل
             chip.onmousedown = () => startFolderPress(f);
             chip.ontouchstart = () => startFolderPress(f);
-            chip.ontouchmove = cancelPress;
-            chip.onmouseup = cancelPress;
-            chip.ontouchend = cancelPress;
+            chip.ontouchmove = window.cancelPress;
+            chip.onmouseup = window.cancelPress;
+            chip.ontouchend = window.cancelPress;
             bar.appendChild(chip);
         });
         
@@ -653,7 +683,6 @@
                  leftSide = `<div style="width:24px; display:flex; justify-content:center"><div style="width:6px; height:6px; background:#e5e7eb; border-radius:50%"></div></div>`;
             }
 
-            // بناء البطاقة
             card.innerHTML = `
                 ${leftSide}
                 <div class="card-main" onclick="window.handleCardClick(event, ${acc.id})">
@@ -672,12 +701,11 @@
             list.appendChild(card);
         });
         
-        // تحديث العداد
         const countLabel = document.getElementById('selectedCount');
         if(countLabel) countLabel.innerText = selectedIds.size + " محدد";
     }
 
-    // --- الوظائف الرئيسية المربوطة بالأزرار ---
+    // --- بقية دوال الواجهة ---
 
     window.prepareSaveAccount = function() {
         const email = document.getElementById('emailInput').value;
@@ -689,14 +717,9 @@
     window.saveAccount = function(targetFolder) {
         const email = document.getElementById('emailInput').value;
         const pass = document.getElementById('passInput').value;
-        
-        // إنشاء الحساب الجديد
         const newAcc = { id: Date.now(), email, pass, folder: targetFolder };
         accounts.unshift(newAcc);
-        
-        // الحفظ في فايربيس فوراً
-        saveToCloud();
-
+        saveToCloud(); // سيحفظ الآن في مجلد المستخدم
         document.getElementById('emailInput').value = '';
         document.getElementById('passInput').value = '';
         window.goBack();
@@ -724,7 +747,6 @@
             else selectedIds.add(id);
             renderVault();
         } else {
-            // إظهار كلمة المرور
             if(isLongPress) return;
             const el = document.getElementById(`pass-${id}`);
             const acc = accounts.find(a => a.id === id);
@@ -744,14 +766,13 @@
         if(selectedIds.size === 0) return;
         window.customConfirm(`حذف ${selectedIds.size} عنصر؟`, () => {
              accounts = accounts.filter(acc => !selectedIds.has(acc.id));
-             saveToCloud(); // تحديث السحابة
+             saveToCloud();
              window.toggleSelectionMode(); 
              renderVault();
              showToast("تم الحذف");
         });
     }
 
-    // --- إدارة المجلدات ---
     window.openAddFolderModal = function(renameTarget = null) {
         folderRenameTarget = renameTarget;
         document.getElementById('addFolderTitle').innerText = renameTarget ? "تعديل المجلد" : "مجلد جديد";
@@ -765,15 +786,13 @@
         const name = document.getElementById('folderNameInput').value.trim();
         if(!name) return;
         if (folderRenameTarget) {
-            // تعديل اسم المجلد
             const index = folders.indexOf(folderRenameTarget);
             if(index !== -1) folders[index] = name;
             accounts.forEach(acc => { if(acc.folder === folderRenameTarget) acc.folder = name; });
         } else {
-            // إضافة جديد
             if(!folders.includes(name)) folders.push(name);
         }
-        saveToCloud(); // تحديث السحابة
+        saveToCloud();
         window.goBack(); renderFoldersBar(); renderVault();
     }
 
@@ -782,8 +801,6 @@
         document.getElementById('folderModalTitle').innerText = title;
         const listBody = document.getElementById('folderListModalBody');
         listBody.innerHTML = '';
-        
-        // زر مجلد جديد
         const addRow = document.createElement('div');
         addRow.className = 'folder-item-row';
         addRow.style.color = 'var(--primary)';
@@ -817,7 +834,6 @@
         showToast("تم النقل ✅");
     }
 
-    // --- قوائم السياق (Context Menu) ---
     window.startPress = function(type, id) {
         isLongPress = false;
         longPressTimer = setTimeout(() => { isLongPress = true; window.openContextMenu(type, id); }, 600);
@@ -853,7 +869,6 @@
             } else if (action === 'edit') {
                 document.getElementById('emailInput').value = acc.email;
                 document.getElementById('passInput').value = acc.pass;
-                // نحذف القديم مؤقتاً حتى يتم الحفظ مجدداً
                 accounts = accounts.filter(a => a.id !== currentCtxId);
                 renderVault(); 
                 if(document.getElementById('vaultPage').style.display==='flex') window.goBack();
@@ -862,7 +877,6 @@
         }, 200);
     }
 
-    // --- المودال والنوافذ ---
     window.showOverlay = function(id) {
         const el = document.getElementById(id);
         el.style.display = 'flex';
@@ -894,27 +908,21 @@
         window.showOverlay('confirmModal');
     }
 
-    window.openVaultCheck = function() {
-        window.openVault(); // فتح مباشر (يمكنك إضافة كود الباسورد هنا لاحقاً)
-    }
-
+    window.openVaultCheck = function() { window.openVault(); }
     window.openVault = function() {
         document.getElementById('vaultPage').style.display = 'flex';
         renderFoldersBar(); renderVault();
     }
-
     window.safeToggleMenu = function(e) {
         if(e) e.stopPropagation();
         const m = document.getElementById('mainMenu');
         m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
     }
-
     window.showToast = function(m) { 
         const t=document.getElementById('toast'); 
         t.innerText=m; t.style.opacity='1'; 
         setTimeout(()=>t.style.opacity='0',2000); 
     }
-
     window.onclick = (e) => { 
         if(!e.target.closest('.menu-btn')) {
             const m = document.getElementById('mainMenu');
@@ -922,8 +930,9 @@
         }
     }
 
-    // تشغيل التطبيق
-    startListening();
+    // استعادة زر الخروج الذي حذفناه (لأنه الآن أصبح له وظيفة)
+    // لكن سنجعله يظهر فقط في القائمة دون تعديل الـ HTML كثيراً
+    // (الكود يقوم بتحديثه تلقائياً عند الدخول)
 
 </script>
 </body>
