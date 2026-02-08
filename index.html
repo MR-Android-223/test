@@ -498,19 +498,20 @@
 <div id="toast" class="toast"></div>
 
 <script type="module">
-    // 1. استيراد مكتبات فايربيس
+    // 1. استيراد مكتبات فايربيس (نسخة الويب)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // 2. إعدادات مشروعك (ضع بياناتك هنا)
+    // 2. إعدادات مشروعك (تمت إضافتها بنجاح) ✅
     const firebaseConfig = {
-        apiKey: "AIzaSyD_EXAMPLE_KEY_HERE",
-        authDomain: "YOUR-PROJECT.firebaseapp.com",
-        databaseURL: "https://YOUR-PROJECT-default-rtdb.firebaseio.com",
-        projectId: "YOUR-PROJECT",
-        storageBucket: "YOUR-PROJECT.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:123456789:web:xxxxxx"
+      apiKey: "AIzaSyCMLMIUht6Az9R1-kiJeNGVN0BeL1N5rG4",
+      authDomain: "wassouf1997.firebaseapp.com",
+      databaseURL: "https://wassouf1997-default-rtdb.firebaseio.com",
+      projectId: "wassouf1997",
+      storageBucket: "wassouf1997.firebasestorage.app",
+      messagingSenderId: "979816526016",
+      appId: "1:979816526016:web:a0538d0d686bf2ff123d25",
+      measurementId: "G-SDRQLNDM23"
     };
 
     // تهيئة التطبيق
@@ -554,6 +555,7 @@
             if (data) {
                 // تحديث البيانات عند حصول تغيير في السيرفر
                 if (data.updatedBy !== deviceId || !accounts.length) {
+                    // إذا البيانات جاءت مصفوفة أو كائن نحولها لشكل صحيح
                     accounts = data.accounts || [];
                     folders = data.folders || ["عام"];
                     renderVault();
