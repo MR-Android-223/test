@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>خزنة أسراري (حسابي)</title>
+    <title>خزنة أسراري (سحابي)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     
@@ -485,12 +485,12 @@
 <div id="toast" class="toast"></div>
 
 <script type="module">
-    // 1. استيراد المكتبات (قاعدة البيانات + المصادقة)
+    // 1. استيراد المكتبات (قاعدة البيانات + المصادقة) في أعلى الملف حصراً
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    // 2. إعدادات مشروعك (كما هي)
+    // 2. إعدادات مشروعك
     const firebaseConfig = {
       apiKey: "AIzaSyCMLMIUht6Az9R1-kiJeNGVN0BeL1N5rG4",
       authDomain: "wassouf1997.firebaseapp.com",
@@ -509,11 +509,11 @@
     const provider = new GoogleAuthProvider();
 
     // متغيرات النظام
-    let currentUser = null; // لتخزين بيانات المستخدم الحالي
+    let currentUser = null; 
     let accounts = [];
     let folders = ["عام"];
     
-    // متغيرات الواجهة (كما هي)
+    // متغيرات الواجهة
     let isSelectionMode = false;
     let selectedIds = new Set();
     let activeFolder = 'All';
@@ -526,66 +526,58 @@
     let isMoveAction = false;
 
     // ==========================================
-    // 3. نظام المصادقة (Google Auth)
+    // 3. نظام المصادقة (Google Auth - Redirect)
     // ==========================================
 
-    // دالة بدء الدخول (مربوطة بزر الدخول)
+    // دالة بدء الدخول (تستخدم التحويل لتجنب الأخطاء على الموبايل)
     window.startGoogleLogin = function() {
         const loginStatus = document.getElementById('loginStatus');
-        if(loginStatus) loginStatus.style.display = 'block';
+        if(loginStatus) {
+            loginStatus.style.display = 'block';
+            loginStatus.innerText = "جاري تحويلك لصفحة جوجل...";
+        }
         
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                // تم الدخول بنجاح
-                showToast("أهلاً " + result.user.displayName);
-            }).catch((error) => {
-                showToast("فشل الدخول: " + error.message);
-                if(loginStatus) loginStatus.style.display = 'none';
-            });
+        signInWithRedirect(auth, provider);
     }
 
     // دالة الخروج
     window.handleGoogleLogout = function() {
         signOut(auth).then(() => {
-            showToast("تم الخروج");
-            window.location.reload(); // إعادة تحميل الصفحة لتنظيف البيانات
+            window.showToast("تم الخروج");
+            window.location.reload(); 
         });
     }
 
-    // مراقب حالة الدخول (يعمل تلقائياً)
+    // مراقب حالة الدخول
     onAuthStateChanged(auth, (user) => {
         const overlay = document.getElementById('loginOverlay');
         
         if (user) {
-            // المستخدم مسجل دخول
             currentUser = user;
-            if(overlay) overlay.style.display = 'none'; // إخفاء شاشة الدخول
+            if(overlay) overlay.style.display = 'none'; 
             
-            // تحديث أيقونة المستخدم في القائمة (اختياري)
             const logoutIcon = document.getElementById('googleLogoutIcon');
             if(logoutIcon && user.photoURL) {
                 logoutIcon.innerHTML = `<img src="${user.photoURL}" class="user-profile-img" style="border-radius:50%;width:24px;">`;
             }
 
-            // تشغيل الاستماع لقاعدة البيانات الخاصة بالمستخدم
             startListeningForUser(user.uid);
             
         } else {
-            // المستخدم غير مسجل
             currentUser = null;
-            if(overlay) overlay.style.display = 'flex'; // إظهار شاشة الدخول
-            accounts = []; // تصفير البيانات المحلية للأمان
+            if(overlay) overlay.style.display = 'flex'; 
+            accounts = []; 
             renderVault();
         }
     });
 
     // ==========================================
-    // 4. محرك قاعدة البيانات (الخاص بالمستخدم)
+    // 4. محرك قاعدة البيانات
     // ==========================================
 
     function startListeningForUser(userId) {
         const statusDot = document.getElementById('connectionStatus');
-        // هنا السر: المسار يحتوي على userId
+        // حفظ البيانات في مسار خاص بالمستخدم
         const userDbRef = ref(db, 'users/' + userId + '/vault_data'); 
 
         onValue(userDbRef, (snapshot) => {
@@ -598,7 +590,6 @@
                 renderVault();
                 renderFoldersBar();
             } else {
-                // حساب جديد أو فارغ
                 accounts = [];
                 folders = ["عام"];
                 renderVault();
@@ -609,26 +600,24 @@
         });
     }
 
-    // دالة الحفظ (تم تعديلها لتستخدم userId)
     function saveToCloud() {
-        if (!currentUser) return; // لا تحفظ إذا لم يكن هناك مستخدم
+        if (!currentUser) return;
 
         set(ref(db, 'users/' + currentUser.uid + '/vault_data'), {
             accounts: accounts,
             folders: folders,
             lastUpdate: Date.now()
         }).then(() => {
-            // تم الحفظ
+            // Success
         }).catch((error) => {
-            showToast("فشل الحفظ ❌");
+            window.showToast("فشل الحفظ ❌");
         });
     }
 
     // ==========================================
-    // 5. وظائف الواجهة (UI Functions)
+    // 5. وظائف الواجهة (Window Functions)
     // ==========================================
 
-    // جعل الدوال متاحة لـ HTML
     window.renderVault = renderVault;
     window.renderFoldersBar = renderFoldersBar;
     
@@ -717,7 +706,7 @@
 
     window.prepareSaveAccount = function() {
         const email = document.getElementById('emailInput').value;
-        if (!email) { showToast("أدخل البيانات أولاً ⚠️"); return; }
+        if (!email) { window.showToast("أدخل البيانات أولاً ⚠️"); return; }
         isMoveAction = false;
         window.openFolderSelectModal("حفظ في...");
     }
@@ -727,11 +716,11 @@
         const pass = document.getElementById('passInput').value;
         const newAcc = { id: Date.now(), email, pass, folder: targetFolder };
         accounts.unshift(newAcc);
-        saveToCloud(); // سيحفظ الآن في مجلد المستخدم
+        saveToCloud();
         document.getElementById('emailInput').value = '';
         document.getElementById('passInput').value = '';
         window.goBack();
-        showToast("تم الحفظ ✅");
+        window.showToast("تم الحفظ ✅");
     }
 
     window.toggleSelectionMode = function() {
@@ -777,7 +766,7 @@
              saveToCloud();
              window.toggleSelectionMode(); 
              renderVault();
-             showToast("تم الحذف");
+             window.showToast("تم الحذف");
         });
     }
 
@@ -839,7 +828,7 @@
         accounts.forEach(acc => { if(selectedIds.has(acc.id)) acc.folder = targetFolder; });
         saveToCloud();
         window.toggleSelectionMode(); activeFolder = targetFolder; renderFoldersBar(); renderVault();
-        showToast("تم النقل ✅");
+        window.showToast("تم النقل ✅");
     }
 
     window.startPress = function(type, id) {
@@ -866,13 +855,13 @@
         setTimeout(() => {
             if (!acc) return;
             if (action === 'copy') {
-                navigator.clipboard.writeText(currentCtxType === 'email' ? acc.email : acc.pass).then(()=>showToast("تم النسخ"));
+                navigator.clipboard.writeText(currentCtxType === 'email' ? acc.email : acc.pass).then(()=>window.showToast("تم النسخ"));
             } else if (action === 'delete') {
                 window.customConfirm("حذف نهائي؟", () => {
                     accounts = accounts.filter(a => a.id !== currentCtxId);
                     saveToCloud();
                     renderVault();
-                    showToast("تم الحذف");
+                    window.showToast("تم الحذف");
                 });
             } else if (action === 'edit') {
                 document.getElementById('emailInput').value = acc.email;
@@ -880,10 +869,81 @@
                 accounts = accounts.filter(a => a.id !== currentCtxId);
                 renderVault(); 
                 if(document.getElementById('vaultPage').style.display==='flex') window.goBack();
-                showToast("جاري التعديل... اضغط حفظ عند الانتهاء");
+                window.showToast("جاري التعديل... اضغط حفظ عند الانتهاء");
             }
         }, 200);
     }
+
+    // --- JSON Export/Import (محدثة لتعمل مع Module) ---
+    
+    window.exportDataAuto = function() {
+        const m = document.getElementById('mainMenu');
+        if(m) m.style.display = 'none';
+        
+        const dataToSave = { accounts: accounts, folders: folders };
+        const blob = new Blob([JSON.stringify(dataToSave)], {type: "application/json"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = "secrets_vault_backup.json";
+        a.click();
+    }
+
+    window.importDataWrapper = function(e) {
+        const m = document.getElementById('mainMenu');
+        if(m) m.style.display = 'none';
+        
+        const reader = new FileReader();
+        reader.onload = (f) => {
+            try {
+                const imported = JSON.parse(f.target.result);
+                const newAccounts = Array.isArray(imported) ? imported : (imported.accounts || []);
+                const newFolders = imported.folders || ["عام"];
+                
+                const clean = newAccounts.map(a => ({ id: a.id || Date.now()+Math.random(), email: a.email || a.title || "مستورد", pass: a.pass||"...", folder: a.folder||"عام" }));
+                accounts = [...accounts, ...clean];
+                
+                newFolders.forEach(f => { if(!folders.includes(f)) folders.push(f); });
+
+                saveToCloud();
+                renderVault();
+                window.showToast('تم استعادة البيانات بنجاح ✅');
+            } catch(e){
+                window.showToast('ملف غير صالح ❌');
+            }
+        };
+        if(e.target.files.length > 0) reader.readAsText(e.target.files[0]);
+    }
+    
+    window.showBackupModal = function() {
+        const m = document.getElementById('mainMenu'); if(m) m.style.display = 'none';
+        document.getElementById('backupText').value = JSON.stringify({accounts, folders});
+        window.showOverlay('backupModal');
+    }
+    
+    window.copyBackup = function() {
+        document.getElementById('backupText').select(); document.execCommand('copy'); window.showToast("تم النسخ");
+    }
+    
+    window.showImportModal = function() {
+        const m = document.getElementById('mainMenu'); if(m) m.style.display = 'none';
+        document.getElementById('importText').value = '';
+        window.showOverlay('importModal');
+    }
+    
+    window.performImport = function() {
+        try {
+            const data = JSON.parse(document.getElementById('importText').value);
+            const raw = Array.isArray(data) ? data : (data.accounts || []);
+            const clean = raw.map(a => ({ id: a.id || Date.now()+Math.random(), email: a.email || a.title || "مستورد", pass: a.pass||"...", folder: a.folder||"عام" }));
+            accounts = [...accounts, ...clean];
+            saveToCloud();
+            window.goBack(); window.showToast(`تم استيراد ${clean.length} عنصر`); renderVault();
+        } catch(e) { window.showToast("كود غير صالح ❌"); }
+    }
+    
+    window.pasteFromClipboard = function() { navigator.clipboard.readText().then(t => document.getElementById('importText').value = t); }
+
+    // --- Helpers ---
 
     window.showOverlay = function(id) {
         const el = document.getElementById(id);
@@ -916,6 +976,45 @@
         window.showOverlay('confirmModal');
     }
 
+    // --- App Lock ---
+    
+    window.handleAppLockSettings = function() {
+        const m = document.getElementById('mainMenu'); if(m) m.style.display = 'none';
+        const appPass = localStorage.getItem('appPass');
+        if(appPass) {
+            window.openPasswordModal("أدخل الرمز الحالي لإزالته", (v) => {
+                if(v === appPass) { 
+                    localStorage.removeItem('appPass'); 
+                    window.showToast("تم إزالة القفل 🔓");
+                }
+                else window.showToast("خطأ في الرمز");
+            });
+        } else {
+            window.openPasswordModal("تعيين رمز جديد", (v) => { 
+                if(v) { 
+                    localStorage.setItem('appPass', v); 
+                    window.showToast("تم القفل 🔒");
+                } 
+            });
+        }
+    }
+    
+    window.openPasswordModal = function(t, cb) {
+        document.getElementById('passModalTitle').innerText = t;
+        document.getElementById('globalPassInput').value = '';
+        window.showOverlay('passwordModal');
+        window.pendingCallback = cb;
+        setTimeout(()=>document.getElementById('globalPassInput').focus(), 100);
+    }
+    
+    window.submitPassword = function() {
+        const val = document.getElementById('globalPassInput').value;
+        const cb = window.pendingCallback;
+        window.goBack(); 
+        if(cb) { setTimeout(() => { cb(val); }, 200); }
+        window.pendingCallback = null;
+    }
+
     window.openVaultCheck = function() { window.openVault(); }
     window.openVault = function() {
         document.getElementById('vaultPage').style.display = 'flex';
@@ -924,7 +1023,20 @@
     window.safeToggleMenu = function(e) {
         if(e) e.stopPropagation();
         const m = document.getElementById('mainMenu');
-        m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        // تحديث نص القفل
+        const appPass = localStorage.getItem('appPass');
+        const lockText = document.getElementById('lockMenuText');
+        if(lockText) lockText.innerText = appPass ? "إلغاء قفل التطبيق" : "تعيين قفل للتطبيق";
+
+        if (m.style.display === 'flex') {
+            m.style.display = 'none';
+        } else {
+            if (appPass) {
+                window.openPasswordModal("رمز القائمة", (v) => {
+                    if (v === appPass) m.style.display = 'flex'; else window.showToast("خطأ");
+                });
+            } else m.style.display = 'flex';
+        }
     }
     window.showToast = function(m) { 
         const t=document.getElementById('toast'); 
@@ -937,10 +1049,6 @@
             if(m) m.style.display = 'none';
         }
     }
-
-    // استعادة زر الخروج الذي حذفناه (لأنه الآن أصبح له وظيفة)
-    // لكن سنجعله يظهر فقط في القائمة دون تعديل الـ HTML كثيراً
-    // (الكود يقوم بتحديثه تلقائياً عند الدخول)
 
 </script>
 </body>
