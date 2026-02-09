@@ -2,40 +2,45 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تجربة الخزنة (الجديد) 🔐</title>
+    <title>فحص الاتصال 🛠️</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f4f4f9; }
-        .card { background: white; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
-        button { background: #4285F4; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; }
-        #status { margin-top: 20px; color: #555; font-weight: bold; }
-        .user-info { text-align: right; background: #e8f5e9; padding: 15px; margin-top: 20px; border-radius: 8px; font-size: 14px; }
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f0f0f0; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        button { background: #4285F4; color: white; border: none; padding: 15px 30px; border-radius: 5px; font-size: 16px; margin-top: 10px; width: 100%; }
+        #log { margin-top: 20px; text-align: left; background: #222; color: #0f0; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px; min-height: 100px; overflow-y: auto; }
+        .error { color: #ff5555; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 id="title">تسجيل دخول Google</h2>
+    <h2>🕵️ فحص تسجيل الدخول</h2>
+    <p>اضغط الزر، وراقب الشاشة السوداء في الأسفل.</p>
     
-    <button id="loginBtn">دخول باستخدام Google</button>
+    <button id="loginBtn">تسجيل دخول Google</button>
+    <button id="logoutBtn" style="background:#db4437; display:none; margin-top:5px;">تسجيل خروج</button>
     
-    <div id="status">انتظار الإجراء...</div>
-
-    <div id="userData" style="display:none;" class="user-info">
-        <p>✅ <strong>تم الاتصال بنجاح!</strong></p>
-        <p>👤 الاسم: <span id="userName"></span></p>
-        <p>🆔 المعرف: <span id="userId" style="font-family:monospace; font-size:12px;"></span></p>
-    </div>
-
-    <button id="logoutBtn" style="background:#db4437; display:none;">تسجيل خروج</button>
+    <div id="log">بدء النظام...</div>
 </div>
 
-<script type="module">
-    // 1. استيراد المكتبات من روابط الويب (CDN) بدلاً من npm
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<script>
+    // نظام كشف الأخطاء البرمجية وطباعتها على الشاشة
+    window.onerror = function(msg, url, line) {
+        document.getElementById('log').innerHTML += `<br><span class="error">⛔ خطأ برمجي: ${msg}</span>`;
+    };
+    function log(msg) {
+        document.getElementById('log').innerHTML += `<br>> ${msg}`;
+    }
+</script>
 
-    // 2. إعدادات تطبيقك الجديدة (تم التحديث) ✅
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    log("جاري تهيئة فايربيس...");
+
+    // إعداداتك الجديدة (keyvault)
     const firebaseConfig = {
       apiKey: "AIzaSyB23TcZ_7cC93t5uNMIqvFoniFuI4cqY4E",
       authDomain: "wassouf1997.firebaseapp.com",
@@ -47,50 +52,50 @@
       measurementId: "G-W6WBHZFX36"
     };
 
-    // 3. تهيئة التطبيق
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+    try {
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+        log("✅ فايربيس جاهز.");
 
-    // 4. برمجة الأزرار
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const statusDiv = document.getElementById('status');
+        // فحص نتيجة التحويل (Redirect) لمعرفة سبب الفشل إن وجد
+        getRedirectResult(auth)
+            .then((result) => {
+                if (result) {
+                    log("🔄 تم العودة من جوجل بنجاح.");
+                    log("👤 المستخدم: " + result.user.displayName);
+                }
+            }).catch((error) => {
+                log("❌ خطأ في التحويل: " + error.message);
+            });
 
-    // عند الضغط على دخول
-    loginBtn.onclick = () => {
-        statusDiv.innerText = "جاري تحويلك إلى صفحة جوجل...";
-        // استخدام Redirect لحل مشاكل الموبايل
-        signInWithRedirect(auth, provider);
-    };
+        // زر الدخول
+        document.getElementById('loginBtn').onclick = () => {
+            log("🚀 جاري التحويل لصفحة جوجل...");
+            signInWithRedirect(auth, provider);
+        };
 
-    // عند الضغط على خروج
-    logoutBtn.onclick = () => {
-        signOut(auth).then(() => window.location.reload());
-    };
+        // زر الخروج
+        document.getElementById('logoutBtn').onclick = () => {
+            signOut(auth).then(() => location.reload());
+        };
 
-    // 5. مراقب حالة الدخول (يعمل تلقائياً عند عودة المستخدم)
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // حالة: مسجل دخول
-            statusDiv.style.display = 'none';
-            loginBtn.style.display = 'none';
-            logoutBtn.style.display = 'block';
-            
-            document.getElementById('userData').style.display = 'block';
-            document.getElementById('userName').innerText = user.displayName;
-            document.getElementById('userId').innerText = user.uid;
-            
-            document.getElementById('title').innerText = "الخزنة مفتوحة 🔓";
-        } else {
-            // حالة: غير مسجل
-            statusDiv.innerText = "أنت غير مسجل دخول.";
-            statusDiv.style.display = 'block';
-            loginBtn.style.display = 'block';
-            logoutBtn.style.display = 'none';
-            document.getElementById('userData').style.display = 'none';
-        }
-    });
+        // مراقب الحالة
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                log("✅ حالة الدخول: متصل");
+                log("👤 الاسم: " + user.displayName);
+                log("🆔 ID: " + user.uid);
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'block';
+            } else {
+                log("ℹ️ حالة الدخول: غير متصل");
+            }
+        });
+
+    } catch (e) {
+        log("❌ خطأ جسيم: " + e.message);
+    }
 </script>
 
 </body>
