@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>كاشير ميدو - الإصدار المطور</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="toast-notification"></div>
+
+<div id="total-box">
+  <div class="total-row">
+    <div id="total-lbp">المجموع: 0</div>
+    <div id="total-usd">$0.00</div>
+  </div>
+  <div id="customer-display">الزبون: <span id="current-customer-name" style="font-weight:bold"></span></div>
+  <div class="total-row" style="margin-top:4px;">
+    <div id="rate-display">سعر الصرف: 89,000</div>
+    <div id="total-items" style="color:#1976d2; font-size:0.8em">عدد الأصناف: 0</div>
+  </div>
+</div>
+
+<div style="display: flex; align-items: center; margin-bottom: 8px;">
+    <div id="settings-btn" onclick="openSettings()">⋮</div>
+    <div id="input-box" onclick="activatePrice()">0</div>
+</div>
+
+<div class="keypad-top">
+    <div class="key" style="background:#e8f5e9; color:#2e7d32;" onclick="openPay()">💵 دفع</div>
+    <div class="key" style="background:#e3f2fd; color:#1565c0;" onclick="openCustomerSelectModal()">👥 الزبائن</div>
+    <div class="key" style="background:#2e7d32; color:#fff;" onclick="saveBill()">✅ حفظ</div> 
+    <div class="key" style="background:#fff3e0; color:#0d47a1;" onclick="toggleReceipt()">👁️ مشتريات</div>
+</div>
+
+<div class="keypad">
+  <div class="key" style="color:#c62828" onclick="clearInput()">C</div>
+  <div class="key" onclick="press('9')">9</div>
+  <div class="key" onclick="press('8')">8</div>
+  <div class="key" onclick="press('7')">7</div>
+
+  <div class="key" style="color:#bf360c" onclick="activatePrice()">🏷️ سعر</div>
+  <div class="key" onclick="press('6')">6</div>
+  <div class="key" onclick="press('5')">5</div>
+  <div class="key" onclick="press('4')">4</div>
+
+  <div class="key dbl" style="color:#1976d2" onclick="openSavedBills()">📂 فواتير</div>
+  <div class="key" onclick="press('3')">3</div>
+  <div class="key" onclick="press('2')">2</div>
+  <div class="key" onclick="press('1')">1</div>
+
+  <div class="key back" onclick="reset()">🗑️ تصفير</div>
+  <div class="key dbl" onclick="press('000')">000</div>
+  <div class="key dbl" onclick="press('00')">00</div>
+  <div class="key zero" onclick="press('0')">0</div>
+</div>
+
+<div class="main">
+  <div class="sort-indicator" id="sort-indicator"></div>
+  <div class="col" id="col1"></div>
+  <div class="col" id="col2"></div>
+  <div class="col" id="col3"></div>
+  <div class="col" id="col4"></div>
+</div>
+
+<div id="receipt"></div>
+
+<!-- ================= MODALS ================= -->
+
+<div id="settings-modal" class="custom-modal">
+    <div class="modal-content" style="padding:15px;">
+        <div class="modal-title">⚙️ الإعدادات</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
+            <button class="menu-btn btn-add" style="margin:0;" onclick="openAddItemModal()">➕ إضافة صنف</button>
+            <button class="menu-btn" style="background:#fffde7; border-color:#fff59d; color:#f57f17; margin:0;" onclick="toggleSortMode()">🔃 ترتيب</button>
+            <button class="menu-btn" style="margin:0;" onclick="changeExchangeRate()">💲 الصرف</button>
+            <button class="menu-btn" style="margin:0;" onclick="showDailyReport()"><span class="icon">📊</span> تقرير اليوم</button>
+        </div>
+        <button id="pass-btn" class="menu-btn" style="background:#e3f2fd; color:#0d47a1; border-color:#bbdefb;" onclick="managePassword()"><span class="icon">🔒</span> حماية الإعدادات</button>
+        <hr style="margin:8px 0; border:0; border-top:1px solid #eee;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+            <button class="menu-btn" style="margin:0;" onclick="exportDataAndCopy()">📋 نسخ</button>
+            <button class="menu-btn" style="margin:0;" onclick="openJsonImport()">📂 استرجاع</button>
+        </div>
+        <button class="menu-btn" style="color:#d32f2f; margin-top:8px;" onclick="clearAllData()"><span class="icon">🗑️</span> ضبط المصنع</button>
+        <button class="menu-btn btn-close" onclick="closeAllModals()">إغلاق</button>
+    </div>
+</div>
+
+<div id="daily-report-modal" class="custom-modal">
+    <div class="modal-content">
+        <div class="modal-title">📊 تقرير اليوم</div>
+        <div id="daily-report-content" style="margin-bottom:15px;"></div>
+        <button class="menu-btn" style="background:#ffebee; color:#c62828; border-color:#ffcdd2;" onclick="clearDailyReport()">
+            <span class="icon">🛑</span> تصفير العداد (بدء شيفت)
+        </button>
+        <button class="menu-btn btn-close" onclick="closeAllModals()">إغلاق</button>
+    </div>
+</div>
+
+<div id="customer-select-modal" class="custom-modal">
+    <div class="modal-content" style="max-width:360px;">
+        <div class="modal-title">الزبائن</div>
+        <button class="menu-btn" style="background:#e3f2fd; color:#1565c0; border-color:#bbdefb; margin-bottom:5px;" onclick="openDebtManagement()">
+            <span class="icon">📂</span> إدارة الديون وكشف الحساب
+        </button>
+        <button class="menu-btn btn-add" onclick="addNewCustomer(true)">➕ إضافة زبون جديد</button>
+        <div style="font-size:12px; color:#555; margin-top:10px; text-align:right;">اختر زبون للفاتورة الحالية:</div>
+        <div id="customer-select-list" style="max-height:300px; overflow-y:auto; text-align:left; margin-top:5px;"></div>
+        <button class="menu-btn btn-close" onclick="closeAllModals()">إلغاء</button>
+    </div>
+</div>
+
+<!-- مودال إدارة الديون مع التحديد -->
+<div id="debt-manage-modal" class="custom-modal">
+    <div class="modal-content" style="max-width:360px;">
+        <div class="modal-title">إدارة الزبائن والديون</div>
+        
+        <button id="btn-cust-select-mode" class="menu-btn btn-select" onclick="toggleSelectionMode('customer')">✅ تحديد يدوي</button>
+        
+        <div id="cust-selection-bar" class="selection-bar">
+            <button class="menu-btn" style="background:#e3f2fd; color:#1565c0; margin:0;" onclick="selectAllItems('customer')">الكل</button>
+            <button class="menu-btn" style="background:#ffebee; color:#c62828; margin:0;" onclick="deleteSelectedItems('customer')">🗑️ حذف المحدد</button>
+        </div>
+
+        <button class="menu-btn btn-add" id="btn-add-cust-manage" onclick="addNewCustomer(false)">➕ إضافة زبون جديد</button>
+        <div style="font-size:11px; color:#666; margin:5px 0;">* اضغط مطولاً للحذف الفردي أو استخدم التحديد</div>
+        
+        <div id="debt-customer-list" style="max-height:300px; overflow-y:auto; text-align:left; margin-top:10px;"></div>
+        
+        <button class="menu-btn btn-close" onclick="openCustomerSelectModal()">رجوع</button>
+    </div>
+</div>
+
+<div id="customer-statement-modal" class="custom-modal">
+    <div class="modal-content" style="max-width:380px; text-align:right;">
+        <div class="modal-title" id="statement-title">كشف حساب</div>
+        <div id="statement-summary" style="background:#f5f5f5; padding:10px; border-radius:8px; margin-bottom:10px; text-align:center;"></div>
+        <button class="menu-btn" style="background:#e8f5e9; color:#1b5e20; border-color:#c8e6c9; margin-bottom:5px;" onclick="openPaymentModal(false)"><span class="icon">➕</span> استلام دفعة من الحساب</button>
+        <button class="menu-btn" style="background:#ffebee; color:#c62828; border-color:#ffcdd2; margin-bottom:10px;" onclick="openPaymentModal(true)"><span class="icon">💸</span> تسجيل دين نقدي (كاش)</button>
+        <div style="font-weight:bold; font-size:12px; margin-bottom:5px;">سجل الحركات:</div>
+        <div id="statement-bills-list" style="max-height:250px; overflow-y:auto; border:1px solid #eee; padding:5px; border-radius:8px; background:#fafafa;"></div>
+        <button class="menu-btn" style="background:#e3f2fd; color:#1565c0; border-color:#bbdefb; margin-top:10px;" onclick="clearCustomerDebt()"><span class="icon">💰</span> تصفية الحساب بالكامل</button>
+        <button class="menu-btn btn-close" onclick="backToDebtManager()">رجوع للقائمة</button>
+    </div>
+</div>
+
+<div id="payment-modal" class="custom-modal">
+    <div class="modal-content">
+        <div class="modal-title" id="payment-modal-title">استلام دفعة</div>
+        <input id="payment-amount" class="pay-input" type="number" placeholder="أدخل المبلغ">
+        <div style="display:flex; gap:10px;">
+            <button class="menu-btn" style="background:#e8f5e9; color:#2e7d32; justify-content:center;" onclick="confirmTransaction('USD')">دولار ($)</button>
+            <button class="menu-btn" style="background:#fff3e0; color:#bf360c; justify-content:center;" onclick="confirmTransaction('LBP')">ليرة (L.L.)</button>
+        </div>
+        <button class="menu-btn btn-close" onclick="closeAllModals(); openCustomerStatement(currentStatementCustomer);">إلغاء</button>
+    </div>
+</div>
+
+<div id="add-item-modal" class="custom-modal">
+    <div class="modal-content">
+        <div class="modal-title">إضافة صنف جديد</div>
+        <input id="new-item-name" class="pay-input" type="text" placeholder="اسم الصنف">
+        <input id="new-item-price" class="pay-input" type="number" placeholder="السعر (L.L.)">
+        <div style="text-align:right; font-size:12px; margin-bottom:5px; color:#666;">اختر العمود:</div>
+        <div style="display:flex; gap:5px; margin-bottom:15px;">
+            <button class="key" onclick="selectCol('col1')" id="btn-col1" style="flex:1; font-size:14px;">1</button>
+            <button class="key" onclick="selectCol('col2')" id="btn-col2" style="flex:1; font-size:14px;">2</button>
+            <button class="key" onclick="selectCol('col3')" id="btn-col3" style="flex:1; font-size:14px;">3</button>
+            <button class="key" onclick="selectCol('col4')" id="btn-col4" style="flex:1; font-size:14px;">4</button>
+        </div>
+        <button class="menu-btn btn-add" style="justify-content:center" onclick="confirmAddItem()">حفظ</button>
+        <button class="menu-btn btn-close" onclick="closeAllModals()">إلغاء</button>
+    </div>
+</div>
+
+<div id="edit-modal" class="custom-modal">
+    <div class="modal-content">
+        <div class="modal-title" id="edit-modal-title">تعديل صنف</div>
+        <input id="edit-name" class="pay-input" type="text" placeholder="الاسم">
+        <input id="edit-price" class="pay-input" type="number" placeholder="السعر">
+        <button class="menu-btn btn-add" style="justify-content:center" onclick="saveItemEdit()">حفظ التعديلات</button>
+        <button class="menu-btn" style="color:#c62828; justify-content:center" onclick="deleteItem()">🗑️ حذف الصنف</button>
+        <button class="menu-btn btn-close" onclick="closeAllModals()">إلغاء</button>
+    </div>
+</div>
+
+<!-- مودال الدفع المطور (4 مربعات) -->
+<div id="pay-box-modal" class="custom-modal">
+    <div class="modal-content">
+        <div class="modal-title">الحساب والدفع</div>
+        
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <div style="flex:1;">
+                <div style="font-size:11px; text-align:right; margin-bottom:2px">المدفوع دولار ($):</div>
+                <input id="pay-usd" class="pay-input" type="number" oninput="calcPay()" style="background:#e8f5e9;">
+            </div>
+            <div style="flex:1;">
+                <div style="font-size:11px; text-align:right; margin-bottom:2px">المدفوع ليرة (L.L.):</div>
+                <input id="pay-lbp" class="pay-input" type="number" oninput="calcPay()" style="background:#fff3e0;">
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <div style="flex:1;">
+                <div style="font-size:11px; text-align:right; margin-bottom:2px">المرتجع دولار ($):</div>
+                <input id="returned-usd" class="pay-input" type="number" oninput="calcPay()" placeholder="أرجع للزبون $">
+            </div>
+            <div style="flex:1;">
+                <div style="font-size:11px; text-align:right; margin-bottom:2px">المرتجع ليرة (L.L.):</div>
+                <input id="returned-lbp" class="pay-input" type="number" oninput="calcPay()" placeholder="أرجع للزبون ليرة">
+            </div>
+        </div>
+
+        <hr style="margin:10px 0; border-top:1px dashed #ccc">
+        
+        <div id="pay-status-msg" style="font-size:14px; font-weight:bold; margin-bottom:5px; min-height:20px;"></div>
+        <input id="pay-balance-display" class="pay-input" type="text" disabled style="background:#eee; font-weight:900; color:#333; margin-top:5px;">
+        
+        <button class="menu-btn btn-close" style="background:#2e7d32; color:#fff; border:none; margin-top:10px;" onclick="closeAllModals()">إتمام وإغلاق</button>
+    </div>
+</div>
+
+<!-- مودال الفواتير مع التحديد -->
+<div id="bills-modal" class="custom-modal">
+    <div class="modal-content" style="max-width:360px;">
+        <div class="modal-title">سجل الفواتير</div>
+        
+        <button id="btn-bill-select-mode" class="menu-btn btn-select" onclick="toggleSelectionMode('bill')">✅ تحديد يدوي</button>
+        
+        <div id="bill-selection-bar" class="selection-bar">
+            <button class="menu-btn" style="background:#e3f2fd; color:#1565c0; margin:0;" onclick="selectAllItems('bill')">الكل</button>
+            <button class="menu-btn" style="background:#ffebee; color:#c62828; margin:0;" onclick="deleteSelectedItems('bill')">🗑️ حذف المحدد</button>
+        </div>
+
+        <div id="saved-bills-list" style="max-height:300px; overflow-y:auto; text-align:left;"></div>
+        <button class="menu-btn btn-close" onclick="closeAllModals()">إغلاق</button>
+    </div>
+</div>
+
+<div id="bill-details-modal" class="custom-modal">
+    <div class="modal-content">
+        <div class="modal-title">تفاصيل الفاتورة</div>
+        <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; background:#f5f5f5; padding:8px; border-radius:8px;">
+            <span id="detail-total" style="font-weight:bold; color:#bf360c; font-size:16px;"></span>
+            <span id="detail-date" style="font-size:12px; color:#555;"></span>
+        </div>
+        <div id="bill-items-container" style="max-height:250px; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:5px; margin-bottom:10px;"></div>
+        <button class="menu-btn" onclick="renameCurrentBill()"><span class="icon">✏️</span> تعديل اسم الفاتورة</button>
+        <button class="menu-btn btn-close" onclick="closeAllModals()">إغلاق</button>
+    </div>
+</div>
+
+<div id="custom-alert" class="custom-modal"><div class="modal-content"><div id="alert-msg" style="margin-bottom:20px;font-weight:bold;"></div><button id="alert-ok" class="menu-btn btn-add" style="justify-content:center">حسناً</button></div></div>
+<div id="custom-confirm" class="custom-modal"><div class="modal-content"><div id="confirm-msg" style="margin-bottom:20px;font-weight:bold;"></div><div style="display:flex;gap:10px;"><button id="confirm-no" class="menu-btn">لا</button><button id="confirm-yes" class="menu-btn btn-close" style="margin:0;background:#c62828;color:#fff;">نعم</button></div></div></div>
+<div id="custom-prompt" class="custom-modal"><div class="modal-content"><div id="prompt-msg" style="margin-bottom:10px;"></div><input id="prompt-input" class="pay-input"><div style="display:flex;gap:10px"><button id="prompt-cancel" class="menu-btn">إلغاء</button><button id="prompt-ok" class="menu-btn btn-add" style="margin:0;justify-content:center">موافق</button></div></div></div>
+<div id="json-modal" class="custom-modal"><div class="modal-content"><div style="margin-bottom:10px">انسخ النص التالي:</div><textarea id="json-area" style="width:100%;height:100px;border:1px solid #ccc;font-size:10px"></textarea><button class="menu-btn btn-add" style="justify-content:center;margin-top:10px" onclick="doCopy()">نسخ</button><button class="menu-btn btn-close" onclick="closeAllModals()">إغلاق</button></div></div>
+
+<div class="modal-overlay" onclick="closeAllModals()"></div>
+<script src="script.js"></script>
+</body>
+</html>
