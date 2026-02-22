@@ -666,7 +666,7 @@ window.addEventListener('popstate', () => {
   if(document.getElementById('inputModal').style.display === 'flex') { closeInputModal(); return; }
   if(document.getElementById('detailsModal').style.display === 'flex') { closeDetailsModal(); return; }
   if(document.getElementById('saveConfirmModal').style.display === 'flex') { resolveSaveConfirm(false); return; }
-  if(document.getElementById('loginOverlay').style.display === 'flex') { /* Prevent closing login by back btn */ return; }
+  if(document.getElementById('loginOverlay').style.display === 'flex') { return; }
   if(document.getElementById('searchInput').value) { clearSearch(); return; }
   if(currentFolderId !== null) { const pid = getParentFolderId(allData, currentFolderId); currentFolderId = (pid === undefined) ? null : pid; renderMainGrid(); return; }
 });
@@ -718,12 +718,14 @@ function renderMainGrid(filter = '') {
       ${!isMainSelectionMode ? `<div class="sort-handle"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>` : ''}
     `;
     
-    let pressTimer = null, touchMoved = false, touchStartX = 0, touchStartY = 0;
+    let pressTimer = null, touchMoved = false, touchStartX = 0, touchStartY = 0, isLongPress = false;
     card.addEventListener('touchstart', e => {
       if(e.target.closest('.sort-handle')) return;
-      touchMoved = false; touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+      touchMoved = false; isLongPress = false;
+      touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
       pressTimer = setTimeout(() => {
         if(!touchMoved) {
+          isLongPress = true;
           if(navigator.vibrate) navigator.vibrate(40);
           if(isMainSelectionMode) { toggleMainSelection(item.id); } else { showCtxSheet(item.id); }
         }
@@ -735,10 +737,11 @@ function renderMainGrid(filter = '') {
     }, {passive: true});
     card.addEventListener('touchend', e => {
       clearTimeout(pressTimer);
+      if(isLongPress) { e.preventDefault(); return; }
       if(!touchMoved) { if(isMainSelectionMode) { e.preventDefault(); toggleMainSelection(item.id); } else { handleCardClick(e, item); } }
     }, {passive: false});
     card.addEventListener('click', e => { if(!('ontouchstart' in window)) { handleCardClick(e, item); } });
-    card.oncontextmenu = e => { e.preventDefault(); if(!touchMoved) { showCtxSheet(item.id); } };
+    card.oncontextmenu = e => { e.preventDefault(); if(!touchMoved && !isLongPress) { showCtxSheet(item.id); } };
     
     addDragEvents(card, item);
     grid.appendChild(card);
@@ -771,12 +774,12 @@ function renderSubNotes() {
     const li = document.createElement('li'); li.className = 'sub-note-item';
     if(isSelectionMode && selectedSubIndices.has(i)) li.classList.add('selected');
     li.innerHTML = `<div class="sub-note-content">${content.length > 200 ? content.substring(0, 200) + '...' : content}</div>`;
-    let pt = null, tm = false, tsx = 0, tsy = 0;
-    li.addEventListener('touchstart', e => { tm = false; tsx = e.touches[0].clientX; tsy = e.touches[0].clientY; pt = setTimeout(() => { if(!tm) { if(navigator.vibrate) navigator.vibrate(40); showSubCtxSheet(i); } }, 500); }, {passive: true});
+    let pt = null, tm = false, tsx = 0, tsy = 0, isLP = false;
+    li.addEventListener('touchstart', e => { tm = false; isLP = false; tsx = e.touches[0].clientX; tsy = e.touches[0].clientY; pt = setTimeout(() => { if(!tm) { isLP = true; if(navigator.vibrate) navigator.vibrate(40); showSubCtxSheet(i); } }, 500); }, {passive: true});
     li.addEventListener('touchmove', e => { if(Math.abs(e.touches[0].clientX - tsx) > 8 || Math.abs(e.touches[0].clientY - tsy) > 8) { tm = true; clearTimeout(pt); } }, {passive: true});
-    li.addEventListener('touchend', () => { clearTimeout(pt); if(!tm) { if(isSelectionMode) toggleSubSelection(i); else editSubNote(i); } });
+    li.addEventListener('touchend', e => { clearTimeout(pt); if(isLP) { e.preventDefault(); return; } if(!tm) { if(isSelectionMode) toggleSubSelection(i); else editSubNote(i); } });
     li.onclick = () => { if(!('ontouchstart' in window)) { if(isSelectionMode) toggleSubSelection(i); else editSubNote(i); } };
-    li.oncontextmenu = e => { e.preventDefault(); showSubCtxSheet(i); };
+    li.oncontextmenu = e => { e.preventDefault(); if(!tm && !isLP) showSubCtxSheet(i); };
     el.appendChild(li);
   });
 }
@@ -1011,7 +1014,60 @@ function setAppPassword() { closeSheet('settingsSheet'); setTimeout(async () => 
 function removeAppPassword() { closeSheet('settingsSheet'); setTimeout(async () => { if(await showConfirm('حذف كلمة مرور التطبيق؟')) { localStorage.removeItem(APP_PASS_KEY); saveData(); showNotif('تم حذف كلمة المرور', 'info'); } }, 350); }
 function deleteAllData() { closeSheet('settingsSheet'); setTimeout(async () => { if(!await showConfirm('حذف جميع البيانات نهائياً؟')) { return; } if(!await showConfirm('هل أنت متأكد تماماً؟ سيتم حذفها من السحابة أيضاً!')) { return; } allData = []; saveData(); renderMainGrid(); showNotif('تم حذف جميع البيانات', 'info'); }, 350); }
 function exportDataManual() { closeSheet('settingsSheet'); setTimeout(() => showInputModal('نسخة احتياطية (كود) — انسخ الكل:', JSON.stringify(allData), 'area', true), 400); }
-function importDataPaste() { closeSheet('settingsSheet'); setTimeout(async () => { const t = await showInputModal('الصق نص النسخة (JSON):', '', 'area', false, true); if(t) { try { let c = t.trim().replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"'); allData = JSON.parse(c); saveData(); renderMainGrid(); showNotif('تم الاستيراد بنجاح', 'success'); } catch(err) { showNotif('الكود غير صالح', 'error'); } } }, 350); }
+function importDataPaste() { closeSheet('settingsSheet'); setTimeout(async () => { const t = await showInputModal('الصق نص النسخة:', '', 'area', false, true); if(t) { try { let c = t.trim().replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"'); allData = JSON.parse(c); saveData(); renderMainGrid(); showNotif('تم الاستيراد بنجاح', 'success'); } catch(err) { showNotif('الكود غير صالح', 'error'); } } }, 350); }
+
+function downloadJSON() {
+  closeSheet('settingsSheet');
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
+  const downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", "smart_notes_backup.json");
+  document.body.appendChild(downloadAnchorNode);
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
+  showNotif('تم التنزيل', 'success');
+}
+
+function importJSON() {
+  closeSheet('settingsSheet');
+  document.getElementById('jsonFileInput').click();
+}
+
+function handleJSONImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      let c = e.target.result.trim().replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
+      allData = JSON.parse(c);
+      saveData();
+      renderMainGrid();
+      showNotif('تم الاستيراد بنجاح', 'success');
+    } catch (err) {
+      showNotif('الملف غير صالح', 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+async function shareBackupText() {
+  closeSheet('settingsSheet');
+  const backupText = JSON.stringify(allData);
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'نسخة احتياطية',
+        text: backupText
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  } else {
+    showInputModal('نسخ احتياطي (كود) — انسخ الكل:', backupText, 'area', true);
+  }
+}
 
 // ─── GOOGLE DRIVE CLOUD LOGIC ─────────────────────────────────────
 function initGoogleLib() {
@@ -1079,7 +1135,7 @@ function updateLogoutIcon(url) {
 async function handleGoogleLogout() {
     closeSheet('settingsSheet');
     setTimeout(async () => {
-        if(await showConfirm("هل تريد تسجيل الخروج من السحابة؟ (لن تمسح البيانات من الهاتف)")) {
+        if(await showConfirm("هل تريد تسجيل الخروج من السحابة؟")) {
             localStorage.removeItem('gAccessToken'); 
             localStorage.removeItem('userPhoto'); 
             gAccessToken = null; 
@@ -1119,7 +1175,7 @@ async function forceUploadToDrive(silent = false) {
         
         if(fileId) { await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, { method: 'PATCH', headers: { 'Authorization': `Bearer ${gAccessToken}`, 'Content-Type': 'application/json' }, body: fileBlob }); } 
         else { const metadata = { name: FILENAME, mimeType: 'application/json', parents: ['appDataFolder'] }; const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', fileBlob); await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': `Bearer ${gAccessToken}` }, body: form }); } 
-        if(!silent) showNotif("تم الحفظ في السحابة ✅", "success"); 
+        if(!silent) showNotif("تم الحفظ في السحابة", "success"); 
     } catch(e) { if(!silent) showNotif("فشل الرفع", "error"); } 
     
     setSyncLoader(false); document.getElementById('syncText').innerText = "";
@@ -1159,7 +1215,7 @@ async function forceSyncFromCloud(silent = false) {
                 else localStorage.removeItem(APP_PASS_KEY); 
 
                 renderMainGrid(); 
-                if(!silent) showNotif("تم استعادة البيانات ✅", "success"); 
+                if(!silent) showNotif("تم استعادة البيانات", "success"); 
             } 
         } else { 
             if(!silent) showNotif("لا توجد بيانات محفوظة", "info"); 
@@ -1169,7 +1225,6 @@ async function forceSyncFromCloud(silent = false) {
     setSyncLoader(false); document.getElementById('syncText').innerText = "";
 }
 
-// ─── NOTIFICATION TOAST ───────────────────────────────────────────
 let notifTimer = null;
 function showNotif(msg, type = 'info') { const t = document.getElementById('notifToast'); const icon = document.getElementById('notifIcon'); document.getElementById('notifMsg').textContent = msg; const colors = {success: '#10b981', error: '#ef4444', info: '#6366f1'}; t.style.background = colors[type] || colors.info; if(type === 'success') icon.innerHTML = '<polyline points="20 6 9 17 4 12"/>'; else if(type === 'error') icon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'; else icon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'; t.classList.add('show'); if(notifTimer) clearTimeout(notifTimer); notifTimer = setTimeout(() => t.classList.remove('show'), 2500); }
 </script>
