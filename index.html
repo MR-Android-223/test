@@ -167,6 +167,21 @@
     animation: fadeUp 0.8s ease both;
   }
 
+  .card:nth-child(1) { animation-delay: 0.3s; }
+  .card:nth-child(2) { animation-delay: 0.4s; }
+  .card:nth-child(3) { animation-delay: 0.5s; }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+  }
+
   .card:hover {
     transform: translateY(-2px);
     border-color: rgba(0,212,255,0.2);
@@ -193,7 +208,6 @@
   .card-icon.blue { background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,212,255,0.05)); border: 1px solid rgba(0,212,255,0.2); }
   .card-icon.red  { background: linear-gradient(135deg, rgba(255,61,113,0.2), rgba(255,61,113,0.05)); border: 1px solid rgba(255,61,113,0.2); }
   .card-icon.purple { background: linear-gradient(135deg, rgba(123,94,167,0.2), rgba(123,94,167,0.05)); border: 1px solid rgba(123,94,167,0.2); }
-  .card-icon.gold { background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05)); border: 1px solid rgba(255,215,0,0.2); }
 
   .card-title {
     font-size: 16px;
@@ -486,6 +500,17 @@
     overflow: hidden;
   }
 
+  .history-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+    opacity: 0.4;
+  }
+
   .history-header {
     display: flex;
     align-items: center;
@@ -539,6 +564,7 @@
     border: 1px solid rgba(255,255,255,0.05);
     transition: all 0.2s;
     gap: 10px;
+    animation: slideIn 0.3s ease both;
   }
 
   .history-item:hover { border-color: rgba(0,212,255,0.15); }
@@ -566,7 +592,6 @@
   .badge-email { background: rgba(0,212,255,0.1); color: var(--accent); }
   .badge-pass  { background: rgba(255,61,113,0.1); color: var(--accent2); }
   .badge-user  { background: rgba(123,94,167,0.1); color: #b39ddb; }
-  .badge-real  { background: rgba(255,215,0,0.1); color: var(--gold); }
 
   .history-copy {
     background: none;
@@ -619,6 +644,7 @@
   .toast.success { border-color: rgba(0,230,118,0.3); }
   .toast.out { animation: toastOut 0.3s ease both; }
 
+  /* Modal Styles */
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -696,6 +722,16 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
   @keyframes toastIn {
     from { opacity: 0; transform: translateY(-10px) scale(0.95); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -730,18 +766,6 @@
   }
 
   .footer span { color: var(--accent2); }
-
-  .real-mail-item {
-    background: var(--surface2);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 8px;
-    border: 1px solid rgba(255,255,255,0.05);
-    cursor: pointer;
-    transition: 0.2s;
-  }
-
-  .real-mail-item:hover { border-color: var(--gold); }
 </style>
 </head>
 <body>
@@ -812,57 +836,12 @@
     </div>
   </div>
 
-  <div class="card" style="border-color: rgba(255, 215, 0, 0.3);">
-    <div class="card-header">
-      <div class="card-icon gold">📥</div>
-      <div>
-        <div class="card-title">
-        إيميل مؤقت حقيقي
-        </div>
-        <div class="card-desc">
-        استقبل رسائل وأكواد التفعيل مباشرة
-        </div>
-      </div>
-    </div>
-
-    <div class="output-wrap">
-      <input type="text" class="output-field" id="realEmailOutput" readonly>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" style="background: linear-gradient(135deg, var(--gold), #d4af37);" onclick="generateRealEmail(this)">
-        <span>⚡</span>
-        توليد إيميل حقيقي
-      </button>
-      <button class="btn btn-copy" id="copyRealBtn" onclick="copyField('realEmailOutput','copyRealBtn')">
-        <span>📋</span>
-        نسخ
-      </button>
-    </div>
-
-    <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-        <strong style="font-size:14px; color:var(--text);">
-        صندوق الوارد
-        </strong>
-        <span id="inboxStatus" style="font-size:12px; color:var(--gold);">
-        بانتظار الإيميل...
-        </span>
-      </div>
-      <div id="realMailList" style="max-height:250px; overflow-y:auto; padding-right:5px;">
-        <div class="empty-history">
-        لا يوجد رسائل...
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="card">
     <div class="card-header">
       <div class="card-icon blue">📧</div>
       <div>
         <div class="card-title">
-        مولد الإيميل الوهمي
+        مولد الإيميل
         </div>
         <div class="card-desc">
         أنشئ إيميلات عشوائية احترافية
@@ -890,7 +869,7 @@
     <div class="btn-row">
       <button class="btn btn-primary" onclick="generateEmail(this)">
         <span>⚡</span>
-        توليد وهمي
+        توليد إيميل
       </button>
       <button class="btn btn-copy" id="copyEmailBtn" onclick="copyField('emailOutput','copyEmailBtn')">
         <span>📋</span>
@@ -1059,7 +1038,6 @@ let placeholderText =
 document.getElementById('emailOutput').placeholder = placeholderText;
 document.getElementById('passOutput').placeholder = placeholderText;
 document.getElementById('userOutput').placeholder = placeholderText;
-document.getElementById('realEmailOutput').placeholder = placeholderText;
 
 let selectedDomain = 'gmail.com';
 let selectedStyle = 'cool';
@@ -1067,20 +1045,10 @@ let history = JSON.parse(localStorage.getItem('abuFaizHistory')) || [];
 let stats = JSON.parse(localStorage.getItem('abuFaizStats')) || { generated: 0, copied: 0 };
 let sessionStart = Date.now();
 
-let realLogin = localStorage.getItem('abuFaizRealLogin') || "";
-let realDomain = localStorage.getItem('abuFaizRealDomain') || "";
-let inboxTimer = null;
-
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('totalGenerated').textContent = stats.generated;
   document.getElementById('totalCopied').textContent = stats.copied;
   renderHistory();
-
-  if(realLogin && realDomain) {
-    document.getElementById('realEmailOutput').value = realLogin + "@" + realDomain;
-    document.getElementById('realEmailOutput').classList.add('has-value');
-    startInboxCheck();
-  }
 });
 
 setInterval(() => {
@@ -1156,13 +1124,10 @@ function renderHistory() {
     let typeStr = '';
     if(item.type === 'email') {
       typeStr =
-      'وهمي';
+      'إيميل';
     } else if(item.type === 'pass') {
       typeStr =
       'سر';
-    } else if(item.type === 'real') {
-      typeStr =
-      'حقيقي';
     } else {
       typeStr =
       'مستخدم';
@@ -1234,137 +1199,27 @@ function shuffle(str) {
   return str.split('').sort(() => 0.5 - Math.random()).join('');
 }
 
-// ----------------------------------------
-// REAL EMAIL GENERATOR
-// ----------------------------------------
-async function generateRealEmail(btn) {
-  if (btn) addRipple(btn, event);
-  
-  try {
-    const res = await fetch('https://www.1secmail.com/api/v1/?action=genEmail&count=1');
-    const data = await res.json();
-    const email = data[0];
-    const parts = email.split('@');
-    
-    realLogin = parts[0];
-    realDomain = parts[1];
-    
-    localStorage.setItem('abuFaizRealLogin', realLogin);
-    localStorage.setItem('abuFaizRealDomain', realDomain);
-    
-    const field = document.getElementById('realEmailOutput');
-    field.value = email;
-    field.classList.add('has-value');
-    
-    let waitMsg =
-    'جاري فحص الرسائل...';
-    document.getElementById('realMailList').innerHTML = '<div class="empty-history">' + waitMsg + '</div>';
-    
-    addHistory(email, 'real');
-    
-    let msgReal =
-    'تم توليد إيميل حقيقي! 📥';
-    showToast(msgReal);
-    
-    startInboxCheck();
-  } catch(e) {
-    let err =
-    'فشل الاتصال بالسيرفر';
-    showToast(err, '❌');
-  }
-}
-
-function startInboxCheck() {
-  if(inboxTimer) clearInterval(inboxTimer);
-  checkRealInbox();
-  inboxTimer = setInterval(checkRealInbox, 5000);
-}
-
-async function checkRealInbox() {
-  if(!realLogin || !realDomain) return;
-  
-  let txtCheck =
-  'جاري الفحص...';
-  document.getElementById('inboxStatus').textContent = txtCheck;
-  
-  try {
-    const res = await fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${realLogin}&domain=${realDomain}`);
-    const mails = await res.json();
-    
-    if(mails.length > 0) {
-      renderRealMails(mails);
-    } else {
-      let txtNo =
-      'لا يوجد رسائل...';
-      document.getElementById('realMailList').innerHTML = '<div class="empty-history">' + txtNo + '</div>';
-    }
-  } catch(e) {}
-  
-  setTimeout(() => { 
-    let txtOk =
-    'متصل ✅';
-    document.getElementById('inboxStatus').textContent = txtOk; 
-  }, 1000);
-}
-
-function renderRealMails(mails) {
-  const list = document.getElementById('realMailList');
-  let htmlResult = '';
-  
-  let txtFrom =
-  'من: ';
-  let txtLoad =
-  'اضغط لقراءة الرسالة...';
-  
-  mails.forEach((m) => {
-    htmlResult += `
-    <div class="real-mail-item" onclick="openMail(${m.id})">
-      <div style="font-weight:700; color:var(--gold); margin-bottom:5px;">${m.subject}</div>
-      <div style="font-size:12px; color:var(--muted);">${txtFrom}${m.from}</div>
-      <div id="mail-body-${m.id}" style="display:none; margin-top:10px; padding:15px; background:#fff; color:#000; border-radius:8px; width:100%; word-break:break-word; font-family:sans-serif;">${txtLoad}</div>
-    </div>`;
-  });
-  list.innerHTML = htmlResult;
-}
-
-async function openMail(id) {
-  const bodyDiv = document.getElementById(`mail-body-${id}`);
-  
-  if(bodyDiv.style.display === "block") {
-    bodyDiv.style.display = "none";
-    return;
-  }
-  
-  bodyDiv.style.display = "block";
-  let txtWait =
-  'جاري جلب المحتوى...';
-  bodyDiv.innerHTML = txtWait;
-  
-  try {
-    const res = await fetch(`https://www.1secmail.com/api/v1/?action=readMessage&login=${realLogin}&domain=${realDomain}&id=${id}`);
-    const data = await res.json();
-    bodyDiv.innerHTML = data.htmlBody || data.textBody || data.body;
-  } catch(e) {
-    let txtErr =
-    'خطأ بالتحميل';
-    bodyDiv.innerHTML = txtErr;
-  }
-}
-
-// ----------------------------------------
-// FAKE EMAIL GENERATOR
-// ----------------------------------------
 function generateEmail(btn) {
   if (btn) addRipple(btn, event);
 
   const adjectives = [
     'dark', 'blue', 'fire', 'swift', 'cool', 'epic', 'star', 'nova', 'iron', 'wild', 'sky', 'zen',
-    'toxic', 'neon', 'shadow', 'crystal', 'quantum', 'cosmic', 'phantom', 'silent', 'golden'
+    'toxic', 'neon', 'shadow', 'crystal', 'quantum', 'cosmic', 'phantom', 'silent', 'golden',
+    'silver', 'crimson', 'emerald', 'sapphire', 'frozen', 'blazing', 'mystic', 'ancient',
+    'digital', 'virtual', 'brave', 'bold', 'clever', 'fast', 'super', 'mega', 'ultra', 'hyper',
+    'giga', 'alpha', 'omega', 'prime', 'elite', 'supreme', 'royal', 'magic', 'secret', 'hidden',
+    'lost', 'last', 'first', 'zero', 'infinite', 'crazy', 'mad', 'smart', 'genius', 'darkness',
+    'light', 'heavy', 'rapid', 'sonic', 'atomic', 'nuclear', 'solar', 'lunar', 'stellar',
+    'astral', 'chaos', 'order', 'chaos', 'doom', 'glory', 'honor', 'power', 'force', 'energy'
   ];
   
   const nouns = [
     'wolf', 'hawk', 'lion', 'dragon', 'ghost', 'shadow', 'blade', 'storm', 'void', 'pixel', 'cyber', 'nexus',
-    'tiger', 'bear', 'eagle', 'falcon', 'shark', 'viper', 'cobra', 'ninja', 'samurai', 'knight', 'wizard'
+    'tiger', 'bear', 'eagle', 'falcon', 'shark', 'viper', 'cobra', 'ninja', 'samurai', 'knight', 'wizard',
+    'mage', 'hunter', 'ranger', 'rogue', 'thief', 'assassin', 'king', 'queen', 'prince', 'lord', 'god',
+    'demon', 'angel', 'spirit', 'soul', 'heart', 'mind', 'brain', 'system', 'network', 'matrix', 'code',
+    'data', 'byte', 'bot', 'mech', 'cyborg', 'alien', 'mutant', 'hero', 'villain', 'titan', 'giant', 'beast',
+    'monster', 'warrior', 'fighter', 'soldier', 'sniper', 'pilot', 'driver', 'rider', 'racer', 'runner'
   ];
 
   const patterns = [
@@ -1380,7 +1235,7 @@ function generateEmail(btn) {
 
   let domain = selectedDomain;
   if (domain === 'random') {
-    const domains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'proton.me', 'outlook.com', 'icloud.com', 'mail.com', 'tutanota.com'];
+    const domains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'proton.me', 'outlook.com', 'icloud.com', 'mail.com', 'tutanota.com', 'yandex.com', 'zoho.com', 'gmx.com'];
     domain = rand(domains);
   }
 
@@ -1391,13 +1246,10 @@ function generateEmail(btn) {
   addHistory(email, 'email');
   
   let msgGenEmail =
-  'تم توليد إيميل وهمي! 📧';
+  'تم توليد إيميل جديد! 📧';
   showToast(msgGenEmail);
 }
 
-// ----------------------------------------
-// PASSWORD GENERATOR
-// ----------------------------------------
 function generatePass(btn) {
   if (btn) addRipple(btn, event);
 
@@ -1480,32 +1332,33 @@ function updateStrength(pass, upper, lower, nums, syms) {
   }
 }
 
-// ----------------------------------------
-// USERNAME GENERATOR
-// ----------------------------------------
 function generateUsername(btn) {
   if (btn) addRipple(btn, event);
 
   const styles = {
     cool: [
-      () => ['dark','epic','ultra','hyper','neo','alpha','omega','meta','cyber','neon'][randInt(0,9)] + ['Wolf','Hawk','Fox','Viper','Ghost','Blade','Storm','Nexus','Core','Void'][randInt(0,9)],
-      () => 'x_' + ['hunter','sniper','driv3r','coderr','hack3r','nod3r'][randInt(0,5)] + '_x',
-      () => ['shadow','phantom','spectr','cipher','zenith','apex'][randInt(0,5)] + randInt(0,9) + randInt(0,9),
+      () => ['dark','epic','ultra','hyper','neo','alpha','omega','meta','cyber','neon','quantum','cosmic','astral','void','flux'][randInt(0,14)] + ['Wolf','Hawk','Fox','Viper','Ghost','Blade','Storm','Nexus','Core','Void','Pulse','Spark','Flare','Sync','Grid'][randInt(0,14)],
+      () => 'x_' + ['hunter','sniper','driv3r','coderr','hack3r','nod3r','kill3r','slay3r','play3r','gam3r','mast3r','lord','king','boss'][randInt(0,13)] + '_x',
+      () => ['shadow','phantom','spectr','cipher','zenith','apex','vortex','matrix','system','logic','pixel','byte'][randInt(0,11)] + randInt(100,9999),
+      () => ['TheReal','Just','Only','True','Pure','Absolute','Infinite'][randInt(0,6)] + ['Legend','Myth','Icon','Hero','Champ','Star'][randInt(0,5)] + randInt(1,99)
     ],
     gamer: [
-      () => ['xX','XX','gg'][randInt(0,2)] + ['Noob','Pro','Killer','Sniper','Boss','God'][randInt(0,5)] + ['Xx','XX','_YT'][randInt(0,2)],
-      () => ['ProPlayer','MLGpro','TopFrag','AceKill','OneShot','HeadShot'][randInt(0,5)] + randInt(100,9999),
-      () => ['N3on','Ph4ntom','Vip3r','Gh0st','Fr0st','Bl4ze'][randInt(0,5)] + '_' + ['GG','YT','TV','PRO'][randInt(0,3)],
+      () => ['xX','XX','gg','Ez','Pro','God'][randInt(0,5)] + ['Noob','Killer','Sniper','Boss','Slayer','Hunter','Beast','Titan','Ninja','Samurai','Demon','Dragon'][randInt(0,11)] + ['Xx','XX','_YT','_TV','TTV'][randInt(0,4)],
+      () => ['ProPlayer','MLGpro','TopFrag','AceKill','OneShot','HeadShot','Clutch','Carry','Rush','Camp','Loot'][randInt(0,10)] + randInt(100,9999),
+      () => ['N3on','Ph4ntom','Vip3r','Gh0st','Fr0st','Bl4ze','Ven0m','T0xic','H4v0c','R3c0n'][randInt(0,9)] + '_' + ['GG','YT','TV','PRO','GOD','MVP'][randInt(0,5)],
+      () => ['FaZe_','OpTic_','TSM_','C9_','G2_','Navi_'][randInt(0,5)] + ['Aim','Flick','Spray','Peek','Push'][randInt(0,4)] + randInt(1,99)
     ],
     pro: [
-      () => ['Alex','Ryan','Sam','Kyle','Drew','Max'][randInt(0,5)] + ['Dev','Tech','Pro','Hub','Lab','Studio'][randInt(0,5)] + randInt(10,99),
-      () => ['the','mr_','sir_'][randInt(0,2)] + ['dev','coder','builder','maker','creator','founder'][randInt(0,5)],
-      () => ['dev','tech','code','build'][randInt(0,3)] + ['_' + ['io','hub','xyz','app','co'][randInt(0,4)]],
+      () => ['Alex','Ryan','Sam','Kyle','Drew','Max','John','Mike','Chris','David','James','Tom'][randInt(0,11)] + ['Dev','Tech','Pro','Hub','Lab','Studio','Code','Web','App','Net'][randInt(0,9)] + randInt(10,999),
+      () => ['the','mr_','sir_','dr_','real_'][randInt(0,4)] + ['dev','coder','builder','maker','creator','founder','admin','root','sys','hacker'][randInt(0,9)],
+      () => ['dev','tech','code','build','stack','data','cloud'][randInt(0,6)] + ['_' + ['io','hub','xyz','app','co','net','org'][randInt(0,6)]],
+      () => ['Code','Byte','Bit','Data','Logic','Loop','Node','Script'][randInt(0,7)] + ['Master','Ninja','Guru','Wizard','Jedi','Geek'][randInt(0,5)] + randInt(1,99)
     ],
     arabic: [
-      () => ['abu','om','bnt','ibn'][randInt(0,3)] + '_' + ['faiz','nour','ali','sara','reem','lara'][randInt(0,5)] + randInt(0,99),
-      () => ['alqamar','alnoor','alsayf','alward','albadr','alahly'][randInt(0,5)] + randInt(10,999),
-      () => ['malik','amir','batal','qaid','nokhba','zaeem'][randInt(0,5)] + '_' + randInt(100,9999),
+      () => ['abu','om','bnt','ibn','akh','okht'][randInt(0,5)] + '_' + ['faiz','nour','ali','sara','reem','lara','ahmad','omar','tariq','rami','sami','fadi'][randInt(0,11)] + randInt(0,999),
+      () => ['alqamar','alnoor','alsayf','alward','albadr','alahly','alshams','alnajm','alfajer','allayl','alassad','alnimr'][randInt(0,11)] + randInt(10,9999),
+      () => ['malik','amir','batal','qaid','nokhba','zaeem','sheikh','pasha','bek','muallem','ostaz','wahsh'][randInt(0,11)] + '_' + randInt(100,9999),
+      () => ['Syrian','Sham','Halabi','Homsi','Dimashqi','Arab'][randInt(0,5)] + ['King','Prince','Boss','Pro','Gamer'][randInt(0,4)] + randInt(1,99)
     ],
     random: null,
   };
