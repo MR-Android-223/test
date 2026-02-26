@@ -1,1229 +1,1533 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ملاحظاتي الذكية Cloud</title>
-
-<script src="https://accounts.google.com/gsi/client" onload="initGoogleLib()" async defer></script>
-
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+أدوات أبو فايز | مولد الحسابات
+</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none;margin:0;padding:0}
-input,textarea{-webkit-user-select:text!important;user-select:text!important}
-body{font-family:'IBM Plex Sans Arabic',sans-serif;background:#f0f2f7;color:#1a1a2e;min-height:100vh;padding-bottom:100px;-webkit-user-select:none;user-select:none;overflow-x:hidden}
+  :root {
+    --bg: #050811;
+    --surface: #0a0f1e;
+    --surface2: #0e1628;
+    --accent: #00d4ff;
+    --accent2: #ff3d71;
+    --accent3: #7b5ea7;
+    --gold: #ffd700;
+    --text: #e8f0fe;
+    --muted: #5a6a8a;
+    --success: #00e676;
+    --glow: rgba(0, 212, 255, 0.15);
+  }
 
-/* ── HEADER ── */
-.header{background:linear-gradient(160deg,#4f46e5,#7c3aed);padding:48px 20px 28px;text-align:center;position:relative;border-radius:0 0 32px 32px;box-shadow:0 8px 30px rgba(79,70,229,.35)}
-.header h1{color:#fff;font-size:1.9rem;font-weight:700;margin-bottom:3px}
-.header p{color:rgba(255,255,255,.7);font-size:.85rem;font-weight:400}
-.header-badge{display:inline-block;background:rgba(255,255,255,.15);color:#fff;font-size:.7rem;font-weight:600;letter-spacing:.1em;padding:4px 12px;border-radius:100px;margin-bottom:10px;border:1px solid rgba(255,255,255,.2)}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* Cloud Status */
-.cloud-status {position:absolute; top:20px; left:60px; font-size:0.75rem; color:rgba(255,255,255,0.9); display:flex; align-items:center; gap:6px; font-weight:600;}
-.sync-loader {display:none; width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top:2px solid #fff; border-radius:50%; animation:spin 0.8s linear infinite;}
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 16px 80px;
+    overflow-x: hidden;
+    position: relative;
+  }
 
-/* Header icon buttons */
-.hdr-btn{position:absolute;top:48px;width:40px;height:40px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s}
-.hdr-btn:active{background:rgba(255,255,255,.3)}
-.hdr-btn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.hdr-btn-left{left:16px}
-#mainSelectBtn{position:absolute;top:48px;right:16px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:12px;color:#fff;font-family:'IBM Plex Sans Arabic';font-weight:600;font-size:.82rem;padding:8px 14px;cursor:pointer}
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(0,212,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(123,94,167,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(255,61,113,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-/* ── NAV BAR ── */
-#navBar{display:none;align-items:center;gap:10px;background:#fff;padding:10px 16px;margin:14px 16px 0;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
-.back-btn{display:flex;align-items:center;gap:6px;background:#f0f2f7;border:none;padding:8px 14px;border-radius:10px;cursor:pointer;font-family:'IBM Plex Sans Arabic';font-weight:600;font-size:.85rem;color:#4f46e5;transition:background .15s}
-.back-btn:active{background:#e0e2f0}
-.back-btn svg{width:16px;height:16px;stroke:#4f46e5;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.current-path{color:#64748b;font-size:.85rem;font-weight:500;margin-right:auto}
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-/* ── SELECTION TOOLBAR ── */
-.sel-toolbar{display:none;align-items:center;justify-content:center;gap:6px;padding:0 12px;margin-top:12px;flex-wrap:wrap}
-.sel-toolbar.active{display:flex}
-.toolbar-btn{display:flex;align-items:center;gap:4px;background:#fff;border:1.5px solid #e2e8f0;padding:8px 12px;border-radius:12px;cursor:pointer;font-family:'IBM Plex Sans Arabic';font-weight:600;font-size:.8rem;color:#374151;box-shadow:0 2px 6px rgba(0,0,0,.05);transition:all .15s;flex:1;justify-content:center;}
-.toolbar-btn:active{transform:scale(.95)}
-.toolbar-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.toolbar-btn.danger{color:#ef4444;border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.04)}
-.toolbar-btn.primary{color:#4f46e5;border-color:rgba(79,70,229,.25);background:rgba(79,70,229,.04)}
-.toolbar-btn.opt{color:#8b5cf6;border-color:rgba(139,92,246,.25);background:rgba(139,92,246,.04)}
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 480px;
+  }
 
-/* ── SEARCH ── */
-.search-wrap{position:relative;margin:16px 16px 0}
-.search-wrap svg.si{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:#94a3b8;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-#searchInput{width:100%;padding:13px 44px 13px 44px;background:#fff;border:2px solid transparent;border-radius:16px;font-family:'IBM Plex Sans Arabic';font-size:.95rem;color:#1a1a2e;text-align:right;box-shadow:0 2px 12px rgba(0,0,0,.07);transition:all .25s}
-#searchInput::placeholder{color:#94a3b8}
-#searchInput:focus{border-color:#4f46e5;box-shadow:0 0 0 4px rgba(79,70,229,.1)}
-.clear-btn{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;background:#e2e8f0;border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer}
-.clear-btn svg{width:14px;height:14px;stroke:#64748b;fill:none;stroke-width:2.5;stroke-linecap:round}
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeDown 0.8s ease both;
+  }
 
-/* ── GRID ── */
-.grid-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px;padding:16px;align-items:start}
-.note-card{background:#fff;border-radius:22px;padding:16px 12px 12px;height:165px;display:flex;flex-direction:column;align-items:center;cursor:pointer;position:relative;text-align:center;box-shadow:0 3px 14px rgba(0,0,0,.08);border:2px solid transparent;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,border-color .2s;touch-action:pan-y;overflow:hidden}
-.note-card:active{transform:scale(.96)}
-.note-card.is-folder{background:linear-gradient(160deg,#fffbeb,#fff);border-color:rgba(245,158,11,.2)}
-.note-card.is-note{background:linear-gradient(160deg,#f5f3ff,#fff);border-color:rgba(124,58,237,.15)}
-.note-card.selected{border-color:#10b981;background:linear-gradient(160deg,#ecfdf5,#fff)}
-.note-card.dragging{opacity:.4;transform:scale(.93)}
-.note-card.drag-target,.note-card.drag-target-hover{border-color:#4f46e5;background:linear-gradient(160deg,#eef2ff,#fff);transform:scale(1.04)}
-.note-card.dragging-mobile{position:fixed;z-index:9999;opacity:.92;box-shadow:0 20px 50px rgba(0,0,0,.25);pointer-events:none;width:155px;height:165px;border:2px solid #4f46e5}
+  .logo-ring {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 16px;
+    position: relative;
+  }
 
-.card-icon-wrap{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;margin-top:4px}
-.card-icon-wrap.folder-ico{background:linear-gradient(135deg,#f59e0b,#d97706)}
-.card-icon-wrap.note-ico{background:linear-gradient(135deg,#7c3aed,#6d28d9)}
-.card-icon-wrap.locked-ico{background:linear-gradient(135deg,#64748b,#475569)}
-.card-icon-wrap svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .logo-ring svg {
+    width: 100%;
+    height: 100%;
+    animation: spinSlow 8s linear infinite;
+  }
 
-.card-title{font-size:.88rem;font-weight:600;color:#1e293b;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;width:100%;max-height:2.8em}
-.card-count{margin-top:auto;margin-bottom:2px;background:#f1f5f9;padding:3px 10px;border-radius:100px;font-size:.7rem;color:#64748b;font-weight:600}
-.card-sel-icon{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:2px solid #10b981;background:#fff;display:none;align-items:center;justify-content:center}
-.card-sel-icon svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.note-card.selected .card-sel-icon{background:#10b981;display:flex}
-.sort-handle{position:absolute;bottom:7px;right:7px;padding:5px;cursor:grab;opacity:.3;transition:opacity .2s}
-.sort-handle svg{width:16px;height:16px;stroke:#64748b;fill:none;stroke-width:2;stroke-linecap:round}
+  .logo-inner {
+    position: absolute;
+    inset: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 0 30px rgba(0,212,255,0.4);
+  }
 
-/* ── EMPTY ── */
-.empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:#94a3b8}
-.empty-state svg{width:56px;height:56px;stroke:#cbd5e1;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:14px}
-.empty-text{font-size:.95rem;font-weight:500}
+  .site-title {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent) 0%, #fff 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
 
-/* ── FAB ── */
-.fab{position:fixed;bottom:28px;left:24px;width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;box-shadow:0 8px 24px rgba(79,70,229,.45);cursor:pointer;z-index:1000;display:flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
-.fab:active{transform:scale(.9)}
-.fab svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.paste-fab{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#059669,#047857);color:#fff;padding:14px 26px;border-radius:100px;border:none;font-family:'IBM Plex Sans Arabic';font-weight:700;font-size:.95rem;box-shadow:0 8px 24px rgba(5,150,105,.4);display:none;z-index:2000;align-items:center;gap:8px;cursor:pointer}
-.paste-fab svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .site-sub {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
 
-/* ── CONTEXT MENU OVERLAY ── */
-#ctxOverlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:4999;display:none;background:rgba(0,0,0,.35);backdrop-filter:blur(2px)}
+  .stats-bar {
+    display: flex;
+    gap: 1px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    border: 1px solid rgba(0,212,255,0.1);
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
 
-/* ── MENUS ── */
-.menu-sheet{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:28px 28px 0 0;z-index:5000;display:flex;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.18);padding:8px 0 24px;transform:translateY(110%);transition:transform .35s cubic-bezier(.32,0,.67,0);pointer-events:none}
-.menu-sheet.open{transform:translateY(0);transition:transform .38s cubic-bezier(.34,1.15,.64,1);pointer-events:all}
-.menu-handle{width:40px;height:4px;background:#e2e8f0;border-radius:100px;margin:10px auto 14px}
-.menu-title{font-size:.8rem;font-weight:700;color:#94a3b8;letter-spacing:.08em;padding:0 20px 8px;text-transform:uppercase}
+  .stat {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    background: var(--surface);
+    transition: background 0.3s;
+  }
 
-.menu-item{display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;border:none;background:none;width:100%;font-family:'IBM Plex Sans Arabic';font-size:1rem;font-weight:500;color:#1e293b;text-align:right;transition:background .15s;position:relative}
-.menu-item:active{background:#f8fafc}
-.menu-item .m-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.menu-item .m-icon svg{width:20px;height:20px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.menu-item .m-label{flex:1;text-align:right}
-.menu-item .m-arrow{color:#d1d5db}
-.menu-item .m-arrow svg{width:16px;height:16px;stroke:#d1d5db;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.menu-sep{height:1px;background:#f1f5f9;margin:4px 20px}
-.menu-item.red .m-label{color:#ef4444}
-.menu-item.red .m-icon{background:rgba(239,68,68,.1)}
-.menu-item.red .m-icon svg{stroke:#ef4444}
-.menu-item.blue .m-icon{background:rgba(79,70,229,.1)}
-.menu-item.blue .m-icon svg{stroke:#4f46e5}
-.menu-item.green .m-icon{background:rgba(16,185,129,.1)}
-.menu-item.green .m-icon svg{stroke:#10b981}
-.menu-item.amber .m-icon{background:rgba(245,158,11,.1)}
-.menu-item.amber .m-icon svg{stroke:#f59e0b}
-.menu-item.violet .m-icon{background:rgba(139,92,246,.1)}
-.menu-item.violet .m-icon svg{stroke:#8b5cf6}
-.menu-item.slate .m-icon{background:rgba(100,116,139,.1)}
-.menu-item.slate .m-icon svg{stroke:#64748b}
+  .stat:hover { background: var(--surface2); }
 
-#createMenu{position:fixed;bottom:96px;left:16px;right:auto;width:200px;background:#fff;border-radius:20px;z-index:5000;display:none;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:6px 0;transform-origin:bottom left}
-#createMenu.open{display:flex;animation:popUp .2s cubic-bezier(.34,1.56,.64,1)}
-@keyframes popUp{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
-.create-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border:none;background:none;width:100%;font-family:'IBM Plex Sans Arabic';font-size:.9rem;font-weight:600;color:#1e293b;text-align:right;transition:background .15s}
-.create-item:active{background:#f8fafc}
-.create-item .ci-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.create-item .ci-icon svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .stat-num {
+    display: block;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
 
-/* ── MODALS ── */
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:6000;justify-content:center;align-items:center;backdrop-filter:blur(6px)}
-.modal-full{position:fixed;top:0;left:0;width:100%;height:100%;z-index:6000;background:#f8fafc;flex-direction:column;display:none}
-.modal-card{background:#fff;width:92%;max-width:340px;border-radius:28px;padding:28px 24px;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:cardPop .25s cubic-bezier(.34,1.56,.64,1)}
-@keyframes cardPop{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
-.modal-msg{font-size:1.05rem;font-weight:600;margin-bottom:20px;line-height:1.6;color:#1e293b;text-align:center}
-.modal-actions{display:flex;gap:10px;margin-top:10px}
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+  }
 
-/* ── BUTTON STYLES ── */
-.btn{display:flex;align-items:center;justify-content:center;gap:7px;border:none;padding:13px 18px;border-radius:14px;cursor:pointer;font-family:'IBM Plex Sans Arabic';font-weight:700;font-size:.95rem;flex:1;transition:all .15s}
-.btn:active{transform:scale(.96)}
-.btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.btn-primary{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;box-shadow:0 4px 14px rgba(79,70,229,.35)}
-.btn-danger{background:rgba(239,68,68,.1);color:#ef4444;border:1.5px solid rgba(239,68,68,.25)}
-.btn-ghost{background:#f1f5f9;color:#64748b}
-.btn-success{background:rgba(16,185,129,.1);color:#059669;border:1.5px solid rgba(16,185,129,.25)}
-.btn-copy{background:rgba(139,92,246,.1);color:#7c3aed;border:1.5px solid rgba(139,92,246,.25)}
+  .card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+    animation: fadeUp 0.8s ease both;
+  }
 
-/* ── INPUT STYLES ── */
-.inp{width:100%;padding:14px 16px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:14px;font-family:'IBM Plex Sans Arabic';font-size:1rem;color:#1e293b;text-align:right;margin-bottom:18px;transition:border-color .2s}
-.inp:focus{border-color:#4f46e5;background:#fff}
-.inp::placeholder{color:#94a3b8}
-.inp-area{width:100%;flex-grow:1;padding:16px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:14px;font-family:'IBM Plex Sans Arabic';font-size:1rem;color:#1e293b;text-align:right;margin-bottom:14px;resize:none;overflow-y:auto;white-space:pre-wrap;line-height:1.7;transition:border-color .2s}
-.inp-area:focus{border-color:#4f46e5;background:#fff}
-.inp-pass{text-align:center;letter-spacing:.2em;font-size:1.1rem}
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(0,212,255,0.2);
+  }
 
-/* ── EDIT FULLSCREEN ── */
-#editModal{background:#fff}
-.edit-topbar{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1.5px solid #f1f5f9}
-.edit-topbar .btn{flex:0;padding:10px 14px;font-size:.85rem}
-.edit-search-bar{display:none;align-items:center;gap:8px;padding:10px 16px;background:#f8fafc;border-bottom:1.5px solid #e2e8f0}
-.es-inp{flex:1;border:1.5px solid #e2e8f0;background:#fff;padding:8px 12px;border-radius:10px;font-family:'IBM Plex Sans Arabic';text-align:right;font-size:.9rem;color:#1e293b}
-.es-btn{width:34px;height:34px;border:1.5px solid #e2e8f0;background:#fff;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.es-btn svg{width:16px;height:16px;stroke:#4f46e5;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
 
-/* ── DETAILS MODAL ── */
-#detailsModal{background:#f8fafc}
-.details-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fff;border-bottom:1.5px solid #f1f5f9;gap:8px}
-.note-title-label{font-size:1.25rem;font-weight:700;color:#4f46e5;padding:12px 16px 0}
-.sub-notes-list{flex:1;overflow-y:auto;list-style:none;padding:10px 16px}
-.sub-note-item{display:flex;align-items:flex-start;gap:12px;background:#fff;padding:13px 14px;margin-bottom:9px;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);border-right:3px solid #7c3aed;cursor:pointer;transition:all .2s}
-.sub-note-item:active{background:#f5f3ff}
-.sub-note-item.selected{border-right-color:#10b981;background:#f0fdf4}
-.sub-note-content{flex:1;font-size:.95rem;line-height:1.55;color:#334155;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;white-space:pre-wrap}
-.input-area{display:flex;gap:10px;padding:12px 16px;background:#fff;border-top:1.5px solid #f1f5f9}
-#newSubNoteInput{flex:1;height:48px;padding:10px 14px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:14px;font-family:'IBM Plex Sans Arabic';font-size:.95rem;color:#1e293b;text-align:right;transition:border-color .2s}
-#newSubNoteInput:focus{border-color:#4f46e5;background:#fff}
-.add-btn{width:48px;height:48px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(79,70,229,.35);flex-shrink:0}
-.add-btn:active{transform:scale(.93)}
-.add-btn svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.sub-search-wrap{padding:10px 16px;background:#fff;border-bottom:1px solid #f1f5f9}
-#subSearchInput{width:100%;padding:10px 14px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;font-family:'IBM Plex Sans Arabic';font-size:.88rem;color:#1e293b;text-align:right;transition:border-color .2s}
-#subSearchInput:focus{border-color:#4f46e5}
+  .card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
 
-/* ── NOTIFICATION ── */
-#notifToast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(20px);background:#1e293b;color:#fff;padding:12px 20px;border-radius:100px;font-size:.9rem;font-weight:600;z-index:9999;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
-#notifToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-#notifToast svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .card-icon.blue { background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,212,255,0.05)); border: 1px solid rgba(0,212,255,0.2); }
+  .card-icon.red  { background: linear-gradient(135deg, rgba(255,61,113,0.2), rgba(255,61,113,0.05)); border: 1px solid rgba(255,61,113,0.2); }
+  .card-icon.purple { background: linear-gradient(135deg, rgba(123,94,167,0.2), rgba(123,94,167,0.05)); border: 1px solid rgba(123,94,167,0.2); }
+  .card-icon.gold { background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05)); border: 1px solid rgba(255,215,0,0.2); }
 
-/* ── DRAG ACTION SHEET ── */
-.drag-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 20px 8px}
-.drag-card{background:#f8fafc;border:2px solid #e2e8f0;border-radius:18px;padding:18px 10px;text-align:center;cursor:pointer;transition:all .2s}
-.drag-card:active{transform:scale(.95)}
-.drag-card.move-c{border-color:rgba(79,70,229,.3);background:#f0f0ff}
-.drag-card.swap-c{border-color:rgba(245,158,11,.3);background:#fffbeb}
-.drag-card .dc-icon{font-size:1.8rem;margin-bottom:6px}
-.drag-card .dc-title{font-weight:700;font-size:.9rem;color:#1e293b;margin-bottom:2px}
-.drag-card .dc-desc{font-size:.75rem;color:#64748b}
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
 
-/* ── GOOGLE LOGIN OVERLAY ── */
-#loginOverlay {position:fixed; top:0; left:0; right:0; bottom:0; background-color:#f0f2f5; z-index:7000; display:none; flex-direction:column; align-items:center; justify-content:center; padding:20px;}
-.login-card {background:white; padding:40px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.1); text-align:center; width:100%; max-width:340px; font-family:'IBM Plex Sans Arabic', sans-serif;}
-.google-btn {display:flex; align-items:center; justify-content:center; background-color:#1a73e8; color:white; border:none; padding:4px; border-radius:8px; font-size:1rem; font-weight:600; font-family:'IBM Plex Sans Arabic'; cursor:pointer; width:100%; transition:background-color 0.3s; text-decoration:none; margin-top:20px;}
-.google-btn:hover {background-color:#1765cc;}
-.google-icon-wrapper {background:white; padding:8px; border-radius:6px; display:flex; align-items:center; justify-content:center;}
-.google-icon {width:20px; height:20px;}
-.user-profile-img {width:24px; height:24px; border-radius:50%; object-fit:cover; border:1px solid #ddd;}
+  .card-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
 
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
+  .domain-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .domain-btn {
+    padding: 8px 4px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: center;
+  }
+
+  .domain-btn:hover {
+    border-color: rgba(0,212,255,0.3);
+    color: var(--accent);
+    background: rgba(0,212,255,0.05);
+  }
+
+  .domain-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,212,255,0.1);
+    box-shadow: 0 0 15px rgba(0,212,255,0.15);
+  }
+
+  .output-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .output-field {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: var(--text);
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    direction: ltr;
+    text-align: left;
+  }
+
+  .output-field:focus {
+    border-color: rgba(0,212,255,0.4);
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.08);
+  }
+
+  .output-field.has-value {
+    border-color: rgba(0,212,255,0.2);
+    color: #fff;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 13px 20px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.2s;
+  }
+
+  .btn:hover::after { background: rgba(255,255,255,0.08); }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #0099cc);
+    color: #000;
+    box-shadow: 0 4px 20px rgba(0,212,255,0.3);
+  }
+
+  .btn-primary:hover { box-shadow: 0 6px 30px rgba(0,212,255,0.5); }
+
+  .btn-copy {
+    background: linear-gradient(135deg, var(--success), #00b248);
+    color: #000;
+    box-shadow: 0 4px 20px rgba(0,230,118,0.2);
+  }
+
+  .btn-copy:hover { box-shadow: 0 6px 30px rgba(0,230,118,0.4); }
+
+  .btn-copy.copied {
+    background: linear-gradient(135deg, var(--gold), #e6ac00);
+  }
+
+  .strength-wrap {
+    margin-bottom: 16px;
+  }
+
+  .strength-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .strength-text {
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  .strength-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .strength-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1), background 0.6s;
+    width: 0%;
+  }
+
+  .pass-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .option-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .option-toggle:hover { border-color: rgba(0,212,255,0.2); }
+
+  .toggle-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1.5px solid var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    font-size: 11px;
+  }
+
+  .option-toggle.checked .toggle-box {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 900;
+  }
+
+  .option-toggle span:last-child {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .option-toggle.checked span:last-child { color: var(--text); }
+
+  .length-wrap {
+    margin-bottom: 16px;
+  }
+
+  .length-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .length-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px rgba(0,212,255,0.5);
+    transition: transform 0.2s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  .username-options {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .style-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--surface2);
+    color: var(--muted);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .style-chip.active {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(255,61,113,0.08);
+  }
+
+  .history-panel {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 24px 28px;
+    border: 1px solid rgba(255,255,255,0.06);
+    animation: fadeUp 0.8s 0.6s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .history-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .clear-btn {
+    font-size: 11px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 600;
+    transition: color 0.2s;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+
+  .clear-btn:hover { color: var(--accent2); background: rgba(255,61,113,0.08); }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .history-list::-webkit-scrollbar { width: 4px; }
+  .history-list::-webkit-scrollbar-track { background: transparent; }
+  .history-list::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.2); border-radius: 2px; }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: all 0.2s;
+    gap: 10px;
+  }
+
+  .history-item:hover { border-color: rgba(0,212,255,0.15); }
+
+  .history-value {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--text);
+    direction: ltr;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+
+  .history-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+
+  .badge-email { background: rgba(0,212,255,0.1); color: var(--accent); }
+  .badge-pass  { background: rgba(255,61,113,0.1); color: var(--accent2); }
+  .badge-user  { background: rgba(123,94,167,0.1); color: #b39ddb; }
+  .badge-real  { background: rgba(255,215,0,0.1); color: var(--gold); }
+
+  .history-copy {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .history-copy:hover { color: var(--success); }
+
+  .empty-history {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 20px;
+  }
+
+  .toast-container {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+  }
+
+  .toast {
+    background: var(--surface2);
+    border: 1px solid rgba(0,212,255,0.2);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    animation: toastIn 0.4s ease both;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .toast.success { border-color: rgba(0,230,118,0.3); }
+  .toast.out { animation: toastOut 0.3s ease both; }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--accent2);
+    border-radius: 20px;
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    transform: translateY(20px);
+    transition: 0.3s;
+    box-shadow: 0 10px 40px rgba(255,61,113,0.2);
+  }
+
+  .modal-overlay.active .modal-box {
+    transform: translateY(0);
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .modal-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .modal-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .btn-cancel {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .btn-confirm {
+    background: linear-gradient(135deg, #ff3d71, #d50000);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255,61,113,0.3);
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes toastOut {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to   { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  }
+
+  .btn { overflow: hidden; }
+
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transform: scale(0);
+    animation: rippleAnim 0.6s linear;
+    pointer-events: none;
+  }
+
+  @keyframes rippleAnim {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 32px;
+    color: var(--muted);
+    font-size: 12px;
+    animation: fadeUp 0.8s 0.8s ease both;
+  }
+
+  .footer span { color: var(--accent2); }
+
+  .real-mail-item {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .real-mail-item:hover { border-color: var(--gold); }
 </style>
 </head>
 <body>
 
-<div id="loginOverlay">
-    <div class="login-card">
-        <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:10px; color:#1e293b;">تسجيل الدخول مطلوب</h2>
-        <p style="color:#64748b; font-size:0.9rem;">لحفظ ملاحظاتك بشكل آمن عبر Google Drive</p>
-
-        <button class="google-btn" onclick="startGoogleLogin()">
-            <div class="google-icon-wrapper">
-                <svg class="google-icon" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-            </div>
-            <span style="flex:1; text-align:center;">المتابعة باستخدام Google</span>
-        </button>
-        <div id="loginStatus" style="margin-top:15px; font-size:0.85rem; color:#4f46e5; display:none; font-weight:600;">جاري الاتصال...</div>
-    </div>
+<div id="confirmModal" class="modal-overlay">
+<div class="modal-box">
+<div class="modal-title">
+تأكيد المسح
 </div>
-
-<div class="header">
-  <button class="hdr-btn hdr-btn-left" onclick="handleSettingsOpen()">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-  </button>
-  
-  <div class="cloud-status">
-      <div id="syncLoader" class="sync-loader"></div>
-      <span id="syncText"></span>
-  </div>
-
-  <div class="header-badge">ملاحظاتي الذكية</div>
-  <h1>مذكّراتي</h1>
-  <p>Mohammad Al Boushi</p>
-  <button id="mainSelectBtn" onclick="toggleMainSelectionMode(true)">تحديد</button>
+<div class="modal-desc">
+هل أنت متأكد أنك تريد مسح جميع السجلات؟ لا يمكن التراجع عن هذا الإجراء.
 </div>
-
-<div id="navBar">
-  <button class="back-btn" onclick="window.history.back()">
-    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    رجوع
-  </button>
-  <span id="currentPathTitle" class="current-path"></span>
-</div>
-
-<div id="selToolbar" class="sel-toolbar">
-  <button class="toolbar-btn primary" onclick="handleSelectionAction('selectAll')">
-    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-    <span id="selAllText">الكل</span>
-  </button>
-  <button class="toolbar-btn danger" onclick="deleteSelectedMainNotesWrapper()">
-    <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-    حذف
-  </button>
-  <button class="toolbar-btn opt" onclick="showCtxSheet(null)">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="12" cy="19" r="2"/></svg>
-    خيارات
-  </button>
-  <button class="toolbar-btn" onclick="toggleMainSelectionMode(false)">
-    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    إلغاء
-  </button>
-</div>
-
-<div class="search-wrap">
-  <svg class="si" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-  <span id="clearSearchBtn" class="clear-btn" onclick="clearSearch()">
-    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </span>
-  <input type="text" id="searchInput" placeholder="ابحث في عناوينك..." oninput="searchNotes()" autocomplete="off">
-</div>
-
-<div id="notesGrid" class="grid-container"></div>
-
-<button id="mainFab" class="fab" onclick="showCreateMenu()">
-  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+<div class="modal-btns">
+<button class="btn btn-cancel" onclick="closeModal()">
+إلغاء
 </button>
-<button id="pasteFloatingBtn" class="paste-fab" onclick="pasteItemsHere()">
-  <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-  لصق هنا
+<button class="btn btn-confirm" onclick="confirmClearHistory()">
+نعم، امسح السجل
 </button>
-
-<div id="createMenu">
-  <button class="create-item" onclick="createItemWrapper('folder')">
-    <div class="ci-icon" style="background:rgba(245,158,11,.12)"><svg viewBox="0 0 24 24" style="stroke:#f59e0b"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
-    مجلد جديد
-  </button>
-  <button class="create-item" onclick="createItemWrapper('note')">
-    <div class="ci-icon" style="background:rgba(124,58,237,.12)"><svg viewBox="0 0 24 24" style="stroke:#7c3aed"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
-    ملاحظة جديدة
-  </button>
+</div>
+</div>
 </div>
 
-<div id="ctxOverlay" onclick="closeAllMenus()"></div>
+<div class="toast-container" id="toastContainer"></div>
 
-<div id="ctxSheet" class="menu-sheet">
-  <div class="menu-handle"></div>
-  <div class="menu-title">خيارات</div>
-  <button class="menu-item blue" id="ctxLockBtn" onclick="handleMenuAction('toggleLock')">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-    <span class="m-label" id="ctxLockLabel">قفل / فتح</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-  <button class="menu-item violet" id="ctxMoveBtn" onclick="handleMenuAction('move')">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 17 15 14"/></svg></div>
-    <span class="m-label">نقل</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-  <button class="menu-item slate" id="ctxCopyBtn" onclick="handleMenuAction('copy')">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>
-    <span class="m-label">نسخ</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-  <button class="menu-item green" id="ctxHomeBtn" onclick="handleMenuAction('moveToRoot')" style="display:none">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-    <span class="m-label">إضافة للرئيسية</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-  <button class="menu-item amber" id="ctxEditBtn" onclick="handleMenuAction('edit')">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
-    <span class="m-label">تعديل الاسم</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-  <div class="menu-sep"></div>
-  <button class="menu-item red" onclick="handleMenuAction('delete')">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></div>
-    <span class="m-label">حذف</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-</div>
+<div class="wrapper">
 
-<div id="subCtxSheet" class="menu-sheet">
-  <div class="menu-handle"></div>
-  <button class="menu-item amber" onclick="handleSubNoteAction('edit')">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
-    <span class="m-label">تعديل</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-  <button class="menu-item slate" onclick="handleSubNoteAction('copy')">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>
-    <span class="m-label">نسخ</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-  <div class="menu-sep"></div>
-  <button class="menu-item red" onclick="handleSubNoteAction('delete')">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></div>
-    <span class="m-label">حذف</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-</div>
-
-<div id="dragSheet" class="menu-sheet">
-  <div class="menu-handle"></div>
-  <div class="menu-title">خيار النقل</div>
-  <div class="drag-grid">
-    <div class="drag-card move-c" onclick="resolveDragAction('move')">
-      <div class="dc-icon">📂</div>
-      <div class="dc-title">نقل للداخل</div>
-      <div class="dc-desc">ضع داخل المجلد</div>
+  <div class="header">
+    <div class="logo-ring">
+      <svg viewBox="0 0 80 80" fill="none">
+        <circle cx="40" cy="40" r="36" stroke="url(#ringGrad)" stroke-width="2" stroke-dasharray="8 4" />
+        <defs>
+          <linearGradient id="ringGrad" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#00d4ff"/>
+            <stop offset="50%" stop-color="#7b5ea7"/>
+            <stop offset="100%" stop-color="#ff3d71"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="logo-inner">⚡</div>
     </div>
-    <div class="drag-card swap-c" onclick="resolveDragAction('swap')">
-      <div class="dc-icon">⇄</div>
-      <div class="dc-title">تبديل</div>
-      <div class="dc-desc">تغيير الترتيب</div>
+    <div class="site-title">
+    أدوات أبو فايز
+    </div>
+    <div class="site-sub">
+    مولد الحسابات الاحترافي
     </div>
   </div>
-  <div style="padding:10px 20px 0">
-    <button class="btn btn-ghost" style="width:100%" onclick="resolveDragAction(null)">إلغاء</button>
-  </div>
-</div>
 
-<div id="settingsSheet" class="menu-sheet">
-  <div class="menu-handle"></div>
-  
-  <div class="menu-title">سحابة حسابي</div>
-  <div id="googleLoginBtnArea">
-      <button class="menu-item blue" onclick="openLoginOverlay()">
-          <div class="m-icon"><svg viewBox="0 0 24 24"><path d="M22 12c0-.85-.08-1.68-.22-2.48H12v4.69h5.68c-.24 1.5-1.12 2.78-2.39 3.64v3.02h3.86c2.26-2.09 3.56-5.17 3.56-8.87z" fill="#4285F4"/><path d="M12 22c2.81 0 5.17-.93 6.9-2.52l-3.86-3.02c-.93.63-2.12 1-3.04 1-2.34 0-4.32-1.58-5.02-3.71H3.02v3.12C4.75 20.32 8.08 22 12 22z" fill="#34A853"/><path d="M6.98 13.75c-.18-.53-.28-1.1-.28-1.75s.1-1.22.28-1.75V7.13H3.02C2.37 8.43 2 9.94 2 12s.37 3.57 1.02 4.87l3.96-3.12z" fill="#FBBC05"/><path d="M12 5.38c1.53 0 2.91.53 3.98 1.51l2.98-2.98C17.17 2.15 14.81 1 12 1 8.08 1 4.75 2.68 3.02 6.13l3.96 3.12c.7-2.13 2.68-3.87 5.02-3.87z" fill="#EA4335"/></svg></div>
-          <span class="m-label">تسجيل الدخول</span>
-          <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-num" id="totalGenerated">0</span>
+      <span class="stat-label">
+      تم التوليد
+      </span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="totalCopied">0</span>
+      <span class="stat-label">
+      تم النسخ
+      </span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="sessionTime">0m</span>
+      <span class="stat-label">
+      وقت الجلسة
+      </span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color: rgba(255, 215, 0, 0.3);">
+    <div class="card-header">
+      <div class="card-icon gold">📥</div>
+      <div>
+        <div class="card-title">
+        إيميل مؤقت حقيقي
+        </div>
+        <div class="card-desc">
+        استقبل رسائل وأكواد التفعيل مباشرة
+        </div>
+      </div>
+    </div>
+
+    <div class="output-wrap">
+      <input type="text" class="output-field" id="realEmailOutput" readonly>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" style="background: linear-gradient(135deg, var(--gold), #d4af37);" onclick="generateRealEmail(this)">
+        <span>⚡</span>
+        توليد إيميل حقيقي
       </button>
-  </div>
-  <div id="googleSyncActions" style="display:none;">
-      <button class="menu-item green" onclick="forceSyncFromCloud()">
-          <div class="m-icon"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg></div>
-          <span class="m-label">جلب بياناتي من السحابة</span>
-          <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      </button>
-      <button class="menu-item slate" onclick="handleGoogleLogout()">
-          <div class="m-icon" id="googleLogoutIcon"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-          <span class="m-label">تسجيل خروج</span>
-          <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-      </button>
-  </div>
-
-  <div class="menu-sep"></div>
-  <div class="menu-title">إعدادات التطبيق</div>
-  
-  <button class="menu-item violet" onclick="downloadJSON()">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
-    <span class="m-label">تنزيل نسخة</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-
-  <button class="menu-item green" onclick="importJSON()">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-    <span class="m-label">استيراد ملف</span>
-    <input type="file" id="jsonFileInput" style="display:none" accept=".json" onchange="handleJSONImport(event)">
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-
-  <button class="menu-item slate" onclick="exportDataManual()">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-    <span class="m-label">نسخ احتياطي (كود)</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-
-  <button class="menu-item violet" onclick="shareBackupText()">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
-    <span class="m-label">مشاركة النص</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-
-  <button class="menu-item amber" onclick="importDataPaste()">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></div>
-    <span class="m-label">استيراد (كود)</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-
-  <button class="menu-item blue" id="setPassBtn" onclick="setAppPassword()">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-    <span class="m-label">تعيين قفل للتطبيق</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-  <button class="menu-item red" id="removePassBtn" onclick="removeAppPassword()" style="display:none">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div>
-    <span class="m-label">حذف كلمة المرور</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-
-  <div class="menu-sep"></div>
-  <button class="menu-item red" onclick="deleteAllData()">
-    <div class="m-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></div>
-    <span class="m-label">حذف جميع البيانات</span>
-    <div class="m-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </button>
-  
-  <div style="padding:12px 20px 0">
-    <button class="btn btn-ghost" style="width:100%" onclick="closeSheet('settingsSheet')">إغلاق</button>
-  </div>
-</div>
-
-<div id="detailsModal" class="modal-full">
-  <div class="details-topbar">
-    <button class="back-btn" onclick="window.history.back()">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      رجوع
-    </button>
-    <button class="toolbar-btn" id="selectBtn" onclick="toggleSelectionMode(true)">
-      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-      تحديد
-    </button>
-    <button class="toolbar-btn primary" id="selectAllBtn" style="display:none" onclick="selectAllSubNotes()">الكل</button>
-    <button class="toolbar-btn" id="cancelSelectionBtn" style="display:none" onclick="toggleSelectionMode(false)">إلغاء</button>
-    <button class="toolbar-btn danger" id="deleteSubBtn" style="display:none" onclick="deleteSelectedSubNotesWrapper()">
-      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-      حذف
-    </button>
-  </div>
-  <div class="sub-search-wrap">
-    <input type="text" id="subSearchInput" placeholder="🔍  بحث داخل القائمة..." oninput="renderSubNotes()" autocomplete="off">
-  </div>
-  <span class="note-title-label" id="modalTitle">عنوان</span>
-  <ul id="subNotesList" class="sub-notes-list"></ul>
-  <div class="input-area">
-    <textarea id="newSubNoteInput" placeholder="أضف نصاً جديداً..."></textarea>
-    <button class="add-btn" onclick="addSubNote()">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    </button>
-  </div>
-</div>
-
-<div id="editModal" class="modal-full">
-  <div class="edit-topbar">
-    <button class="btn btn-ghost" style="flex:0;padding:9px 14px" onclick="handleEditBack()">
-      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#64748b;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="15 18 9 12 15 6"/></svg>
-      رجوع
-    </button>
-    <div style="flex:1"></div>
-    <button class="btn btn-ghost" style="flex:0;padding:9px 12px" id="editSearchBtn" onclick="toggleEditSearch()">
-      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#64748b;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    </button>
-    <button class="btn btn-ghost" id="btnUndo" style="flex:0;padding:9px 12px;opacity:.4" onclick="undo()">
-      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#64748b;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
-    </button>
-    <button class="btn btn-ghost" id="btnRedo" style="flex:0;padding:9px 12px;opacity:.4" onclick="redo()">
-      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#64748b;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
-    </button>
-    <button class="btn btn-primary" style="flex:0;padding:9px 16px" id="editSaveBtn">
-      <svg viewBox="0 0 24 24" style="width:16px;height:16px"><polyline points="20 6 9 17 4 12"/></svg>
-      حفظ
-    </button>
-  </div>
-  <div class="edit-search-bar" id="editSearchBar">
-    <button class="es-btn" onclick="findInText('prev')"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></button>
-    <button class="es-btn" onclick="findInText('next')"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
-    <input type="text" id="inTextSearchInput" class="es-inp" placeholder="بحث في النص..." onkeyup="if(event.key==='Enter') findInText('next')">
-    <button class="es-btn" onclick="toggleEditSearch()" style="background:#fee2e2;border-color:#fca5a5"><svg viewBox="0 0 24 24" style="stroke:#ef4444"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-  </div>
-  <textarea id="editTextArea" style="flex:1;border:none;padding:18px 16px;font-family:'IBM Plex Sans Arabic';font-size:1rem;line-height:1.8;color:#1e293b;background:#fff;resize:none;text-align:right;overflow-y:auto" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
-</div>
-
-<div id="inputModal" class="modal">
-  <div class="modal-card">
-    <p id="inputMessage" class="modal-msg"></p>
-    <input type="text" id="modalInputSingle" class="inp" style="display:none" autocomplete="off">
-    <textarea id="modalInputArea" class="inp-area" style="display:none;height:140px" spellcheck="false"></textarea>
-    <div class="modal-actions">
-      <button id="inputCopyBtn" class="btn btn-copy" style="display:none" onclick="copyModalContent()">
-        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <button class="btn btn-copy" id="copyRealBtn" onclick="copyField('realEmailOutput','copyRealBtn')">
+        <span>📋</span>
         نسخ
       </button>
-      <button id="inputPasteBtn" class="btn btn-success" style="display:none" onclick="pasteModalContent()">
-        <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-        لصق
-      </button>
-      <button id="inputBtn" class="btn btn-primary">
-        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        حفظ
-      </button>
-      <button class="btn btn-ghost" onclick="closeInputModal()">إلغاء</button>
+    </div>
+
+    <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+        <strong style="font-size:14px; color:var(--text);">
+        صندوق الوارد
+        </strong>
+        <span id="inboxStatus" style="font-size:12px; color:var(--gold);">
+        بانتظار الإيميل...
+        </span>
+      </div>
+      <div id="realMailList" style="max-height:250px; overflow-y:auto; padding-right:5px;">
+        <div class="empty-history">
+        لا يوجد رسائل...
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="confirmModal" class="modal">
-  <div class="modal-card">
-    <p id="confirmMessage" class="modal-msg"></p>
-    <div class="modal-actions">
-      <button class="btn btn-danger" onclick="hideConfirmModal(true)">
-        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-        تأكيد
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">📧</div>
+      <div>
+        <div class="card-title">
+        مولد الإيميل الوهمي
+        </div>
+        <div class="card-desc">
+        أنشئ إيميلات عشوائية احترافية
+        </div>
+      </div>
+    </div>
+
+    <div class="domain-grid">
+      <button class="domain-btn active" onclick="selectDomain(this,'gmail.com')">Gmail</button>
+      <button class="domain-btn" onclick="selectDomain(this,'hotmail.com')">Hotmail</button>
+      <button class="domain-btn" onclick="selectDomain(this,'yahoo.com')">Yahoo</button>
+      <button class="domain-btn" onclick="selectDomain(this,'proton.me')">Proton</button>
+      <button class="domain-btn" onclick="selectDomain(this,'outlook.com')">Outlook</button>
+      <button class="domain-btn" onclick="selectDomain(this,'icloud.com')">iCloud</button>
+      <button class="domain-btn" onclick="selectDomain(this,'mail.com')">Mail</button>
+      <button class="domain-btn" onclick="selectDomain(this,'random')">
+      🎲 عشوائي
       </button>
-      <button class="btn btn-ghost" onclick="hideConfirmModal(false)">إلغاء</button>
+    </div>
+
+    <div class="output-wrap">
+      <input type="text" class="output-field" id="emailOutput" readonly>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="generateEmail(this)">
+        <span>⚡</span>
+        توليد وهمي
+      </button>
+      <button class="btn btn-copy" id="copyEmailBtn" onclick="copyField('emailOutput','copyEmailBtn')">
+        <span>📋</span>
+        نسخ
+      </button>
     </div>
   </div>
-</div>
 
-<div id="passwordModal" class="modal">
-  <div class="modal-card">
-    <p class="modal-msg">🔐  أدخل كلمة المرور</p>
-    <input type="password" id="modalPasswordInput" class="inp inp-pass" placeholder="• • • • • •">
-    <div class="modal-actions">
-      <button id="passwordBtn" class="btn btn-primary">
-        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        تأكيد
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon red">🔐</div>
+      <div>
+        <div class="card-title">
+        مولد كلمة السر
+        </div>
+        <div class="card-desc">
+        كلمات سر قوية ومشفرة
+        </div>
+      </div>
+    </div>
+
+    <div class="length-wrap">
+      <div class="length-header">
+        <span>
+        طول كلمة السر
+        </span>
+        <span class="length-val" id="lengthVal">16</span>
+      </div>
+      <input type="range" id="passLength" min="8" max="32" value="16" oninput="document.getElementById('lengthVal').textContent=this.value">
+    </div>
+
+    <div class="pass-options" id="passOptions">
+      <label class="option-toggle checked" onclick="toggleOption(this)">
+        <div class="toggle-box">✓</div>
+        <span>
+        أحرف كبيرة
+        </span>
+      </label>
+      <label class="option-toggle checked" onclick="toggleOption(this)">
+        <div class="toggle-box">✓</div>
+        <span>
+        أحرف صغيرة
+        </span>
+      </label>
+      <label class="option-toggle checked" onclick="toggleOption(this)">
+        <div class="toggle-box">✓</div>
+        <span>
+        أرقام
+        </span>
+      </label>
+      <label class="option-toggle checked" onclick="toggleOption(this)">
+        <div class="toggle-box">✓</div>
+        <span>
+        رموز خاصة
+        </span>
+      </label>
+    </div>
+
+    <div class="strength-wrap">
+      <div class="strength-label">
+        <span>
+        قوة كلمة السر
+        </span>
+        <span class="strength-text" id="strengthText" style="color:var(--muted)">—</span>
+      </div>
+      <div class="strength-bar">
+        <div class="strength-fill" id="strengthFill"></div>
+      </div>
+    </div>
+
+    <div class="output-wrap">
+      <input type="text" class="output-field" id="passOutput" readonly>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="generatePass(this)">
+        <span>🔑</span>
+        توليد كلمة سر
       </button>
-      <button class="btn btn-ghost" onclick="hidePasswordModal(null)">إلغاء</button>
+      <button class="btn btn-copy" id="copyPassBtn" onclick="copyField('passOutput','copyPassBtn')">
+        <span>📋</span>
+        نسخ
+      </button>
     </div>
   </div>
-</div>
 
-<div id="saveConfirmModal" class="modal">
-  <div class="modal-card">
-    <p class="modal-msg">هل تريد حفظ التعديلات؟</p>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="resolveSaveConfirm(true)">
-        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        نعم، احفظ
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon purple">👤</div>
+      <div>
+        <div class="card-title">
+        مولد اسم المستخدم
+        </div>
+        <div class="card-desc">
+        أسماء مستخدم فريدة وإبداعية
+        </div>
+      </div>
+    </div>
+
+    <div class="username-options">
+      <button class="style-chip active" onclick="selectStyle(this,'cool')">
+      😎 كول
       </button>
-      <button class="btn btn-ghost" onclick="resolveSaveConfirm(false)">تجاهل</button>
+      <button class="style-chip" onclick="selectStyle(this,'gamer')">
+      🎮 جيمر
+      </button>
+      <button class="style-chip" onclick="selectStyle(this,'pro')">
+      💼 بروفيشنال
+      </button>
+      <button class="style-chip" onclick="selectStyle(this,'arabic')">
+      🌙 عربي
+      </button>
+      <button class="style-chip" onclick="selectStyle(this,'random')">
+      🎲 عشوائي
+      </button>
+    </div>
+
+    <div class="output-wrap">
+      <input type="text" class="output-field" id="userOutput" readonly>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="generateUsername(this)">
+        <span>✨</span>
+        توليد اسم
+      </button>
+      <button class="btn btn-copy" id="copyUserBtn" onclick="copyField('userOutput','copyUserBtn')">
+        <span>📋</span>
+        نسخ
+      </button>
     </div>
   </div>
-</div>
 
-<div id="notifToast">
-  <svg id="notifIcon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-  <span id="notifMsg"></span>
+  <div class="history-panel">
+    <div class="card-header" style="margin-bottom:0">
+      <div class="card-icon blue" style="width:34px;height:34px;font-size:16px">📝</div>
+      <div class="history-header" style="flex:1;margin-bottom:0">
+        <div class="history-title">
+        السجل الأخير
+        </div>
+        <button class="clear-btn" onclick="askClearHistory()">
+        مسح الكل 🗑️
+        </button>
+      </div>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,0.05);margin:16px 0"></div>
+    <div class="history-list" id="historyList">
+      <div class="empty-history">
+      لا يوجد سجل بعد...
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+  صُنع بـ
+  <span>♥</span>
+  لأبو فايز · جميع الأدوات تعمل محلياً
+  </div>
+
 </div>
 
 <script>
-// ─── DATA & CONSTANTS ──────────────────────────────────────────
-const APP_PASS_KEY = 'smartNotes_appPass';
-const LOCAL_DATA_KEY = 'smartNotes_localData'; 
-const GOOGLE_CLIENT_ID = '979816526016-ukb9vqtb6u2hlutombpf8rumbjr3o2ua.apps.googleusercontent.com';
-const SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.profile';
-const FILENAME = 'smart_notes_cloud_v1.json'; 
+let placeholderText =
+'اضغط توليد...';
 
-let allData = [];
-let currentFolderId = null;
-let searchMatches = [], currentSearchIndex = -1;
-let historyStack = [], historyIndex = -1, originalContent = '';
-let itemsClipboard = [], isPasteMode = false, clipboardAction = 'move';
-let activeCardId = null, currentNoteId = null, activeSubNoteIndex = null;
-let isMainSelectionMode = false, selectedMainIds = new Set();
-let isSelectionMode = false, selectedSubIndices = new Set();
-let activeEditResolve = null;
+document.getElementById('emailOutput').placeholder = placeholderText;
+document.getElementById('passOutput').placeholder = placeholderText;
+document.getElementById('userOutput').placeholder = placeholderText;
+document.getElementById('realEmailOutput').placeholder = placeholderText;
 
-let tokenClient;
-let gAccessToken = localStorage.getItem('gAccessToken'); 
-let saveTimeout = null; 
-let isRetry = false; 
+let selectedDomain = 'gmail.com';
+let selectedStyle = 'cool';
+let history = JSON.parse(localStorage.getItem('abuFaizHistory')) || [];
+let stats = JSON.parse(localStorage.getItem('abuFaizStats')) || { generated: 0, copied: 0 };
+let sessionStart = Date.now();
 
-// ─── INIT ────────────────────────────────────────────────────────
+let realLogin = localStorage.getItem('abuFaizRealLogin') || "";
+let realDomain = localStorage.getItem('abuFaizRealDomain') || "";
+let inboxTimer = null;
+
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('searchInput').value = '';
-  loadData(); 
-  document.getElementById('searchInput').addEventListener('focus', pushState);
-  document.getElementById('editTextArea').addEventListener('input', function() { saveHistory(this.value); });
-  document.getElementById('editSaveBtn').onclick = () => { const v = document.getElementById('editTextArea').value; hideEditModal(true, v); };
-  document.addEventListener('click', e => {
-    const cm = document.getElementById('createMenu');
-    if(cm.classList.contains('open') && !e.target.closest('#createMenu') && !e.target.closest('.fab'))
-      { cm.classList.remove('open'); cm.style.display = 'none'; }
-  });
+  document.getElementById('totalGenerated').textContent = stats.generated;
+  document.getElementById('totalCopied').textContent = stats.copied;
+  renderHistory();
+
+  if(realLogin && realDomain) {
+    document.getElementById('realEmailOutput').value = realLogin + "@" + realDomain;
+    document.getElementById('realEmailOutput').classList.add('has-value');
+    startInboxCheck();
+  }
 });
 
-// ─── STORAGE (HYBRID RAM+CLOUD) ──────────────────────────────────
-function saveData() { 
-    localStorage.setItem(LOCAL_DATA_KEY, JSON.stringify(allData));
-    
-    if(saveTimeout) clearTimeout(saveTimeout);
-    document.getElementById('syncText').innerText = "جاري الحفظ...";
-    setSyncLoader(true);
-    saveTimeout = setTimeout(() => { forceUploadToDrive(true); }, 1000);
-} 
+setInterval(() => {
+  const mins = Math.floor((Date.now() - sessionStart) / 60000);
+  document.getElementById('sessionTime').textContent = mins + 'm';
+}, 10000);
 
-function loadData() { 
-    const cachedData = localStorage.getItem(LOCAL_DATA_KEY);
-    if (cachedData) {
-        try { allData = JSON.parse(cachedData); renderMainGrid(); } 
-        catch (e) { console.error(e); }
-    }
-
-    if(gAccessToken) {
-        forceSyncFromCloud(true);
-    } else {
-        if (!cachedData || allData.length === 0) {
-             document.getElementById('loginOverlay').style.display = 'flex';
-        }
-    }
+function saveStats() {
+  localStorage.setItem('abuFaizStats', JSON.stringify(stats));
 }
 
-// ─── HISTORY API ─────────────────────────────────────────────────
-window.addEventListener('popstate', () => {
-  const openSheet = ['ctxSheet', 'subCtxSheet', 'dragSheet', 'settingsSheet'].find(id => { const el = document.getElementById(id); return el && el.classList.contains('open'); });
-  if(openSheet) { closeSheet(openSheet); return; }
-  if(document.getElementById('editModal').style.display === 'flex') { handleEditBack(); return; }
-  if(document.getElementById('inputModal').style.display === 'flex') { closeInputModal(); return; }
-  if(document.getElementById('detailsModal').style.display === 'flex') { closeDetailsModal(); return; }
-  if(document.getElementById('saveConfirmModal').style.display === 'flex') { resolveSaveConfirm(false); return; }
-  if(document.getElementById('loginOverlay').style.display === 'flex') { return; }
-  if(document.getElementById('searchInput').value) { clearSearch(); return; }
-  if(currentFolderId !== null) { const pid = getParentFolderId(allData, currentFolderId); currentFolderId = (pid === undefined) ? null : pid; renderMainGrid(); return; }
-});
-function pushState() { window.history.pushState({open: true}, ''); }
+function selectDomain(btn, domain) {
+  document.querySelectorAll('.domain-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedDomain = domain;
+}
 
-// ─── HELPERS ─────────────────────────────────────────────────────
-function findNoteById(list, id) { id = parseFloat(id); for(let it of list){ if(parseFloat(it.id) === id) return it; if(it.type === 'folder' && it.items){ const f = findNoteById(it.items, id); if(f) return f; } } return null; }
-function getCurrentList() { if(currentFolderId === null) return allData; const f = findNoteById(allData, currentFolderId); return f ? (f.items || []) : []; }
-function getParentFolderId(list, targetId, parentId = null) { for(let it of list){ if(parseFloat(it.id) === parseFloat(targetId)) return parentId; if(it.type === 'folder' && it.items){ const f = getParentFolderId(it.items, targetId, it.id); if(f !== undefined) return f; } } return undefined; }
-function removeItemFromTree(list, id) { for(let i = 0; i < list.length; i++){ if(parseFloat(list[i].id) === parseFloat(id)){ list.splice(i, 1); return true; } if(list[i].type === 'folder' && list[i].items && removeItemFromTree(list[i].items, id)) return true; } return false; }
+function selectStyle(btn, style) {
+  document.querySelectorAll('.style-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedStyle = style;
+}
 
-// ─── RENDER GRID ─────────────────────────────────────────────────
-function renderMainGrid(filter = '') {
-  const grid = document.getElementById('notesGrid'); grid.innerHTML = '';
-  const nav = document.getElementById('navBar');
-  if(currentFolderId === null) { nav.style.display = 'none'; }
-  else { nav.style.display = 'flex'; const f = findNoteById(allData, currentFolderId); document.getElementById('currentPathTitle').textContent = f ? `📁 ${f.title}` : ''; }
+function toggleOption(el) {
+  el.classList.toggle('checked');
+  const box = el.querySelector('.toggle-box');
+  box.textContent = el.classList.contains('checked') ? '✓' : '';
+}
+
+function addRipple(btn, e) {
+  const rect = btn.getBoundingClientRect();
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  const size = Math.max(rect.width, rect.height);
+  ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+  btn.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 700);
+}
+
+function showToast(msg, emoji = '✅') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast success';
+  toast.innerHTML = '<span>' + emoji + '</span> ' + msg;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('out');
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+
+function addHistory(value, typeKey) {
+  history.unshift({ value: value, type: typeKey, time: new Date().toLocaleTimeString('en-US') });
+  if (history.length > 50) history.pop();
+  localStorage.setItem('abuFaizHistory', JSON.stringify(history));
+  renderHistory();
+  stats.generated++;
+  document.getElementById('totalGenerated').textContent = stats.generated;
+  saveStats();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (history.length === 0) {
+    let emptyMsg =
+    'لا يوجد سجل بعد...';
+    list.innerHTML = '<div class="empty-history">' + emptyMsg + '</div>';
+    return;
+  }
   
-  const pb = document.getElementById('pasteFloatingBtn'), fab = document.getElementById('mainFab');
-  if(isPasteMode) { pb.style.display = 'flex'; fab.style.display = 'none'; pb.childNodes[2].textContent = clipboardAction === 'move' ? ' لصق هنا (نقل)' : ' لصق هنا (نسخ)'; }
-  else { pb.style.display = 'none'; fab.style.display = 'flex'; }
-  
-  const list = getCurrentList();
-  const filtered = list.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()));
-  if(!filtered.length) { grid.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p class="empty-text">لا توجد عناصر هنا بعد</p></div>`; return; }
-  
-  filtered.forEach(item => {
-    const card = document.createElement('div');
-    card.className = `note-card ${item.type === 'folder' ? 'is-folder' : 'is-note'}`;
-    card.dataset.id = item.id; card.dataset.type = item.type; card.draggable = true;
-    if(selectedMainIds.has(item.id)) card.classList.add('selected');
+  let htmlResult = '';
+  history.forEach((item, i) => {
+    let typeStr = '';
+    if(item.type === 'email') {
+      typeStr =
+      'وهمي';
+    } else if(item.type === 'pass') {
+      typeStr =
+      'سر';
+    } else if(item.type === 'real') {
+      typeStr =
+      'حقيقي';
+    } else {
+      typeStr =
+      'مستخدم';
+    }
     
-    let iconHtml = '', iconClass = 'note-ico';
-    if(item.isLocked) { iconClass = 'locked-ico'; iconHtml = `<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`; }
-    else if(item.type === 'folder') { iconClass = 'folder-ico'; iconHtml = `<svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`; }
-    else if(item.type === 'note') { iconClass = 'note-ico'; iconHtml = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`; }
-    else { iconClass = 'locked-ico'; iconHtml = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`; }
-    
-    let countLabel = `<div class="card-count">${item.items ? item.items.length : 0} ${item.type === 'folder' ? 'عنصر' : 'ملاحظة'}</div>`;
-    if(item.type === 'file') countLabel = `<div class="card-count">ملف قديم</div>`;
-    
-    const selCheckSvg = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
-    
-    card.innerHTML = `
-      <div class="card-sel-icon">${selCheckSvg}</div>
-      <div class="card-icon-wrap ${iconClass}">${iconHtml}</div>
-      <div class="card-title">${item.title}</div>
-      ${countLabel}
-      ${!isMainSelectionMode ? `<div class="sort-handle"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>` : ''}
+    htmlResult += `
+    <div class="history-item" style="animation-delay:${i*0.03}s">
+      <div class="history-value">${item.value}</div>
+      <span class="history-badge badge-${item.type}">${typeStr}</span>
+      <button class="history-copy" onclick="copyRaw('${item.value.replace(/'/g,"\\'")}')">📋</button>
+    </div>
     `;
+  });
+  list.innerHTML = htmlResult;
+}
+
+function askClearHistory() {
+  document.getElementById('confirmModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('confirmModal').classList.remove('active');
+}
+
+function confirmClearHistory() {
+  history = [];
+  localStorage.removeItem('abuFaizHistory');
+  renderHistory();
+  closeModal();
+  let msgClear =
+  'تم مسح السجل بنجاح';
+  showToast(msgClear, '🗑️');
+}
+
+async function copyRaw(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    let msgCopied =
+    'تم النسخ!';
+    showToast(msgCopied);
+    stats.copied++;
+    document.getElementById('totalCopied').textContent = stats.copied;
+    saveStats();
+  } catch {}
+}
+
+async function copyField(fieldId, btnId) {
+  const field = document.getElementById(fieldId);
+  if (!field.value) { 
+    let msgEmpty =
+    'لا يوجد شيء للنسخ';
+    showToast(msgEmpty, '⚠️'); 
+    return; 
+  }
+  await copyRaw(field.value);
+  const btn = document.getElementById(btnId);
+  btn.classList.add('copied');
+  btn.querySelector('span').textContent = '✅';
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.querySelector('span').textContent = '📋';
+  }, 2000);
+}
+
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+const randInt = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+
+function shuffle(str) {
+  return str.split('').sort(() => 0.5 - Math.random()).join('');
+}
+
+// ----------------------------------------
+// REAL EMAIL GENERATOR
+// ----------------------------------------
+async function generateRealEmail(btn) {
+  if (btn) addRipple(btn, event);
+  
+  try {
+    const res = await fetch('https://www.1secmail.com/api/v1/?action=genEmail&count=1');
+    const data = await res.json();
+    const email = data[0];
+    const parts = email.split('@');
     
-    let pressTimer = null, touchMoved = false, touchStartX = 0, touchStartY = 0, isLongPress = false;
-    card.addEventListener('touchstart', e => {
-      if(e.target.closest('.sort-handle')) return;
-      touchMoved = false; isLongPress = false;
-      touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
-      pressTimer = setTimeout(() => {
-        if(!touchMoved) {
-          isLongPress = true;
-          if(navigator.vibrate) navigator.vibrate(40);
-          if(isMainSelectionMode) { toggleMainSelection(item.id); } else { showCtxSheet(item.id); }
-        }
-      }, 500);
-    }, {passive: true});
-    card.addEventListener('touchmove', e => {
-      const dx = Math.abs(e.touches[0].clientX - touchStartX); const dy = Math.abs(e.touches[0].clientY - touchStartY);
-      if(dx > 8 || dy > 8) { touchMoved = true; clearTimeout(pressTimer); }
-    }, {passive: true});
-    card.addEventListener('touchend', e => {
-      clearTimeout(pressTimer);
-      if(isLongPress) { e.preventDefault(); return; }
-      if(!touchMoved) { if(isMainSelectionMode) { e.preventDefault(); toggleMainSelection(item.id); } else { handleCardClick(e, item); } }
-    }, {passive: false});
-    card.addEventListener('click', e => { if(!('ontouchstart' in window)) { handleCardClick(e, item); } });
-    card.oncontextmenu = e => { e.preventDefault(); if(!touchMoved && !isLongPress) { showCtxSheet(item.id); } };
+    realLogin = parts[0];
+    realDomain = parts[1];
     
-    addDragEvents(card, item);
-    grid.appendChild(card);
-  });
-  
-  document.getElementById('clearSearchBtn').style.display = filter ? 'flex' : 'none';
-}
-
-function searchNotes() { renderMainGrid(document.getElementById('searchInput').value); }
-function clearSearch() { document.getElementById('searchInput').value = ''; renderMainGrid(); }
-
-// ─── CARD CLICK ───────────────────────────────────────────────────
-function handleCardClick(e, item) {
-  if(isMainSelectionMode) { toggleMainSelection(item.id); return; }
-  if(e.target.closest('.sort-handle')) return;
-  if(item.type === 'folder') { if(item.isLocked) { checkPassword(item, () => { currentFolderId = item.id; pushState(); renderMainGrid(); }); } else { currentFolderId = item.id; pushState(); renderMainGrid(); } }
-  else if(item.type === 'file') { showNotif('الملفات القديمة غير مدعومة. للتحميل اضغط مطولاً.', 'info'); }
-  else { if(item.isLocked) { checkPassword(item, () => openNoteDetails(item.id)); } else openNoteDetails(item.id); }
-}
-
-// ─── NOTE DETAILS ─────────────────────────────────────────────────
-function openNoteDetails(id) { currentNoteId = id; pushState(); const n = findNoteById(allData, id); if(!n) return; document.getElementById('modalTitle').textContent = n.title; document.getElementById('detailsModal').style.display = 'flex'; renderSubNotes(); }
-function closeDetailsModal() { document.getElementById('detailsModal').style.display = 'none'; document.getElementById('subSearchInput').value = ''; toggleSelectionMode(false); }
-function renderSubNotes() {
-  const el = document.getElementById('subNotesList'); el.innerHTML = '';
-  const n = findNoteById(allData, currentNoteId); if(!n) return;
-  const filter = document.getElementById('subSearchInput').value.toLowerCase();
-  (n.items || []).forEach((content, i) => {
-    if(filter && !content.toLowerCase().includes(filter)) return;
-    const li = document.createElement('li'); li.className = 'sub-note-item';
-    if(isSelectionMode && selectedSubIndices.has(i)) li.classList.add('selected');
-    li.innerHTML = `<div class="sub-note-content">${content.length > 200 ? content.substring(0, 200) + '...' : content}</div>`;
-    let pt = null, tm = false, tsx = 0, tsy = 0, isLP = false;
-    li.addEventListener('touchstart', e => { tm = false; isLP = false; tsx = e.touches[0].clientX; tsy = e.touches[0].clientY; pt = setTimeout(() => { if(!tm) { isLP = true; if(navigator.vibrate) navigator.vibrate(40); showSubCtxSheet(i); } }, 500); }, {passive: true});
-    li.addEventListener('touchmove', e => { if(Math.abs(e.touches[0].clientX - tsx) > 8 || Math.abs(e.touches[0].clientY - tsy) > 8) { tm = true; clearTimeout(pt); } }, {passive: true});
-    li.addEventListener('touchend', e => { clearTimeout(pt); if(isLP) { e.preventDefault(); return; } if(!tm) { if(isSelectionMode) toggleSubSelection(i); else editSubNote(i); } });
-    li.onclick = () => { if(!('ontouchstart' in window)) { if(isSelectionMode) toggleSubSelection(i); else editSubNote(i); } };
-    li.oncontextmenu = e => { e.preventDefault(); if(!tm && !isLP) showSubCtxSheet(i); };
-    el.appendChild(li);
-  });
-}
-function addSubNote() { const inp = document.getElementById('newSubNoteInput'); if(!inp.value.trim()) return; const n = findNoteById(allData, currentNoteId); if(!n.items) n.items = []; n.items.unshift(inp.value.trim()); inp.value = ''; saveData(); renderSubNotes(); }
-async function editSubNote(i) { const n = findNoteById(allData, currentNoteId); const v = await showEditModal(n.items[i]); if(v !== null) { n.items[i] = v; saveData(); renderSubNotes(); } }
-function toggleSelectionMode(a) { isSelectionMode = a; selectedSubIndices.clear(); document.getElementById('selectBtn').style.display = a ? 'none' : 'flex'; ['selectAllBtn', 'cancelSelectionBtn', 'deleteSubBtn'].forEach(id => document.getElementById(id).style.display = a ? 'flex' : 'none'); renderSubNotes(); }
-function toggleSubSelection(i) { selectedSubIndices.has(i) ? selectedSubIndices.delete(i) : selectedSubIndices.add(i); renderSubNotes(); }
-function selectAllSubNotes() { const n = findNoteById(allData, currentNoteId); if(n && n.items) n.items.forEach((_, i) => selectedSubIndices.add(i)); renderSubNotes(); }
-async function deleteSelectedSubNotesWrapper() { if(!selectedSubIndices.size) return; if(!await verifyAppPass()) return; if(await showConfirm('حذف العناصر المحددة؟')) { const n = findNoteById(allData, currentNoteId); Array.from(selectedSubIndices).sort((a,b) => b-a).forEach(i => n.items.splice(i, 1)); saveData(); toggleSelectionMode(false); } }
-
-// ─── EDIT MODAL ───────────────────────────────────────────────────
-function showEditModal(initialValue = '') {
-  pushState();
-  document.getElementById('editModal').style.display = 'flex';
-  document.getElementById('editTextArea').value = initialValue;
-  originalContent = initialValue;
-  initHistory(initialValue);
-  return new Promise(resolve => { activeEditResolve = resolve; });
-}
-function hideEditModal(saved, val = null) { document.getElementById('editModal').style.display = 'none'; document.getElementById('editSearchBar').style.display = 'none'; if(activeEditResolve) { activeEditResolve(saved ? val : null); activeEditResolve = null; } if(window.history.state?.open) window.history.back(); }
-function handleEditBack() { const v = document.getElementById('editTextArea').value; if(v !== originalContent) { document.getElementById('saveConfirmModal').style.display = 'flex'; } else hideEditModal(false); }
-function resolveSaveConfirm(s) { document.getElementById('saveConfirmModal').style.display = 'none'; if(s) hideEditModal(true, document.getElementById('editTextArea').value); else hideEditModal(false); }
-function toggleEditSearch() { const bar = document.getElementById('editSearchBar'); const open = bar.style.display === 'flex'; bar.style.display = open ? 'none' : 'flex'; if(!open) { document.getElementById('inTextSearchInput').focus(); searchMatches = []; currentSearchIndex = -1; } }
-function initHistory(v) { historyStack = [v]; historyIndex = 0; updUR(); }
-function saveHistory(v) { if(historyIndex < historyStack.length - 1) historyStack = historyStack.slice(0, historyIndex + 1); historyStack.push(v); historyIndex++; updUR(); }
-function undo() { if(historyIndex > 0) { historyIndex--; document.getElementById('editTextArea').value = historyStack[historyIndex]; updUR(); } }
-function redo() { if(historyIndex < historyStack.length - 1) { historyIndex++; document.getElementById('editTextArea').value = historyStack[historyIndex]; updUR(); } }
-function updUR() { document.getElementById('btnUndo').style.opacity = historyIndex > 0 ? '1' : '.3'; document.getElementById('btnRedo').style.opacity = historyIndex < historyStack.length - 1 ? '1' : '.3'; }
-function findInText(dir) {
-  const ta = document.getElementById('editTextArea'); const term = document.getElementById('inTextSearchInput').value; if(!term) return;
-  if(!searchMatches.length || ta.value.indexOf(term, searchMatches[0]) !== searchMatches[0]) { searchMatches = []; let p = ta.value.indexOf(term); while(p > -1) { searchMatches.push(p); p = ta.value.indexOf(term, p + 1); } if(!searchMatches.length) { showNotif('لم يتم العثور', 'info'); return; } currentSearchIndex = -1; }
-  if(dir === 'next') { currentSearchIndex = (currentSearchIndex + 1) % searchMatches.length; } else { currentSearchIndex = (currentSearchIndex - 1 + searchMatches.length) % searchMatches.length; }
-  const mp = searchMatches[currentSearchIndex]; ta.focus(); ta.setSelectionRange(mp, mp + term.length); ta.scrollTop = (ta.value.substring(0, mp).split('\n').length - 2) * 24;
-}
-
-// ─── INPUT MODAL ──────────────────────────────────────────────────
-function showInputModal(msg, initVal = '', type = 'single', allowCopy = false, allowPaste = false) {
-  pushState();
-  document.getElementById('inputMessage').textContent = msg;
-  const si = document.getElementById('modalInputSingle'), ai = document.getElementById('modalInputArea');
-  si.style.display = type === 'single' ? 'block' : 'none'; ai.style.display = type === 'area' ? 'block' : 'none';
-  document.getElementById('inputCopyBtn').style.display = allowCopy ? 'flex' : 'none';
-  document.getElementById('inputPasteBtn').style.display = allowPaste ? 'flex' : 'none';
-  const active = type === 'single' ? si : ai; active.value = initVal;
-  document.getElementById('inputModal').style.display = 'flex';
-  setTimeout(() => active.focus(), 300);
-  return new Promise(resolve => {
-    document.getElementById('inputBtn').onclick = () => { closeInputModal(resolve, active.value); };
-    window.copyModalContent = () => { navigator.clipboard.writeText(active.value); showNotif('تم النسخ', 'success'); };
-    window.pasteModalContent = async () => { try { active.value = await navigator.clipboard.readText(); } catch(e) { showNotif('تعذر الوصول للحافظة', 'error'); } };
-    window._inputResolve = resolve;
-  });
-}
-function closeInputModal(resolve = null, val = null) {
-  document.getElementById('inputModal').style.display = 'none';
-  const res = resolve || window._inputResolve;
-  if(res) res(val);
-  window._inputResolve = null;
-  if(window.history.state?.open) window.history.back();
-}
-
-// ─── CONFIRM / PASSWORD ───────────────────────────────────────────
-function showConfirm(msg) { document.getElementById('confirmMessage').textContent = msg; document.getElementById('confirmModal').style.display = 'flex'; return new Promise(r => { window.hideConfirmModal = res => { document.getElementById('confirmModal').style.display = 'none'; r(res); }; }); }
-function showPasswordModal() { document.getElementById('modalPasswordInput').value = ''; document.getElementById('passwordModal').style.display = 'flex'; setTimeout(() => document.getElementById('modalPasswordInput').focus(), 200); return new Promise(r => { document.getElementById('passwordBtn').onclick = () => { const v = document.getElementById('modalPasswordInput').value; document.getElementById('passwordModal').style.display = 'none'; r(v); }; window.hidePasswordModal = v => { document.getElementById('passwordModal').style.display = 'none'; r(v); }; }); }
-async function checkPassword(item, cb) { const p = await showPasswordModal(); if(!p) return false; if(btoa(p) === item.passwordHash) { if(cb) cb(); return true; } else { showNotif('كلمة المرور خاطئة', 'error'); return false; } }
-async function verifyAppPass() { const sp = localStorage.getItem(APP_PASS_KEY); if(!sp) return true; const p = await showPasswordModal(); if(p && btoa(p) === sp) return true; showNotif('كلمة مرور خاطئة', 'error'); return false; }
-
-// ─── SHEETS ───────────────────────────────────────────────────────
-function openSheet(id) { document.getElementById('ctxOverlay').style.display = 'block'; requestAnimationFrame(() => document.getElementById(id).classList.add('open')); pushState(); }
-function closeSheet(id) { document.getElementById(id).classList.remove('open'); document.getElementById('ctxOverlay').style.display = 'none'; }
-function closeAllMenus() { ['ctxSheet', 'subCtxSheet', 'dragSheet', 'settingsSheet'].forEach(id => document.getElementById(id).classList.remove('open')); document.getElementById('ctxOverlay').style.display = 'none'; const cm = document.getElementById('createMenu'); cm.classList.remove('open'); cm.style.display = 'none'; }
-
-// ─── CTX SHEET ────────────────────────────────────────────────────
-function showCtxSheet(id) {
-  const isMulti = isMainSelectionMode && selectedMainIds.size > 0;
-  let item = null;
-  
-  if(isMulti) {
-    const sel = getCurrentList().filter(n => selectedMainIds.has(n.id));
-    const allLocked = sel.every(n => n.isLocked);
-    document.getElementById('ctxLockLabel').textContent = allLocked ? 'فتح قفل المحدد' : 'قفل المحدد';
-    document.getElementById('ctxEditBtn').style.display = 'none';
-  } else {
-    activeCardId = id;
-    item = findNoteById(allData, id);
-    if(!item) return;
-    document.getElementById('ctxLockLabel').textContent = item.isLocked ? 'فتح القفل' : 'قفل';
-    document.getElementById('ctxEditBtn').style.display = 'flex';
+    localStorage.setItem('abuFaizRealLogin', realLogin);
+    localStorage.setItem('abuFaizRealDomain', realDomain);
+    
+    const field = document.getElementById('realEmailOutput');
+    field.value = email;
+    field.classList.add('has-value');
+    
+    let waitMsg =
+    'جاري فحص الرسائل...';
+    document.getElementById('realMailList').innerHTML = '<div class="empty-history">' + waitMsg + '</div>';
+    
+    addHistory(email, 'real');
+    
+    let msgReal =
+    'تم توليد إيميل حقيقي! 📥';
+    showToast(msgReal);
+    
+    startInboxCheck();
+  } catch(e) {
+    let err =
+    'فشل الاتصال بالسيرفر';
+    showToast(err, '❌');
   }
-
-  document.getElementById('ctxLockBtn').style.display = 'flex';
-  document.getElementById('ctxHomeBtn').style.display = currentFolderId !== null ? 'flex' : 'none';
-  openSheet('ctxSheet');
 }
-function showSubCtxSheet(i) { activeSubNoteIndex = i; openSheet('subCtxSheet'); }
 
-// ─── CTX ACTIONS ─────────────────────────────────────────────────
-async function handleMenuAction(action) {
-  closeSheet('ctxSheet'); 
-  const isMulti = isMainSelectionMode && selectedMainIds.size > 0;
-  let item = null;
+function startInboxCheck() {
+  if(inboxTimer) clearInterval(inboxTimer);
+  checkRealInbox();
+  inboxTimer = setInterval(checkRealInbox, 5000);
+}
+
+async function checkRealInbox() {
+  if(!realLogin || !realDomain) return;
   
-  if(!isMulti) {
-    item = findNoteById(allData, activeCardId);
-    if(!item) return;
-  }
+  let txtCheck =
+  'جاري الفحص...';
+  document.getElementById('inboxStatus').textContent = txtCheck;
   
-  if(action === 'delete') {
-    if(isMulti) { deleteSelectedMainNotesWrapper(); return; }
-    if(!await verifyAppPass()) return;
-    if(item.isLocked) { const p = await showPasswordModal(); if(!p || btoa(p) !== item.passwordHash) { showNotif('كلمة المرور خاطئة', 'error'); return; } }
-    if(await showConfirm(`حذف "${item.title}"؟`)) { removeItemFromTree(allData, activeCardId); saveData(); renderMainGrid(); }
-  }
-  else if(action === 'edit') {
-    if(item.isLocked && !await checkPassword(item)) return;
-    const t = await showInputModal(item.type === 'folder' ? 'اسم المجلد:' : 'عنوان الملاحظة:', item.title, 'single');
-    if(t) { item.title = t; saveData(); renderMainGrid(); }
-  }
-  else if(action === 'toggleLock') {
-    if(isMulti) {
-      const sel = getCurrentList().filter(n => selectedMainIds.has(n.id));
-      const allLocked = sel.every(n => n.isLocked);
-      if(allLocked) {
-        const p = await showPasswordModal();
-        if(p) {
-          let c = 0;
-          sel.forEach(it => { if(it.passwordHash === btoa(p)) { it.isLocked = false; it.passwordHash = null; c++; } });
-          showNotif(c > 0 ? `تم فتح ${c} عنصر` : 'كلمة المرور خاطئة', c > 0 ? 'success' : 'error');
-        }
-      } else {
-        const p = await showPasswordModal();
-        if(p) {
-          sel.forEach(it => { it.isLocked = true; it.passwordHash = btoa(p); });
-          showNotif('تم القفل بنجاح', 'success');
-        }
-      }
-      toggleMainSelectionMode(false);
+  try {
+    const res = await fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${realLogin}&domain=${realDomain}`);
+    const mails = await res.json();
+    
+    if(mails.length > 0) {
+      renderRealMails(mails);
     } else {
-      if(item.isLocked) { if(await checkPassword(item)) { item.isLocked = false; item.passwordHash = null; showNotif('تم فتح القفل', 'success'); } }
-      else { const p = await showPasswordModal(); if(p) { item.isLocked = true; item.passwordHash = btoa(p); showNotif('تم القفل', 'success'); } }
+      let txtNo =
+      'لا يوجد رسائل...';
+      document.getElementById('realMailList').innerHTML = '<div class="empty-history">' + txtNo + '</div>';
     }
-    saveData(); renderMainGrid();
-  }
-  else if(action === 'move' || action === 'copy') {
-    if(!await verifyAppPass()) return;
-    const list = getCurrentList();
-    itemsClipboard = isMulti ? list.filter(n => selectedMainIds.has(n.id)) : [item];
-    clipboardAction = action; isPasteMode = true;
-    toggleMainSelectionMode(false); renderMainGrid();
-    showNotif(action === 'move' ? 'تم القص — انتقل للوجهة واضغط لصق' : 'تم النسخ — انتقل للوجهة واضغط لصق', 'info');
-  }
-  else if(action === 'moveToRoot') {
-    if(currentFolderId === null) return; if(!await verifyAppPass()) return;
-    const list = getCurrentList(); const items = isMulti ? list.filter(n => selectedMainIds.has(n.id)) : [item];
-    if(await showConfirm('إضافة العناصر للواجهة الرئيسية؟')) {
-      const folder = findNoteById(allData, currentFolderId);
-      items.forEach(it => { folder.items = folder.items.filter(n => n.id !== it.id); allData.unshift(it); });
-      saveData(); toggleMainSelectionMode(false); renderMainGrid(); showNotif('تمت الإضافة', 'success');
-    }
-  }
-}
-
-async function handleSubNoteAction(action) {
-  closeSheet('subCtxSheet');
-  const n = findNoteById(allData, currentNoteId);
-  if(action === 'delete') { if(!await verifyAppPass()) return; n.items.splice(activeSubNoteIndex, 1); saveData(); renderSubNotes(); }
-  else if(action === 'copy') { navigator.clipboard.writeText(n.items[activeSubNoteIndex]); showNotif('تم النسخ', 'success'); }
-  else if(action === 'edit') { editSubNote(activeSubNoteIndex); }
-}
-
-// ─── PASTE ────────────────────────────────────────────────────────
-async function pasteItemsHere() {
-  if(!isPasteMode || !itemsClipboard.length) return;
-  if(clipboardAction === 'move') { itemsClipboard.forEach(c => removeItemFromTree(allData, c.id)); getCurrentList().unshift(...itemsClipboard); }
-  else { itemsClipboard.forEach(it => { const copy = JSON.parse(JSON.stringify(it)); copy.id = Date.now() + Math.random(); copy.title += ' (نسخة)'; getCurrentList().unshift(copy); }); }
-  saveData(); itemsClipboard = []; isPasteMode = false; renderMainGrid(); showNotif('تم اللصق ✅', 'success');
-}
-
-// ─── MAIN SELECTION ───────────────────────────────────────────────
-function toggleMainSelectionMode(active) {
-  isMainSelectionMode = active; if(!active) selectedMainIds.clear();
-  const tb = document.getElementById('selToolbar'); tb.classList.toggle('active', active);
-  document.getElementById('mainSelectBtn').textContent = active ? 'إلغاء' : 'تحديد';
-  renderMainGrid();
-}
-function toggleMainSelection(id) { selectedMainIds.has(id) ? selectedMainIds.delete(id) : selectedMainIds.add(id); renderMainGrid(); }
-function handleSelectionAction(action) {
-  const list = getCurrentList();
-  if(action === 'selectAll') { if(selectedMainIds.size === list.length) selectedMainIds.clear(); else list.forEach(i => selectedMainIds.add(i.id)); isMainSelectionMode = true; renderMainGrid(); }
-}
-async function deleteSelectedMainNotesWrapper() {
-  if(!selectedMainIds.size) return; if(!await verifyAppPass()) return;
-  const list = getCurrentList(); const locked = list.filter(n => selectedMainIds.has(n.id) && n.isLocked);
-  if(locked.length) { const p = await showPasswordModal(); if(!p || locked[0].passwordHash !== btoa(p)) { showNotif('كلمة المرور خاطئة', 'error'); return; } }
-  if(await showConfirm(`حذف ${selectedMainIds.size} عناصر؟`)) { selectedMainIds.forEach(id => removeItemFromTree(allData, id)); saveData(); toggleMainSelectionMode(false); showNotif('تم الحذف', 'success'); }
-}
-
-// ─── DRAG & DROP ─────────────────────────────────────────────────
-let dragSrcId = null, mobileDragEl = null, mobileDragClone = null, lastTargetEl = null;
-
-function addDragEvents(card, item) {
-  card.addEventListener('dragstart', e => { dragSrcId = parseFloat(card.dataset.id); card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragSrcId); });
-  card.addEventListener('dragover', e => { e.preventDefault(); });
-  card.addEventListener('dragenter', () => card.classList.add('drag-target'));
-  card.addEventListener('dragleave', () => card.classList.remove('drag-target'));
-  card.addEventListener('drop', async e => { e.stopPropagation(); document.querySelectorAll('.note-card').forEach(c => c.classList.remove('drag-target')); const tid = parseFloat(card.dataset.id); if(dragSrcId === tid) return; if(card.dataset.type === 'folder') { const a = await showDragSheet(); if(a === 'move') moveItemsToFolder(tid); else if(a === 'swap') reorderItems(dragSrcId, tid); } else reorderItems(dragSrcId, tid); });
-  card.addEventListener('dragend', () => { card.classList.remove('dragging'); document.querySelectorAll('.note-card').forEach(c => c.classList.remove('drag-target')); });
+  } catch(e) {}
   
-  const handle = card.querySelector('.sort-handle');
-  if(handle) {
-    let tm = false, tsx = 0, tsy = 0;
-    handle.addEventListener('touchstart', e => { e.stopPropagation(); tm = false; tsx = e.touches[0].clientX; tsy = e.touches[0].clientY; mobileDragEl = card; dragSrcId = parseFloat(card.dataset.id); mobileDragClone = card.cloneNode(true); mobileDragClone.className = 'note-card dragging-mobile'; document.body.appendChild(mobileDragClone); updateClonePos(tsx, tsy); card.style.opacity = '.3'; }, {passive: true});
-    handle.addEventListener('touchmove', e => { if(!mobileDragClone) return; const t = e.touches[0]; updateClonePos(t.clientX, t.clientY); mobileDragClone.style.display = 'none'; let el = document.elementFromPoint(t.clientX, t.clientY); mobileDragClone.style.display = 'flex'; const tc = el?.closest('.note-card'); if(lastTargetEl && lastTargetEl !== tc) lastTargetEl.classList.remove('drag-target-hover'); if(tc && tc !== mobileDragEl) { tc.classList.add('drag-target-hover'); lastTargetEl = tc; } else lastTargetEl = null; }, {passive: true});
-    handle.addEventListener('touchend', async () => { if(!mobileDragClone) return; mobileDragClone.remove(); mobileDragClone = null; if(mobileDragEl) mobileDragEl.style.opacity = '1'; if(lastTargetEl) { lastTargetEl.classList.remove('drag-target-hover'); const tid = parseFloat(lastTargetEl.dataset.id); if(lastTargetEl.dataset.type === 'folder') { const a = await showDragSheet(); if(a === 'move') moveItemsToFolder(tid); else if(a === 'swap') reorderItems(dragSrcId, tid); } else reorderItems(dragSrcId, tid); } mobileDragEl = null; lastTargetEl = null; }, {passive: true});
+  setTimeout(() => { 
+    let txtOk =
+    'متصل ✅';
+    document.getElementById('inboxStatus').textContent = txtOk; 
+  }, 1000);
+}
+
+function renderRealMails(mails) {
+  const list = document.getElementById('realMailList');
+  let htmlResult = '';
+  
+  let txtFrom =
+  'من: ';
+  let txtLoad =
+  'اضغط لقراءة الرسالة...';
+  
+  mails.forEach((m) => {
+    htmlResult += `
+    <div class="real-mail-item" onclick="openMail(${m.id})">
+      <div style="font-weight:700; color:var(--gold); margin-bottom:5px;">${m.subject}</div>
+      <div style="font-size:12px; color:var(--muted);">${txtFrom}${m.from}</div>
+      <div id="mail-body-${m.id}" style="display:none; margin-top:10px; padding:15px; background:#fff; color:#000; border-radius:8px; width:100%; word-break:break-word; font-family:sans-serif;">${txtLoad}</div>
+    </div>`;
+  });
+  list.innerHTML = htmlResult;
+}
+
+async function openMail(id) {
+  const bodyDiv = document.getElementById(`mail-body-${id}`);
+  
+  if(bodyDiv.style.display === "block") {
+    bodyDiv.style.display = "none";
+    return;
+  }
+  
+  bodyDiv.style.display = "block";
+  let txtWait =
+  'جاري جلب المحتوى...';
+  bodyDiv.innerHTML = txtWait;
+  
+  try {
+    const res = await fetch(`https://www.1secmail.com/api/v1/?action=readMessage&login=${realLogin}&domain=${realDomain}&id=${id}`);
+    const data = await res.json();
+    bodyDiv.innerHTML = data.htmlBody || data.textBody || data.body;
+  } catch(e) {
+    let txtErr =
+    'خطأ بالتحميل';
+    bodyDiv.innerHTML = txtErr;
   }
 }
 
-function updateClonePos(x, y) { if(mobileDragClone) { mobileDragClone.style.left = (x - 77) + 'px'; mobileDragClone.style.top = (y - 77) + 'px'; } }
+// ----------------------------------------
+// FAKE EMAIL GENERATOR
+// ----------------------------------------
+function generateEmail(btn) {
+  if (btn) addRipple(btn, event);
 
-function showDragSheet() { openSheet('dragSheet'); return new Promise(r => { window.resolveDragAction = action => { closeSheet('dragSheet'); r(action); }; }); }
-function moveItemsToFolder(tfid) { const list = getCurrentList(); const tf = findNoteById(allData, tfid); if(!tf || tf.type !== 'folder') return; const items = (selectedMainIds.has(dragSrcId) && selectedMainIds.size > 1) ? list.filter(n => selectedMainIds.has(n.id) && n.id !== tfid) : list.filter(n => parseFloat(n.id) === dragSrcId && n.id !== tfid); if(!items.length) return; items.forEach(it => removeItemFromTree(allData, it.id)); items.forEach(it => tf.items.unshift(it)); saveData(); if(selectedMainIds.has(dragSrcId)) toggleMainSelectionMode(false); else renderMainGrid(); }
-function reorderItems(srcId, targetId) { const list = getCurrentList(); const si = list.findIndex(n => parseFloat(n.id) === srcId); const ti = list.findIndex(n => parseFloat(n.id) === targetId); if(si < 0 || ti < 0 || si === ti) return; const [m] = list.splice(si, 1); list.splice(ti, 0, m); saveData(); renderMainGrid(); }
+  const adjectives = [
+    'dark', 'blue', 'fire', 'swift', 'cool', 'epic', 'star', 'nova', 'iron', 'wild', 'sky', 'zen',
+    'toxic', 'neon', 'shadow', 'crystal', 'quantum', 'cosmic', 'phantom', 'silent', 'golden'
+  ];
+  
+  const nouns = [
+    'wolf', 'hawk', 'lion', 'dragon', 'ghost', 'shadow', 'blade', 'storm', 'void', 'pixel', 'cyber', 'nexus',
+    'tiger', 'bear', 'eagle', 'falcon', 'shark', 'viper', 'cobra', 'ninja', 'samurai', 'knight', 'wizard'
+  ];
 
-// ─── CREATE ───────────────────────────────────────────────────────
-function showCreateMenu() { const cm = document.getElementById('createMenu'); if(cm.classList.contains('open')) { cm.classList.remove('open'); setTimeout(() => cm.style.display = 'none', 200); } else { cm.style.display = 'flex'; requestAnimationFrame(() => cm.classList.add('open')); } }
-async function createItemWrapper(type) { document.getElementById('createMenu').classList.remove('open'); document.getElementById('createMenu').style.display = 'none'; const title = await showInputModal(type === 'folder' ? 'اسم المجلد:' : 'عنوان الملاحظة:', '', 'single'); if(title) { const ni = { id: Date.now(), type, title, items: [], isLocked: false }; getCurrentList().unshift(ni); saveData(); renderMainGrid(); if(type === 'note') openNoteDetails(ni.id); } }
+  const patterns = [
+    () => rand(adjectives) + rand(nouns) + randInt(10, 9999),
+    () => rand(adjectives) + '_' + rand(nouns) + randInt(1, 999),
+    () => rand(nouns) + '.' + rand(adjectives) + randInt(10, 9999),
+    () => shuffle('abcdefghijklmnopqrstuvwxyz'.substring(0, randInt(5,9))) + randInt(100, 99999),
+    () => rand(adjectives) + randInt(10000, 99999),
+    () => rand(nouns) + rand(nouns) + randInt(1, 99)
+  ];
 
-// ─── SETTINGS & EXPORT/IMPORT ─────────────────────────────────────
-async function handleSettingsOpen() { const sp = localStorage.getItem(APP_PASS_KEY); if(sp) { const p = await showPasswordModal(); if(!p || btoa(p) !== sp) { showNotif('كلمة مرور خاطئة', 'error'); return; } } updateSettingsUI(); checkGoogleLoginState(); openSheet('settingsSheet'); }
-function updateSettingsUI() { const has = !!localStorage.getItem(APP_PASS_KEY); document.getElementById('setPassBtn').style.display = has ? 'none' : 'flex'; document.getElementById('removePassBtn').style.display = has ? 'flex' : 'none'; }
-function setAppPassword() { closeSheet('settingsSheet'); setTimeout(async () => { const p = await showPasswordModal(); if(p) { localStorage.setItem(APP_PASS_KEY, btoa(p)); saveData(); showNotif('تم القفل بنجاح', 'success'); } }, 350); }
-function removeAppPassword() { closeSheet('settingsSheet'); setTimeout(async () => { if(await showConfirm('حذف كلمة مرور التطبيق؟')) { localStorage.removeItem(APP_PASS_KEY); saveData(); showNotif('تم حذف كلمة المرور', 'info'); } }, 350); }
-function deleteAllData() { closeSheet('settingsSheet'); setTimeout(async () => { if(!await showConfirm('حذف جميع البيانات نهائياً؟')) { return; } if(!await showConfirm('هل أنت متأكد تماماً؟ سيتم حذفها من السحابة أيضاً!')) { return; } allData = []; saveData(); renderMainGrid(); showNotif('تم حذف جميع البيانات', 'info'); }, 350); }
-function exportDataManual() { closeSheet('settingsSheet'); setTimeout(() => showInputModal('نسخة احتياطية (كود) — انسخ الكل:', JSON.stringify(allData), 'area', true), 400); }
-function importDataPaste() { closeSheet('settingsSheet'); setTimeout(async () => { const t = await showInputModal('الصق نص النسخة:', '', 'area', false, true); if(t) { try { let c = t.trim().replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"'); allData = JSON.parse(c); saveData(); renderMainGrid(); showNotif('تم الاستيراد بنجاح', 'success'); } catch(err) { showNotif('الكود غير صالح', 'error'); } } }, 350); }
+  const username = rand(patterns)();
 
-function downloadJSON() {
-  closeSheet('settingsSheet');
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
-  const downloadAnchorNode = document.createElement('a');
-  downloadAnchorNode.setAttribute("href", dataStr);
-  downloadAnchorNode.setAttribute("download", "smart_notes_backup.json");
-  document.body.appendChild(downloadAnchorNode);
-  downloadAnchorNode.click();
-  downloadAnchorNode.remove();
-  showNotif('تم التنزيل', 'success');
+  let domain = selectedDomain;
+  if (domain === 'random') {
+    const domains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'proton.me', 'outlook.com', 'icloud.com', 'mail.com', 'tutanota.com'];
+    domain = rand(domains);
+  }
+
+  const email = username + '@' + domain;
+  const field = document.getElementById('emailOutput');
+  field.value = email;
+  field.classList.add('has-value');
+  addHistory(email, 'email');
+  
+  let msgGenEmail =
+  'تم توليد إيميل وهمي! 📧';
+  showToast(msgGenEmail);
 }
 
-function importJSON() {
-  closeSheet('settingsSheet');
-  document.getElementById('jsonFileInput').click();
+// ----------------------------------------
+// PASSWORD GENERATOR
+// ----------------------------------------
+function generatePass(btn) {
+  if (btn) addRipple(btn, event);
+
+  const options = document.querySelectorAll('#passOptions .option-toggle');
+  const upper = options[0].classList.contains('checked') ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : '';
+  const lower = options[1].classList.contains('checked') ? 'abcdefghijklmnopqrstuvwxyz' : '';
+  const nums  = options[2].classList.contains('checked') ? '0123456789' : '';
+  const syms  = options[3].classList.contains('checked') ? '!@#$%^&*()_+-=[]{}|;:,.<>?' : '';
+
+  const all = upper + lower + nums + syms;
+  if (!all) { 
+    let msgNoType =
+    'اختر نوع واحد على الأقل!';
+    showToast(msgNoType, '⚠️'); 
+    return; 
+  }
+
+  const length = parseInt(document.getElementById('passLength').value);
+  let pass = '';
+
+  if (upper) pass += rand(upper);
+  if (lower) pass += rand(lower);
+  if (nums)  pass += rand(nums);
+  if (syms)  pass += rand(syms);
+
+  while (pass.length < length) pass += rand(all);
+  pass = shuffle(pass);
+
+  const field = document.getElementById('passOutput');
+  field.value = pass;
+  field.classList.add('has-value');
+
+  updateStrength(pass, upper, lower, nums, syms);
+  addHistory(pass, 'pass');
+  
+  let msgGenPass =
+  'تم توليد كلمة سر قوية! 🔐';
+  showToast(msgGenPass);
 }
 
-function handleJSONImport(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      let c = e.target.result.trim().replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
-      allData = JSON.parse(c);
-      saveData();
-      renderMainGrid();
-      showNotif('تم الاستيراد بنجاح', 'success');
-    } catch (err) {
-      showNotif('الملف غير صالح', 'error');
-    }
-  };
-  reader.readAsText(file);
-  event.target.value = '';
-}
+function updateStrength(pass, upper, lower, nums, syms) {
+  let score = 0;
+  if (pass.length >= 12) score += 25;
+  if (pass.length >= 20) score += 15;
+  if (upper) score += 15;
+  if (lower) score += 15;
+  if (nums)  score += 15;
+  if (syms)  score += 15;
 
-async function shareBackupText() {
-  closeSheet('settingsSheet');
-  const backupText = JSON.stringify(allData);
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: 'نسخة احتياطية',
-        text: backupText
-      });
-    } catch (err) {
-      console.log(err);
-    }
+  const fill = document.getElementById('strengthFill');
+  const text = document.getElementById('strengthText');
+
+  fill.style.width = score + '%';
+  
+  let txt1 =
+  'ضعيفة ⚠️';
+  let txt2 =
+  'متوسطة ⚡';
+  let txt3 =
+  'قوية 💪';
+  let txt4 =
+  'لا تكسر! 🔥';
+
+  if (score < 40) {
+    fill.style.background = '#ff3d71';
+    text.style.color = '#ff3d71';
+    text.textContent = txt1;
+  } else if (score < 70) {
+    fill.style.background = '#ffd700';
+    text.style.color = '#ffd700';
+    text.textContent = txt2;
+  } else if (score < 90) {
+    fill.style.background = '#00e676';
+    text.style.color = '#00e676';
+    text.textContent = txt3;
   } else {
-    showInputModal('نسخ احتياطي (كود) — انسخ الكل:', backupText, 'area', true);
+    fill.style.background = 'linear-gradient(90deg, #00d4ff, #00e676)';
+    text.style.color = '#00d4ff';
+    text.textContent = txt4;
   }
 }
 
-// ─── GOOGLE DRIVE CLOUD LOGIC ─────────────────────────────────────
-function initGoogleLib() {
-    if(window.google) {
-        tokenClient = google.accounts.oauth2.initTokenClient({ 
-            client_id: GOOGLE_CLIENT_ID, 
-            scope: SCOPES, 
-            callback: (resp) => { 
-                if (resp.access_token) { 
-                    gAccessToken = resp.access_token; 
-                    localStorage.setItem('gAccessToken', gAccessToken); 
-                    document.getElementById('loginOverlay').style.display = 'none'; 
-                    isRetry = false; 
-                    showNotif("تم الاتصال بالسحابة بنجاح", "success"); 
-                    fetchUserInfo(); 
-                    checkGoogleLoginState(); 
-                    forceSyncFromCloud(true); 
-                } 
-            } 
-        });
-        if(gAccessToken) { checkGoogleLoginState(); }
-    }
+// ----------------------------------------
+// USERNAME GENERATOR
+// ----------------------------------------
+function generateUsername(btn) {
+  if (btn) addRipple(btn, event);
+
+  const styles = {
+    cool: [
+      () => ['dark','epic','ultra','hyper','neo','alpha','omega','meta','cyber','neon'][randInt(0,9)] + ['Wolf','Hawk','Fox','Viper','Ghost','Blade','Storm','Nexus','Core','Void'][randInt(0,9)],
+      () => 'x_' + ['hunter','sniper','driv3r','coderr','hack3r','nod3r'][randInt(0,5)] + '_x',
+      () => ['shadow','phantom','spectr','cipher','zenith','apex'][randInt(0,5)] + randInt(0,9) + randInt(0,9),
+    ],
+    gamer: [
+      () => ['xX','XX','gg'][randInt(0,2)] + ['Noob','Pro','Killer','Sniper','Boss','God'][randInt(0,5)] + ['Xx','XX','_YT'][randInt(0,2)],
+      () => ['ProPlayer','MLGpro','TopFrag','AceKill','OneShot','HeadShot'][randInt(0,5)] + randInt(100,9999),
+      () => ['N3on','Ph4ntom','Vip3r','Gh0st','Fr0st','Bl4ze'][randInt(0,5)] + '_' + ['GG','YT','TV','PRO'][randInt(0,3)],
+    ],
+    pro: [
+      () => ['Alex','Ryan','Sam','Kyle','Drew','Max'][randInt(0,5)] + ['Dev','Tech','Pro','Hub','Lab','Studio'][randInt(0,5)] + randInt(10,99),
+      () => ['the','mr_','sir_'][randInt(0,2)] + ['dev','coder','builder','maker','creator','founder'][randInt(0,5)],
+      () => ['dev','tech','code','build'][randInt(0,3)] + ['_' + ['io','hub','xyz','app','co'][randInt(0,4)]],
+    ],
+    arabic: [
+      () => ['abu','om','bnt','ibn'][randInt(0,3)] + '_' + ['faiz','nour','ali','sara','reem','lara'][randInt(0,5)] + randInt(0,99),
+      () => ['alqamar','alnoor','alsayf','alward','albadr','alahly'][randInt(0,5)] + randInt(10,999),
+      () => ['malik','amir','batal','qaid','nokhba','zaeem'][randInt(0,5)] + '_' + randInt(100,9999),
+    ],
+    random: null,
+  };
+
+  let username;
+  if (selectedStyle === 'random') {
+    const allStyles = Object.values(styles).filter(s => s);
+    const picked = rand(allStyles);
+    username = rand(picked)();
+  } else {
+    username = rand(styles[selectedStyle])();
+  }
+
+  const field = document.getElementById('userOutput');
+  field.value = username;
+  field.classList.add('has-value');
+  addHistory(username, 'user');
+  
+  let msgGenUser =
+  'تم توليد اسم مستخدم! ✨';
+  showToast(msgGenUser);
 }
-
-function startGoogleLogin() { 
-    if(tokenClient) {
-        document.getElementById('loginStatus').style.display = 'block';
-        tokenClient.requestAccessToken(); 
-    }
-}
-
-function openLoginOverlay() { closeSheet('settingsSheet'); document.getElementById('loginOverlay').style.display = 'flex'; }
-
-function checkGoogleLoginState() { 
-    if(gAccessToken) { 
-        document.getElementById('googleLoginBtnArea').style.display = 'none'; 
-        document.getElementById('googleSyncActions').style.display = 'block'; 
-    } else { 
-        document.getElementById('googleLoginBtnArea').style.display = 'block'; 
-        document.getElementById('googleSyncActions').style.display = 'none'; 
-    } 
-}
-
-async function fetchUserInfo() { 
-    if(!gAccessToken) return; 
-    const localPic = localStorage.getItem('userPhoto'); 
-    if(localPic) updateLogoutIcon(localPic); 
-    try { 
-        let res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { 'Authorization': `Bearer ${gAccessToken}` } }); 
-        if(res.ok) { 
-            let data = await res.json(); 
-            if(data.picture) { 
-                localStorage.setItem('userPhoto', data.picture); 
-                updateLogoutIcon(data.picture); 
-            } 
-        }
-    } catch(e) {} 
-}
-
-function updateLogoutIcon(url) { 
-    const area = document.getElementById('googleLogoutIcon'); 
-    if(area) area.innerHTML = `<img src="${url}" class="user-profile-img" alt="User">`; 
-}
-
-async function handleGoogleLogout() {
-    closeSheet('settingsSheet');
-    setTimeout(async () => {
-        if(await showConfirm("هل تريد تسجيل الخروج من السحابة؟")) {
-            localStorage.removeItem('gAccessToken'); 
-            localStorage.removeItem('userPhoto'); 
-            gAccessToken = null; 
-            document.getElementById('googleLogoutIcon').innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`; 
-            checkGoogleLoginState(); 
-            window.location.reload();
-        }
-    }, 350);
-}
-
-function setSyncLoader(show) { document.getElementById('syncLoader').style.display = show ? 'inline-block' : 'none'; }
-
-async function forceUploadToDrive(silent = false) {
-    if(!gAccessToken) { if(!silent) showNotif("غير مسجل دخول بالسحابة", "error"); return; } 
-    if(!silent) { closeSheet('settingsSheet'); showNotif("جاري الرفع للسحابة...", "info"); }
-    setSyncLoader(true);
-    document.getElementById('syncText').innerText = "حفظ...";
-    
-    try { 
-        const q = `name = '${FILENAME}' and 'appDataFolder' in parents and trashed = false`; 
-        const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder`, { headers: { 'Authorization': `Bearer ${gAccessToken}` } }); 
-        
-        if(searchResp.status === 401) { 
-            if(!isRetry && tokenClient) {
-                isRetry = true; tokenClient.requestAccessToken({prompt: ''}); return; 
-            } else {
-                 if(!silent) showNotif("انتهت الجلسة، يرجى تسجيل الدخول", "error");
-                 localStorage.removeItem('gAccessToken'); gAccessToken=null; 
-                 document.getElementById('loginOverlay').style.display = 'flex'; return; 
-            }
-        } 
-
-        const data = await searchResp.json(); let fileId = null; if(data.files && data.files.length > 0) fileId = data.files[0].id; 
-        
-        const payload = { smartNotesData: allData, appGlobalPass: localStorage.getItem(APP_PASS_KEY) }; 
-        const fileBlob = new Blob([JSON.stringify(payload)], { type: 'application/json' }); 
-        
-        if(fileId) { await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, { method: 'PATCH', headers: { 'Authorization': `Bearer ${gAccessToken}`, 'Content-Type': 'application/json' }, body: fileBlob }); } 
-        else { const metadata = { name: FILENAME, mimeType: 'application/json', parents: ['appDataFolder'] }; const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', fileBlob); await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': `Bearer ${gAccessToken}` }, body: form }); } 
-        if(!silent) showNotif("تم الحفظ في السحابة", "success"); 
-    } catch(e) { if(!silent) showNotif("فشل الرفع", "error"); } 
-    
-    setSyncLoader(false); document.getElementById('syncText').innerText = "";
-}
-
-async function forceSyncFromCloud(silent = false) {
-    if(!gAccessToken) { if(!silent) showNotif("غير مسجل دخول", "error"); return; } 
-    if(!silent) { closeSheet('settingsSheet'); showNotif("جاري الجلب...", "info"); }
-    setSyncLoader(true);
-    document.getElementById('syncText').innerText = "تحميل...";
-
-    try { 
-        const q = `name = '${FILENAME}' and 'appDataFolder' in parents and trashed = false`; 
-        const searchResp = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder`, { headers: { 'Authorization': `Bearer ${gAccessToken}` } }); 
-        
-        if(searchResp.status === 401) { 
-            if(!isRetry && tokenClient) {
-                isRetry = true; try { tokenClient.requestAccessToken({prompt: ''}); } catch (e) { document.getElementById('loginOverlay').style.display = 'flex'; } return; 
-            } else {
-                 localStorage.removeItem('gAccessToken'); gAccessToken=null; 
-                 document.getElementById('loginOverlay').style.display = 'flex'; return; 
-            }
-        }
-
-        const data = await searchResp.json(); 
-        if(data.files && data.files.length > 0) { 
-            const fileId = data.files[0].id; 
-            const fileResp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: { 'Authorization': `Bearer ${gAccessToken}` } }); 
-            const cloudContent = await fileResp.json(); 
-            
-            if(cloudContent) { 
-                if(cloudContent.smartNotesData) {
-                    allData = cloudContent.smartNotesData; 
-                    localStorage.setItem(LOCAL_DATA_KEY, JSON.stringify(allData));
-                }
-                if(cloudContent.appGlobalPass) localStorage.setItem(APP_PASS_KEY, cloudContent.appGlobalPass); 
-                else localStorage.removeItem(APP_PASS_KEY); 
-
-                renderMainGrid(); 
-                if(!silent) showNotif("تم استعادة البيانات", "success"); 
-            } 
-        } else { 
-            if(!silent) showNotif("لا توجد بيانات محفوظة", "info"); 
-        } 
-    } catch(e) { if(!silent) showNotif("فشل الجلب", "error"); } 
-    
-    setSyncLoader(false); document.getElementById('syncText').innerText = "";
-}
-
-let notifTimer = null;
-function showNotif(msg, type = 'info') { const t = document.getElementById('notifToast'); const icon = document.getElementById('notifIcon'); document.getElementById('notifMsg').textContent = msg; const colors = {success: '#10b981', error: '#ef4444', info: '#6366f1'}; t.style.background = colors[type] || colors.info; if(type === 'success') icon.innerHTML = '<polyline points="20 6 9 17 4 12"/>'; else if(type === 'error') icon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'; else icon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'; t.classList.add('show'); if(notifTimer) clearTimeout(notifTimer); notifTimer = setTimeout(() => t.classList.remove('show'), 2500); }
 </script>
 </body>
 </html>
