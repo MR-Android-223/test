@@ -1,10 +1,10 @@
 {
   "name": "خزنة أسراري",
-  "short_name": "الخزنة",
+  "short_name": "خزنة أسراري",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "icon.png",
