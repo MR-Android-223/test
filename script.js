@@ -136,16 +136,57 @@ function importDataWrapper(e) {
     reader.onload = (f) => {
         try {
             const imported = JSON.parse(f.target.result);
-            const newAccounts = Array.isArray(imported) ? imported : (imported.accounts || []);
+            const rawAccounts = Array.isArray(imported) ? imported : (imported.accounts || []);
             const newFolders = imported.folders || ["عام"];
-            const clean = newAccounts.map(a => ({ id: a.id || Date.now()+Math.random(), email: a.email || a.title || "مستورد", pass: a.pass||"...", folder: a.folder||"عام" }));
-            accounts = [...accounts, ...clean];
+
+            // فلترة ذكية تعتمد على (الإيميل + القسم) معاً لمنع التكرار في نفس القسم
+            const seenCombinations = new Set(accounts.map(a => {
+                const em = (a.email || "").trim().toLowerCase();
+                const fol = a.folder || "عام";
+                return `${em}|${fol}`;
+            }));
+            
+            const cleanAccounts = [];
+
+            rawAccounts.forEach(importedAcc => {
+                const rawEmail = importedAcc.email || importedAcc.title || "مستورد";
+                const emailLower = rawEmail.trim().toLowerCase();
+                const folder = importedAcc.folder || "عام";
+                const combo = `${emailLower}|${folder}`;
+
+                if (!seenCombinations.has(combo)) {
+                    seenCombinations.add(combo);
+                    cleanAccounts.push({
+                        id: importedAcc.id || Date.now() + Math.random(),
+                        email: rawEmail,
+                        pass: importedAcc.pass || "...",
+                        folder: folder
+                    });
+                }
+            });
+
+            accounts = [...accounts, ...cleanAccounts];
+
             newFolders.forEach(f => {
                 if(!folders.includes(f)) folders.push(f);
             });
+
+            cleanAccounts.forEach(acc => {
+                if (acc.folder && !folders.includes(acc.folder)) {
+                    folders.push(acc.folder);
+                }
+            });
+
             saveToCloud();
-            showToast("تم استعادة البيانات بنجاح");
-        } catch(e){
+            renderFoldersBar();
+            renderVault();
+
+            if (cleanAccounts.length === 0 && rawAccounts.length > 0) {
+                showToast("جميع حسابات الملف موجودة مسبقاً في أقسامها");
+            } else {
+                showToast("تم استعادة البيانات بنجاح");
+            }
+        } catch(err){
             showToast("ملف غير صالح");
         }
     };
@@ -213,15 +254,31 @@ function submitPassword() {
 }
 
 function prepareSaveAccount() {
-    const email = document.getElementById('emailInput').value;
-    if (!email) { showToast("أدخل البيانات أولا"); return; }
+    const email = document.getElementById('emailInput').value.trim();
+    if (!email) {
+        showToast("أدخل البيانات أولاً");
+        return;
+    }
+    // شلنا الفلتر من هون، رح نفحص التكرار بداخل دالة الحفظ بعد ما تختار القسم
     isMoveAction = false;
     openFolderSelectModal("حفظ في");
 }
 
 function saveAccount(targetFolder) {
-    const email = document.getElementById('emailInput').value;
+    const email = document.getElementById('emailInput').value.trim();
     const pass = document.getElementById('passInput').value;
+    
+    // الفحص صار هون: هل الإيميل موجود بنفس القسم اللي اخترته؟
+    const lowerEmail = email.toLowerCase();
+    const isDuplicate = accounts.some(acc => 
+        (acc.email || "").trim().toLowerCase() === lowerEmail && acc.folder === targetFolder
+    );
+
+    if (isDuplicate) {
+        showToast("هذا الحساب موجود مسبقاً في هذا القسم");
+        return;
+    }
+
     accounts.unshift({ id: Date.now(), email, pass, folder: targetFolder });
     saveToCloud();
     document.getElementById('emailInput').value = '';
@@ -474,7 +531,8 @@ function saveNewOrder() {
 
 function startPress(type, id) {
     isLongPress = false;
-    longPressTimer = setTimeout(() => { isLongPress = true; openContextMenu(type, id); }, 600);
+    // كبرنا مدة الضغطة المطولة للـ 800 مشان السكرول
+    longPressTimer = setTimeout(() => { isLongPress = true; openContextMenu(type, id); }, 800);
 }
 function cancelPress() { clearTimeout(longPressTimer); }
 
@@ -610,23 +668,92 @@ function showBackupModal() {
 function copyBackup() {
     document.getElementById('backupText').select(); document.execCommand('copy'); showToast("تم النسخ");
 }
+
 function showImportModal() {
     document.getElementById('mainMenu').style.display = 'none';
     document.getElementById('importText').value = '';
     showOverlay('importModal');
 }
+
 function performImport() {
     try {
-        const data = JSON.parse(document.getElementById('importText').value);
-        const raw = Array.isArray(data) ? data : (data.accounts || []);
-        const clean = raw.map(a => ({ id: a.id || Date.now()+Math.random(), email: a.email || a.title || "مستورد", pass: a.pass||"...", folder: a.folder||"عام" }));
-        accounts = [...accounts, ...clean];
+        const textValue = document.getElementById('importText').value.trim();
+        if (!textValue) {
+            showToast("الرجاء لصق الكود أولا");
+            return;
+        }
+
+        const data = JSON.parse(textValue);
+        const rawAccounts = Array.isArray(data) ? data : (data.accounts || []);
+        const newFolders = data.folders || [];
+
+        // فلترة ذكية تعتمد على (الإيميل + القسم) معاً لمنع التكرار في نفس القسم
+        const seenCombinations = new Set(accounts.map(a => {
+            const em = (a.email || "").trim().toLowerCase();
+            const fol = a.folder || "عام";
+            return `${em}|${fol}`;
+        }));
+        
+        const cleanAccounts = [];
+
+        rawAccounts.forEach(importedAcc => {
+            const rawEmail = importedAcc.email || importedAcc.title || "مستورد";
+            const emailLower = rawEmail.trim().toLowerCase();
+            const folder = importedAcc.folder || "عام";
+            const combo = `${emailLower}|${folder}`;
+
+            if (!seenCombinations.has(combo)) {
+                seenCombinations.add(combo);
+                cleanAccounts.push({
+                    id: importedAcc.id || Date.now() + Math.random(),
+                    email: rawEmail,
+                    pass: importedAcc.pass || "...",
+                    folder: folder
+                });
+            }
+        });
+
+        accounts = [...accounts, ...cleanAccounts];
+
+        newFolders.forEach(f => {
+            if(!folders.includes(f)) folders.push(f);
+        });
+
+        cleanAccounts.forEach(acc => {
+            if (acc.folder && !folders.includes(acc.folder)) {
+                folders.push(acc.folder);
+            }
+        });
+
         saveToCloud();
-        goBack(); showToast("تم الاستيراد بنجاح");
-    } catch(e) { showToast("كود غير صالح"); }
+        renderFoldersBar();
+        renderVault();
+        document.getElementById('importText').value = '';
+        goBack();
+
+        if (cleanAccounts.length === 0 && rawAccounts.length > 0) {
+            showToast("جميع الحسابات موجودة مسبقاً في أقسامها");
+        } else {
+            showToast("تم الاستيراد بنجاح");
+        }
+    } catch(e) {
+        console.error(e);
+        showToast("كود غير صالح");
+    }
 }
 
-function pasteFromClipboard() { navigator.clipboard.readText().then(t => document.getElementById('importText').value = t); }
+function pasteFromClipboard() {
+    if (navigator.clipboard && navigator.clipboard.readText) {
+        navigator.clipboard.readText().then(t => {
+            document.getElementById('importText').value = t;
+        }).catch(err => {
+            showToast("نظام الحماية منع الزر، استخدم الضغطة المطولة للصق");
+        });
+    } else {
+        showToast("استخدم الضغطة المطولة للصق بهذا الجهاز");
+    }
+}
+
 function copyToClipboard(t) { navigator.clipboard.writeText(t).then(()=>showToast("تم النسخ")); }
 function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.style.opacity='1'; setTimeout(()=>t.style.opacity='0',2000); }
 
@@ -662,3 +789,11 @@ function sendToKodular(message) {
         window.AppInventor.setWebViewString(message);
     }
 }
+
+// حل مشكلة فتح القائمة بالغلط أثناء التمرير
+document.addEventListener('DOMContentLoaded', () => {
+    const vaultList = document.getElementById('vaultList');
+    if (vaultList) {
+        vaultList.addEventListener('scroll', cancelPress);
+    }
+});

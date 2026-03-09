@@ -3,8 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>خزنة أسراري</title>
     
+    <title>خزنة أسراري - حفظ كلمات المرور بأمان</title>
+    
+    <meta name="description" content="خزنة أسراري - تطبيق آمن وذكي لحفظ وإدارة كلمات المرور والحسابات.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#0f172a">
+    <meta http-equiv="content-language" content="ar">
+    <link rel="canonical" href="https://mr-android-223.github.io/keyvault/">
+    
+    <meta property="og:title" content="خزنة أسراري - حفظ كلمات المرور بأمان">
+    <meta property="og:description" content="تطبيقك الآمن لإدارة حساباتك الشخصية.">
+    <meta property="og:image" content="https://mr-android-223.github.io/keyvault/icon.png">
+    <meta property="og:url" content="https://mr-android-223.github.io/keyvault/">
+    <meta property="og:type" content="website">
+    
+    <link rel="icon" href="https://mr-android-223.github.io/keyvault/icon.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="https://mr-android-223.github.io/keyvault/icon.png">
+    <link rel="manifest" href="manifest.json">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "خزنة أسراري",
+      "url": "https://mr-android-223.github.io/keyvault/",
+      "description": "تطبيق ويب آمن لحفظ وإدارة كلمات المرور والحسابات بشكل مشفر.",
+      "applicationCategory": "SecurityApplication",
+      "operatingSystem": "Web",
+      "image": "https://mr-android-223.github.io/keyvault/icon.png"
+    }
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -12,7 +43,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body oncontextmenu="return false;">
+<body>
+
+<div style="position: absolute; left: -9999px; top: -9999px;">
+    <h2>مدير كلمات مرور آمن</h2>
+    <p>تطبيق ويب بسيط لحفظ الحسابات وكلمات المرور بشكل مشفر وآمن.</p>
+</div>
 
 <div id="loginOverlay">
     <div class="login-card">
@@ -45,6 +81,11 @@
     
     <div id="mainMenu" class="main-menu" onclick="event.stopPropagation()">
         
+        <div class="menu-item" onclick="toggleTheme()">
+            <span id="themeText">الوضع الليلي</span>
+            <span id="themeIcon" style="font-size: 18px;">🌙</span>
+        </div>
+
         <div class="menu-item" id="menuSetPass" onclick="handleAppLockSettings()">
             <span id="lockMenuText">إعدادات القفل</span>
             <svg style="width:20px" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -94,7 +135,16 @@
     <div style="margin-top: 10px;"></div>
     
     <input type="text" id="emailInput" class="app-input" placeholder="البريد الإلكتروني / العنوان" autocomplete="off">
-    <input type="text" id="passInput" class="app-input" placeholder="كلمة المرور" autocomplete="off">
+    
+    <div style="width: 100%; position: relative;">
+        <input type="text" id="passInput" class="app-input" placeholder="كلمة المرور" autocomplete="off" oninput="checkPasswordStrength()">
+        <div id="strengthContainer" style="display: none; margin-top: -5px; padding: 0 5px;">
+            <div style="height: 4px; width: 100%; background: #e5e7eb; border-radius: 2px; overflow: hidden; margin-bottom: 5px;">
+                <div id="strengthBar" style="height: 100%; width: 0%; transition: 0.3s;"></div>
+            </div>
+            <span id="strengthText" style="font-size: 12px; font-weight: bold;"></span>
+        </div>
+    </div>
     
     <button class="btn btn-primary" onclick="prepareSaveAccount()">
         <span>حفظ في الخزنة</span> 
@@ -125,9 +175,15 @@
             </div>
         </div>
 
-        <div style="position: relative; margin-bottom: 5px;">
-            <svg style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #9ca3af;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchInput" style="width: 100%; padding: 15px 45px 15px 15px; border-radius: 15px; border: 1px solid #e5e7eb; background: white; margin:0; font-family:'Tajawal'" placeholder="بحث سريع..." oninput="renderVault()">
+        <div style="display: flex; gap: 8px; margin-bottom: 5px;">
+            <div style="position: relative; flex: 1;">
+                <svg style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #9ca3af;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="searchInput" style="width: 100%; padding: 15px 40px 15px 40px; border-radius: 15px; border: 1px solid var(--gray-border); background: var(--surface); color: var(--text); margin:0; font-family:'Tajawal'" placeholder="بحث سريع..." oninput="renderVault()">
+                <div id="clearSearchBtn" onclick="clearSearch()" style="display:none; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor:pointer; color:var(--danger); font-weight:bold; font-size:18px;">✕</div>
+            </div>
+            <button class="icon-btn" onclick="openSortModal()" style="border-radius: 15px; width: 52px; flex-shrink: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h12M3 18h6"/></svg>
+            </button>
         </div>
 
         <div class="folders-bar" id="foldersBar">
@@ -186,7 +242,7 @@
 <div id="passwordModal" class="overlay">
     <div class="modal">
         <h3 id="passModalTitle">أدخل الرمز</h3>
-        <input type="password" id="globalPassInput" style="text-align:center; font-size:24px; letter-spacing:5px; width:100%; border:1px solid #ddd; padding:10px; border-radius:10px;" placeholder="••••" inputmode="numeric">
+        <input type="password" id="globalPassInput" style="text-align:center; font-size:24px; letter-spacing:5px; width:100%; border:1px solid var(--gray-border); padding:10px; border-radius:10px; background:var(--surface); color:var(--text);" placeholder="••••" inputmode="numeric">
         <div class="modal-actions">
             <button class="btn-small btn-cancel" onclick="goBack()">إلغاء</button>
             <button class="btn-small btn-confirm" onclick="submitPassword()">تأكيد</button>
@@ -216,7 +272,7 @@
 <div id="backupModal" class="overlay" onclick="goBack()">
     <div class="modal" onclick="event.stopPropagation()">
         <h3>نسخ احتياطي</h3>
-        <textarea id="backupText" style="width:100%; height:100px; border:1px solid #ddd; border-radius:12px; padding:10px; resize:none;" readonly></textarea>
+        <textarea id="backupText" style="width:100%; height:100px; border:1px solid var(--gray-border); border-radius:12px; padding:10px; resize:none; background:var(--surface); color:var(--text);" readonly></textarea>
         <div class="modal-actions">
             <button class="btn-small btn-confirm" onclick="copyBackup()">نسخ</button>
             <button class="btn-small btn-cancel" onclick="goBack()">إغلاق</button>
@@ -227,7 +283,7 @@
 <div id="importModal" class="overlay" onclick="goBack()">
     <div class="modal" onclick="event.stopPropagation()">
         <h3>استيراد بيانات</h3>
-        <textarea id="importText" style="width:100%; height:100px; border:1px solid #ddd; border-radius:12px; padding:10px; resize:none;" placeholder="الصق الكود هنا"></textarea>
+        <textarea id="importText" style="width:100%; height:100px; border:1px solid var(--gray-border); border-radius:12px; padding:10px; resize:none; background:var(--surface); color:var(--text);" placeholder="الصق الكود هنا"></textarea>
         <div class="modal-actions" style="flex-direction: column; gap:10px">
             <button class="btn-small btn-cancel" onclick="pasteFromClipboard()" style="width:100%">لصق</button>
             <div style="display:flex; gap:10px; width:100%">
@@ -238,8 +294,35 @@
     </div>
 </div>
 
+<div id="sortModal" class="overlay" onclick="goBack()">
+    <div class="modal-clean" onclick="event.stopPropagation()">
+        <div style="text-align: center; padding: 20px 0 10px 0; color: var(--primary); font-weight: 700;">ترتيب حسب</div>
+        <div class="action-list">
+            <div class="action-item" onclick="applySort('newest')">
+                <span>الأحدث</span>
+                <span id="check-newest" style="color:var(--primary); font-weight:bold; display:none;">✔</span>
+            </div>
+            <div class="action-item" onclick="applySort('oldest')">
+                <span>الأقدم</span>
+                <span id="check-oldest" style="color:var(--primary); font-weight:bold; display:none;">✔</span>
+            </div>
+            <div class="action-item" onclick="applySort('az')">
+                <span>أ - ي</span>
+                <span id="check-az" style="color:var(--primary); font-weight:bold; display:none;">✔</span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script src="script.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+  }
+</script>
+
 </body>
 </html>
