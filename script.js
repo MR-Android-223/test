@@ -797,3 +797,26 @@ document.addEventListener('DOMContentLoaded', () => {
         vaultList.addEventListener('scroll', cancelPress);
     }
 });
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBtn = document.getElementById('installAppBtn');
+    if (installBtn) {
+        installBtn.style.display = 'flex';
+    }
+});
+
+function installApp() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                showToast("تم بدء التثبيت");
+            }
+            deferredPrompt = null;
+            document.getElementById('installAppBtn').style.display = 'none';
+        });
+    }
+}
