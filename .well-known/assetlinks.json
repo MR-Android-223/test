@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.netlify.wasaouf_myvault.twa",
+        "sha256_cert_fingerprints": ["9D:2C:12:1E:D1:7D:5E:12:D5:14:47:70:04:2B:F5:65:A2:4E:59:A5:9D:25:CD:BF:93:01:5E:C9:1D:C7:00:81"]
+      }
+    }]
