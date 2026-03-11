@@ -1,200 +1,83 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-تطبيق الملاحظات السحابي
-    </title>
-    
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    
-    <style>
-        body { 
-            font-family: Tahoma, sans-serif; 
-            background: #0f172a; 
-            margin: 0; 
-            padding: 20px; 
-            display: flex; 
-            justify-content: center; 
-        }
-        .container { 
-            background: #1e293b; 
-            padding: 30px; 
-            border-radius: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-            width: 100%; 
-            max-width: 400px; 
-        }
-        input { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 10px 0; 
-            border: none; 
-            border-radius: 8px; 
-            background: #334155; 
-            color: white; 
-            box-sizing: border-box; 
-            text-align: right;
-        }
-        input::placeholder {
-            color: #94a3b8;
-        }
-        button { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 10px 0; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 16px; 
-            transition: 0.3s; 
-        }
-        .btn-primary { background: #8b5cf6; color: white; }
-        .btn-secondary { background: #10b981; color: white; }
-        .btn-danger { background: #ef4444; color: white; margin-bottom: 20px; }
-        .hidden { display: none; }
-        .note-card { 
-            background: #334155; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin-bottom: 10px; 
-            border-right: 4px solid #8b5cf6; 
-            color: white;
-        }
-        .title-text { 
-            text-align: center; 
-            color: #f8fafc; 
-            margin-bottom: 20px; 
-        }
-        .error-msg { 
-            color: #f87171; 
-            text-align: center; 
-            font-size: 14px; 
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>إدارة الديون</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"> 
+  
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
-    <div class="container" id="authSection">
-        <h2 class="title-text">
-تسجيل الدخول
-        </h2>
-        <input type="email" id="email" placeholder="
-البريد الإلكتروني
-        ">
-        <input type="password" id="password" placeholder="
-كلمة المرور
-        ">
-        <button class="btn-primary" onclick="login()">
-تسجيل دخول
-        </button>
-        <button class="btn-secondary" onclick="signup()">
-إنشاء حساب جديد
-        </button>
-        <p id="authMessage" class="error-msg"></p>
+<div id="auth-container" class="auth-wrapper">
+  <div class="auth-box">
+    <h2>تسجيل الدخول</h2>
+    <input type="email" id="auth-email" class="auth-input" placeholder="البريد الإلكتروني">
+    <input type="password" id="auth-password" class="auth-input" placeholder="كلمة المرور">
+    
+    <button id="login-btn" class="auth-btn btn-primary">تسجيل دخول</button>
+    <button id="signup-btn" class="auth-btn btn-secondary">إنشاء حساب جديد</button>
+    
+    <p id="auth-message" class="auth-msg"></p>
+  </div>
+</div>
+
+<div id="container" class="hidden">
+  <div id="person-list">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <h2>الزبائن</h2>
+      <button id="logout-btn" style="background: #ef4444; color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold;">تسجيل خروج</button>
     </div>
-
-    <div class="container hidden" id="appSection">
-        <h2 class="title-text">
-ملاحظاتي السحابية
-        </h2>
-        <button class="btn-danger" onclick="logout()">
-تسجيل خروج
-        </button>
-        <input type="text" id="noteInput" placeholder="
-اكتب ملاحظة جديدة
-        ">
-        <button class="btn-primary" onclick="addNote()">
-حفظ الملاحظة
-        </button>
-        <div id="notesList" style="margin-top: 20px;"></div>
+    <div id="person-actions">
+      <button id="archive-btn">🗂️ المحفوظات</button>
+      <button id="more-options-btn">⋮</button>
+      <div id="more-options-dropdown">
+        <button id="change-rate-btn"><span>💲</span> تغيير سعر الصرف</button>
+        <button id="export-data-btn"><span>📤</span> تصدير بيانات (نسخ)</button>
+        <button id="import-data-btn"><span>📥</span> استيراد بيانات (لصق)</button>
+        <button id="clear-all-data-btn"><span>🗑️</span> مسح جميع البيانات</button>
+      </div>
     </div>
+    <div id="persons-container"></div>
+    <button id="add-person-btn">+</button>
+  </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBB_U4C880PW4GxZd8FALv8yBSiP2mNeBY",
-            authDomain: "malaboushi.firebaseapp.com",
-            projectId: "malaboushi",
-            storageBucket: "malaboushi.firebasestorage.app",
-            messagingSenderId: "110336819350",
-            appId: "1:110336819350:web:2b1b0488e72b811f0602b7"
-        };
+  <div id="keypad-section">
+    <div class="currency-inputs">
+      <div id="lbp-section" class="currency-field">
+        <span>ليرة</span>
+        <div id="lbp-display">0</div>
+      </div>
+      <div id="usd-section" class="currency-field">
+        <span>دولار</span>
+        <div id="usd-display">0</div>
+      </div>
+    </div>
+    <div class="keypad"></div>
+    <button id="ok-btn">تأكيد العملية</button>
+  </div>
+</div>
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+<div id="overlay" class="overlay-base">
+  <div id="overlay-content"></div>
+</div>
 
-        const authSection = document.getElementById('authSection');
-        const appSection = document.getElementById('appSection');
-        const authMessage = document.getElementById('authMessage');
-        let unsubscribe = null;
-
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                authSection.classList.add('hidden');
-                appSection.classList.remove('hidden');
-                loadNotes(user.uid);
-            } else {
-                authSection.classList.remove('hidden');
-                appSection.classList.add('hidden');
-                if (unsubscribe) unsubscribe();
-                document.getElementById('notesList').innerHTML = '';
-            }
-        });
-
-        function signup() {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('password').value;
-            authMessage.innerText = '';
-            auth.createUserWithEmailAndPassword(e, p).catch(err => {
-                authMessage.innerText = "Error: " + err.message;
-            });
-        }
-
-        function login() {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('password').value;
-            authMessage.innerText = '';
-            auth.signInWithEmailAndPassword(e, p).catch(err => {
-                authMessage.innerText = "Error: " + err.message;
-            });
-        }
-
-        function logout() {
-            auth.signOut();
-        }
-
-        function addNote() {
-            const note = document.getElementById('noteInput').value;
-            if (!note) return;
-            const user = auth.currentUser;
-            
-            db.collection('test_notes').doc(user.uid).collection('items').add({
-                text: note,
-                time: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                document.getElementById('noteInput').value = '';
-            });
-        }
-
-        function loadNotes(uid) {
-            unsubscribe = db.collection('test_notes').doc(uid).collection('items')
-                .orderBy('time', 'desc')
-                .onSnapshot(snap => {
-                    const list = document.getElementById('notesList');
-                    list.innerHTML = '';
-                    snap.forEach(doc => {
-                        const div = document.createElement('div');
-                        div.className = 'note-card';
-                        div.innerText = doc.data().text;
-                        list.appendChild(div);
-                    });
-                });
-        }
-    </script>
+<div id="dialog-overlay" class="overlay-base" style="z-index: 2000;">
+  <div id="dialog-box">
+    <h3 id="dialog-title">عنوان</h3>
+    <p id="dialog-message">رسالة</p>
+    <input type="text" id="dialog-input" style="display:none;">
+    <textarea id="dialog-textarea" style="display:none;"></textarea>
+    <div class="dialog-buttons">
+      <button id="dialog-cancel" class="dialog-btn btn-secondary">إلغاء</button>
+      <button id="dialog-confirm" class="dialog-btn btn-primary">موافق</button>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
 </body>
 </html>
