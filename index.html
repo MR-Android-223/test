@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق تجريبي</title>
+    <title>
+تطبيق الملاحظات السحابي
+    </title>
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -12,66 +14,104 @@
     <style>
         body { 
             font-family: Tahoma, sans-serif; 
-            background: #f3f4f6; 
+            background: #0f172a; 
+            margin: 0; 
             padding: 20px; 
-            max-width: 400px; 
-            margin: auto; 
+            display: flex; 
+            justify-content: center; 
         }
-        .hidden { display: none; }
-        .box { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 10px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-            margin-bottom: 20px; 
+        .container { 
+            background: #1e293b; 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            width: 100%; 
+            max-width: 400px; 
         }
         input { 
             width: 100%; 
-            padding: 10px; 
+            padding: 12px; 
             margin: 10px 0; 
-            border: 1px solid #ccc; 
-            border-radius: 5px; 
+            border: none; 
+            border-radius: 8px; 
+            background: #334155; 
+            color: white; 
             box-sizing: border-box; 
+            text-align: right;
+        }
+        input::placeholder {
+            color: #94a3b8;
         }
         button { 
             width: 100%; 
-            padding: 10px; 
-            margin: 5px 0; 
+            padding: 12px; 
+            margin: 10px 0; 
             border: none; 
-            border-radius: 5px; 
+            border-radius: 8px; 
             cursor: pointer; 
-            color: white; 
             font-weight: bold; 
+            font-size: 16px; 
+            transition: 0.3s; 
         }
-        .btn-blue { background: #3b82f6; }
-        .btn-green { background: #10b981; }
-        .btn-red { background: #ef4444; }
-        .note { 
-            background: #e5e7eb; 
-            padding: 10px; 
-            margin-top: 10px; 
-            border-radius: 5px; 
+        .btn-primary { background: #8b5cf6; color: white; }
+        .btn-secondary { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; margin-bottom: 20px; }
+        .hidden { display: none; }
+        .note-card { 
+            background: #334155; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 10px; 
+            border-right: 4px solid #8b5cf6; 
+            color: white;
+        }
+        .title-text { 
+            text-align: center; 
+            color: #f8fafc; 
+            margin-bottom: 20px; 
+        }
+        .error-msg { 
+            color: #f87171; 
+            text-align: center; 
+            font-size: 14px; 
         }
     </style>
 </head>
 <body>
 
-    <div id="authSection" class="box">
-        <h2 style="text-align: center;">تسجيل الدخول</h2>
-        <input type="email" id="email" placeholder="البريد الإلكتروني">
-        <input type="password" id="password" placeholder="كلمة المرور">
-        <button class="btn-blue" onclick="login()">تسجيل دخول</button>
-        <button class="btn-green" onclick="signup()">إنشاء حساب جديد</button>
-        <p id="authMessage" style="color: red; text-align: center; font-size: 14px;"></p>
+    <div class="container" id="authSection">
+        <h2 class="title-text">
+تسجيل الدخول
+        </h2>
+        <input type="email" id="email" placeholder="
+البريد الإلكتروني
+        ">
+        <input type="password" id="password" placeholder="
+كلمة المرور
+        ">
+        <button class="btn-primary" onclick="login()">
+تسجيل دخول
+        </button>
+        <button class="btn-secondary" onclick="signup()">
+إنشاء حساب جديد
+        </button>
+        <p id="authMessage" class="error-msg"></p>
     </div>
 
-    <div id="appSection" class="box hidden">
-        <h2 style="text-align: center;">ملاحظاتي</h2>
-        <button class="btn-red" onclick="logout()">تسجيل خروج</button>
-        <hr>
-        <input type="text" id="noteInput" placeholder="اكتب ملاحظة جديدة...">
-        <button class="btn-blue" onclick="addNote()">إضافة الملاحظة</button>
-        <div id="notesList"></div>
+    <div class="container hidden" id="appSection">
+        <h2 class="title-text">
+ملاحظاتي السحابية
+        </h2>
+        <button class="btn-danger" onclick="logout()">
+تسجيل خروج
+        </button>
+        <input type="text" id="noteInput" placeholder="
+اكتب ملاحظة جديدة
+        ">
+        <button class="btn-primary" onclick="addNote()">
+حفظ الملاحظة
+        </button>
+        <div id="notesList" style="margin-top: 20px;"></div>
     </div>
 
     <script>
@@ -111,7 +151,7 @@
             const p = document.getElementById('password').value;
             authMessage.innerText = '';
             auth.createUserWithEmailAndPassword(e, p).catch(err => {
-                authMessage.innerText = "خطأ: " + err.message;
+                authMessage.innerText = "Error: " + err.message;
             });
         }
 
@@ -120,7 +160,7 @@
             const p = document.getElementById('password').value;
             authMessage.innerText = '';
             auth.signInWithEmailAndPassword(e, p).catch(err => {
-                authMessage.innerText = "خطأ: " + err.message;
+                authMessage.innerText = "Error: " + err.message;
             });
         }
 
@@ -149,7 +189,7 @@
                     list.innerHTML = '';
                     snap.forEach(doc => {
                         const div = document.createElement('div');
-                        div.className = 'note';
+                        div.className = 'note-card';
                         div.innerText = doc.data().text;
                         list.appendChild(div);
                     });
