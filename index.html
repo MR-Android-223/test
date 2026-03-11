@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق تجريبي</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body { 
+            font-family: Tahoma, sans-serif; 
+            background: #f3f4f6; 
+            padding: 20px; 
+            max-width: 400px; 
+            margin: auto; 
+        }
+        .hidden { display: none; }
+        .box { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            margin-bottom: 20px; 
+        }
+        input { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+        }
+        button { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 5px 0; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            color: white; 
+            font-weight: bold; 
+        }
+        .btn-blue { background: #3b82f6; }
+        .btn-green { background: #10b981; }
+        .btn-red { background: #ef4444; }
+        .note { 
+            background: #e5e7eb; 
+            padding: 10px; 
+            margin-top: 10px; 
+            border-radius: 5px; 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="authSection" class="box">
+        <h2 style="text-align: center;">تسجيل الدخول</h2>
+        <input type="email" id="email" placeholder="البريد الإلكتروني">
+        <input type="password" id="password" placeholder="كلمة المرور">
+        <button class="btn-blue" onclick="login()">تسجيل دخول</button>
+        <button class="btn-green" onclick="signup()">إنشاء حساب جديد</button>
+        <p id="authMessage" style="color: red; text-align: center; font-size: 14px;"></p>
+    </div>
+
+    <div id="appSection" class="box hidden">
+        <h2 style="text-align: center;">ملاحظاتي</h2>
+        <button class="btn-red" onclick="logout()">تسجيل خروج</button>
+        <hr>
+        <input type="text" id="noteInput" placeholder="اكتب ملاحظة جديدة...">
+        <button class="btn-blue" onclick="addNote()">إضافة الملاحظة</button>
+        <div id="notesList"></div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBB_U4C880PW4GxZd8FALv8yBSiP2mNeBY",
+            authDomain: "malaboushi.firebaseapp.com",
+            projectId: "malaboushi",
+            storageBucket: "malaboushi.firebasestorage.app",
+            messagingSenderId: "110336819350",
+            appId: "1:110336819350:web:2b1b0488e72b811f0602b7"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const authSection = document.getElementById('authSection');
+        const appSection = document.getElementById('appSection');
+        const authMessage = document.getElementById('authMessage');
+        let unsubscribe = null;
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                authSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+                loadNotes(user.uid);
+            } else {
+                authSection.classList.remove('hidden');
+                appSection.classList.add('hidden');
+                if (unsubscribe) unsubscribe();
+                document.getElementById('notesList').innerHTML = '';
+            }
+        });
+
+        function signup() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            authMessage.innerText = '';
+            auth.createUserWithEmailAndPassword(e, p).catch(err => {
+                authMessage.innerText = "خطأ: " + err.message;
+            });
+        }
+
+        function login() {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            authMessage.innerText = '';
+            auth.signInWithEmailAndPassword(e, p).catch(err => {
+                authMessage.innerText = "خطأ: " + err.message;
+            });
+        }
+
+        function logout() {
+            auth.signOut();
+        }
+
+        function addNote() {
+            const note = document.getElementById('noteInput').value;
+            if (!note) return;
+            const user = auth.currentUser;
+            
+            db.collection('test_notes').doc(user.uid).collection('items').add({
+                text: note,
+                time: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('noteInput').value = '';
+            });
+        }
+
+        function loadNotes(uid) {
+            unsubscribe = db.collection('test_notes').doc(uid).collection('items')
+                .orderBy('time', 'desc')
+                .onSnapshot(snap => {
+                    const list = document.getElementById('notesList');
+                    list.innerHTML = '';
+                    snap.forEach(doc => {
+                        const div = document.createElement('div');
+                        div.className = 'note';
+                        div.innerText = doc.data().text;
+                        list.appendChild(div);
+                    });
+                });
+        }
+    </script>
+</body>
+</html>
