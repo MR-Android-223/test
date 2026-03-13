@@ -1077,3 +1077,6 @@ select.form-input { cursor: pointer; }
   .toast-container { bottom: calc(90px + env(safe-area-inset-bottom)); }
   .modal { padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
 }
+[hidden] {
+  display: none !important;
+}
