@@ -10,7 +10,7 @@
     --danger: #ef4444;
     --success: #10b981;
     --warning: #f59e0b;
-    --header-height: 60px;
+    --header-height: 75px; /* كبرنا الشريط العلوي */
     
     --radius: 16px;
     --radius-sm: 10px;
@@ -275,7 +275,7 @@ input, textarea {
 }
 
 .vault-header { 
-    display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; height: 45px; margin-top: 50px;
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; height: 45px; margin-top: 75px; /* رفعنا المارجن بناءً على الشريط الجديد */
 }
 .vault-title { color: var(--text); margin:0; font-size: 22px; font-weight: 700; }
 
