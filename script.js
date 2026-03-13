@@ -343,6 +343,7 @@ function submitPassword() {
     pendingCallback = null;
 }
 
+// الإضافة مسموحة دائماً بدون قفل
 function prepareSaveAccount() {
     if (!auth.currentUser) {
         showToast("اتصل بحساب جوجل من القائمة أولاً");
@@ -430,7 +431,6 @@ function renderVault() {
         card.className = `account-card ${selectedIds.has(acc.id) ? 'selected-card' : ''}`;
         card.setAttribute('data-id', acc.id);
         const displayName = acc.email || "بدون عنوان";
-        const displayPass = acc.pass || "...";
         
         let leftSide = '';
         if (isSelectionMode) {
@@ -476,14 +476,29 @@ function toggleSelectionMode() {
     renderVault();
 }
 
+// قفل وتحديث مباشر للحذف المتعدد
 function deleteSelected() {
     if(selectedIds.size === 0) return;
-    customConfirm(`هل أنت متأكد من الحذف؟`, () => {
-         accounts = accounts.filter(acc => !selectedIds.has(acc.id));
-         saveToCloud();
-         toggleSelectionMode(); 
-         showToast("تم الحذف");
-    });
+    const appPass = localStorage.getItem('appPass');
+    
+    const doDelete = () => {
+        customConfirm(`هل أنت متأكد من الحذف؟`, () => {
+            accounts = accounts.filter(acc => !selectedIds.has(acc.id));
+            saveToCloud();
+            toggleSelectionMode(); 
+            renderFoldersBar(); // تحديث الأرقام بالعداد
+            showToast("تم الحذف");
+        });
+    };
+
+    if (appPass) {
+        openPasswordModal("أدخل الرمز للحذف", (v) => {
+            if (v === appPass) doDelete();
+            else showToast("رمز خاطئ");
+        });
+    } else {
+        doDelete();
+    }
 }
 
 function handleCardClick(e, id) {
@@ -645,24 +660,57 @@ function openContextMenu(type, id) {
     if (navigator.vibrate) navigator.vibrate(50);
 }
 
+// قفل وتحديث مباشر لخيارات التعديل والحذف
 function ctxAction(action) {
     goBack();
     const acc = accounts.find(a => a.id === currentCtxId);
+    const appPass = localStorage.getItem('appPass');
+    
     setTimeout(() => {
         if (!acc) return;
-        if (action === 'copy') copyToClipboard(currentCtxType === 'email' ? acc.email : acc.pass);
+        
+        if (action === 'copy') {
+            copyToClipboard(currentCtxType === 'email' ? acc.email : acc.pass);
+        } 
         else if (action === 'delete') {
-            customConfirm("حذف نهائي؟", () => {
+            const doDelete = () => {
+                customConfirm("حذف نهائي؟", () => {
+                    accounts = accounts.filter(a => a.id !== currentCtxId);
+                    saveToCloud();
+                    renderVault(); // تحديث فوري
+                    renderFoldersBar(); // تحديث الأرقام
+                    showToast("تم الحذف");
+                });
+            };
+
+            if (appPass) {
+                openPasswordModal("أدخل الرمز للحذف", (v) => {
+                    if (v === appPass) doDelete();
+                    else showToast("رمز خاطئ");
+                });
+            } else {
+                doDelete();
+            }
+        } 
+        else if (action === 'edit') {
+            const doEdit = () => {
+                document.getElementById('emailInput').value = acc.email;
+                document.getElementById('passInput').value = acc.pass;
                 accounts = accounts.filter(a => a.id !== currentCtxId);
-                saveToCloud();
-                showToast("تم الحذف");
-            });
-        } else if (action === 'edit') {
-            document.getElementById('emailInput').value = acc.email;
-            document.getElementById('passInput').value = acc.pass;
-            accounts = accounts.filter(a => a.id !== currentCtxId);
-            saveToCloud(); 
-            if(document.getElementById('vaultPage').style.display==='flex') goBack();
+                saveToCloud(); 
+                renderVault(); // تحديث فوري
+                renderFoldersBar();
+                if(document.getElementById('vaultPage').style.display === 'flex') goBack();
+            };
+
+            if (appPass) {
+                openPasswordModal("أدخل الرمز للتعديل", (v) => {
+                    if (v === appPass) doEdit();
+                    else showToast("رمز خاطئ");
+                });
+            } else {
+                doEdit();
+            }
         }
     }, 200);
 }
@@ -768,8 +816,11 @@ function sendToKodular(message) {
     }
 }
 
+// دالة الوضع الليلي بتصليح جذري
 function toggleTheme() {
     const body = document.body;
+    document.documentElement.removeAttribute('data-theme'); // مسح القيمة اللي كانت معلقة بالـ HTML
+    
     body.classList.toggle('dark-theme');
     const isDark = body.classList.contains('dark-theme');
     
@@ -779,11 +830,18 @@ function toggleTheme() {
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
 }
 
+// قراءة الوضع الليلي المحفوظ أول ما يفتح التطبيق
 document.addEventListener('DOMContentLoaded', () => {
+    document.documentElement.removeAttribute('data-theme'); // تنظيف إجباري
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
+    const themeIcon = document.getElementById('themeIcon');
+    
+    if (savedTheme === 'light') {
+        document.body.classList.remove('dark-theme');
+        if(themeIcon) themeIcon.innerText = "🌙";
+    } else {
+        // الافتراضي داكن إذا مافي شي محفوظ أو إذا محفوظ داكن
         document.body.classList.add('dark-theme');
-        const themeIcon = document.getElementById('themeIcon');
         if(themeIcon) themeIcon.innerText = "☀️";
     }
 
