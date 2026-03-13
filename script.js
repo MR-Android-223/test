@@ -1,966 +1,822 @@
-/**
- * ═══════════════════════════════════════════════════════════
- *  خزنة أسراري — Main Application Script
- *  Firebase + CryptoJS AES Encrypted Password Manager
- * ═══════════════════════════════════════════════════════════
- */
+const firebaseConfig = {
+  apiKey: "AIzaSyBB_U4C880PW4GxZd8FALv8yBSiP2mNeBY",
+  authDomain: "malaboushi.firebaseapp.com",
+  projectId: "malaboushi",
+  storageBucket: "malaboushi.firebasestorage.app",
+  messagingSenderId: "110336819350",
+  appId: "1:110336819350:web:2b1b0488e72b811f0602b7",
+  measurementId: "G-94ZT4TQYZY"
+};
 
-'use strict';
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const provider = new firebase.auth.GoogleAuthProvider();
 
-// ─── Wait for Firebase to load ───────────────────────────
-if (window.Firebase) {
-  initApp();
-} else {
-  window.addEventListener('firebase-ready', initApp);
+let accounts = [];
+let folders = ["عام", "فيسبوك", "جوجل"];
+let unsubscribeVault = null;
+
+let longPressTimer, isLongPress = false;
+let currentCtxId = null, currentCtxType = null;
+let pendingCallback = null;
+let activeFolder = 'All'; 
+let isSelectionMode = false;
+let selectedIds = new Set();
+let isMoveAction = false; 
+let folderRenameTarget = null;
+let vaultPressTimer = null;
+let currentSort = 'newest';
+
+auth.onAuthStateChanged(user => {
+    const userNameEl = document.getElementById('userName');
+    const userEmailEl = document.getElementById('userEmail');
+    const userAvatarEl = document.getElementById('userAvatar');
+    const loginContainer = document.getElementById('googleLoginContainer');
+    const logoutContainer = document.getElementById('googleLogoutContainer');
+
+    if (user) {
+        loginContainer.style.display = 'none';
+        logoutContainer.style.display = 'block';
+        
+        if(userNameEl) userNameEl.innerText = user.displayName || "مستخدم";
+        if(userEmailEl) userEmailEl.innerText = user.email || "";
+        
+        const photoUrl = user.photoURL;
+        if(photoUrl && userAvatarEl) {
+            userAvatarEl.innerHTML = `<img src="${photoUrl}" alt="User">`;
+        }
+        setupRealtimeListener(user.uid);
+    } else {
+        loginContainer.style.display = 'block';
+        logoutContainer.style.display = 'none';
+        
+        if(userNameEl) userNameEl.innerText = "مستخدم زائر";
+        if(userEmailEl) userEmailEl.innerText = "سجل الدخول للمزامنة";
+        if(userAvatarEl) userAvatarEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+        
+        if(unsubscribeVault) {
+            unsubscribeVault();
+            unsubscribeVault = null;
+        }
+        accounts = [];
+        folders = ["عام"];
+        setSyncLoader(false, true);
+    }
+});
+
+// دوال القائمة الجانبية (السحب)
+function safeToggleMenu(e) {
+    if(e) e.stopPropagation();
+    const menu = document.getElementById('sideMenu');
+    const overlay = document.getElementById('sideMenuOverlay');
+    
+    if (menu.classList.contains('open')) {
+        menu.classList.remove('open');
+        overlay.classList.remove('active');
+    } else {
+        const appPass = localStorage.getItem('appPass');
+        if (appPass) {
+            openPasswordModal("رمز القائمة", (v) => {
+                if (v === appPass) {
+                    menu.classList.add('open');
+                    overlay.classList.add('active');
+                    updateLockText(true);
+                } else {
+                    showToast("خطأ بالرمز");
+                }
+            });
+        } else {
+            menu.classList.add('open');
+            overlay.classList.add('active');
+            updateLockText(false);
+        }
+    }
 }
 
-function initApp() {
-  /* ════════════════════════════════════════════════════════
-     1. FIREBASE CONFIGURATION & INIT
-  ════════════════════════════════════════════════════════ */
-  const firebaseConfig = {
-    apiKey: "AIzaSyBB_U4C880PW4GxZd8FALv8yBSiP2mNeBY",
-    authDomain: "malaboushi.firebaseapp.com",
-    projectId: "malaboushi",
-    storageBucket: "malaboushi.firebasestorage.app",
-    messagingSenderId: "110336819350",
-    appId: "1:110336819350:web:2b1b0488e72b811f0602b7",
-    measurementId: "G-94ZT4TQYZY"
-  };
+function closeSideMenu() {
+    const menu = document.getElementById('sideMenu');
+    const overlay = document.getElementById('sideMenuOverlay');
+    if(menu) menu.classList.remove('open');
+    if(overlay) overlay.classList.remove('active');
+}
 
-  const {
-    initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut,
-    onAuthStateChanged, getFirestore, collection, doc, setDoc,
-    onSnapshot, deleteDoc, writeBatch, updateDoc, getDoc
-  } = window.Firebase;
-
-  const firebaseApp = initializeApp(firebaseConfig);
-  const auth = getAuth(firebaseApp);
-  const db = getFirestore(firebaseApp);
-
-  /* ════════════════════════════════════════════════════════
-     2. APP STATE
-  ════════════════════════════════════════════════════════ */
-  let currentUser = null;
-  let encKey = '';
-  let allItems = [];           // raw decrypted items
-  let folders = [];            // array of {id, name}
-  let currentFolder = 'all';   // 'all' or folder id
-  let searchQuery = '';
-  let selectionMode = false;
-  let selectedIds = new Set();
-  let firestoreUnsub = null;
-  let actionTargetId = null;   // item id for action sheet
-  let longPressTimer = null;
-  let pinBuffer = '';
-  let renameFolderTarget = null;
-  let moveTargetIds = [];
-
-  /* ════════════════════════════════════════════════════════
-     3. DOM REFS
-  ════════════════════════════════════════════════════════ */
-  const $ = id => document.getElementById(id);
-  const splash = $('splash-screen');
-  const lockScreen = $('lock-screen');
-  const loginScreen = $('login-screen');
-  const appEl = $('app');
-  const vaultList = $('vault-list');
-  const emptyState = $('empty-state');
-  const folderTabsEl = $('folder-tabs');
-  const searchBarWrap = $('search-bar-wrap');
-  const searchInput = $('search-input');
-  const searchClear = $('search-clear');
-  const selectionBar = $('selection-bar');
-  const selectionCount = $('selection-count');
-  const syncIndicator = $('sync-indicator');
-  const toastContainer = $('toast-container');
-  const userAvatar = $('user-avatar');
-  const drawerAvatar = $('drawer-avatar');
-  const drawerName = $('drawer-name');
-  const drawerEmail = $('drawer-email');
-
-  /* ════════════════════════════════════════════════════════
-     4. CRYPTO HELPERS
-  ════════════════════════════════════════════════════════ */
-  function encrypt(text) {
-    if (!encKey || !text) return text;
-    return CryptoJS.AES.encrypt(text, encKey).toString();
-  }
-
-  function decrypt(cipherText) {
-    if (!encKey || !cipherText) return cipherText;
-    try {
-      const bytes = CryptoJS.AES.decrypt(cipherText, encKey);
-      const dec = bytes.toString(CryptoJS.enc.Utf8);
-      return dec || cipherText; // fallback if decryption fails
-    } catch { return cipherText; }
-  }
-
-  function getEncKey() {
-    return localStorage.getItem('vault_enc_key') || 'default-khazna-key-2024';
-  }
-  function saveEncKey(k) { localStorage.setItem('vault_enc_key', k); }
-
-  /* ════════════════════════════════════════════════════════
-     5. TOAST NOTIFICATIONS
-  ════════════════════════════════════════════════════════ */
-  function toast(msg, type = 'info', duration = 3000) {
-    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-    const el = document.createElement('div');
-    el.className = `toast ${type}`;
-    el.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-msg">${msg}</span>`;
-    toastContainer.appendChild(el);
-    setTimeout(() => {
-      el.classList.add('removing');
-      el.addEventListener('animationend', () => el.remove());
-    }, duration);
-  }
-
-  /* ════════════════════════════════════════════════════════
-     6. THEME MANAGEMENT
-  ════════════════════════════════════════════════════════ */
-  function applyTheme(theme) {
-    document.body.classList.toggle('theme-dark', theme === 'dark');
-    document.body.classList.toggle('theme-light', theme === 'light');
-    $('sun-icon') && $('sun-icon').classList.toggle('hidden', theme === 'dark');
-    // Update moon/sun icon
-    const sunIcon = document.querySelector('.sun-icon');
-    const moonIcon = document.querySelector('.moon-icon');
-    if (sunIcon) sunIcon.classList.toggle('hidden', theme === 'dark');
-    if (moonIcon) moonIcon.classList.toggle('hidden', theme === 'light');
-  }
-
-  const savedTheme = localStorage.getItem('vault_theme') || 'light';
-  applyTheme(savedTheme);
-
-  $('theme-btn').addEventListener('click', () => {
-    const cur = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
-    const next = cur === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('vault_theme', next);
-    applyTheme(next);
-  });
-
-  /* ════════════════════════════════════════════════════════
-     7. PIN LOCK SYSTEM
-  ════════════════════════════════════════════════════════ */
-  function getPIN() { return localStorage.getItem('vault_pin'); }
-  function setPIN(p) { localStorage.setItem('vault_pin', p); }
-
-  function showLockScreen() {
-    if (!getPIN()) return false; // no PIN set, skip
-    lockScreen.classList.remove('hidden');
-    pinBuffer = '';
-    updatePinDots();
-    return true;
-  }
-
-  function hideLockScreen() { lockScreen.classList.add('hidden'); }
-
-  function updatePinDots() {
-    for (let i = 1; i <= 4; i++) {
-      const dot = $(`d${i}`);
-      dot.classList.toggle('filled', i <= pinBuffer.length);
-      dot.classList.remove('error');
+function updateLockText(hasLock) {
+    const lockText = document.getElementById('lockMenuText');
+    if(lockText) {
+        lockText.innerText = (hasLock || localStorage.getItem('appPass')) ? "إلغاء قفل التطبيق" : "تعيين قفل للتطبيق";
     }
-  }
+}
 
-  function pinError() {
-    for (let i = 1; i <= 4; i++) {
-      $(`d${i}`).classList.add('error');
-    }
-    pinBuffer = '';
-    $('lock-msg').textContent = 'رمز PIN غير صحيح، حاول مجدداً';
-    setTimeout(() => {
-      updatePinDots();
-      $('lock-msg').textContent = 'أدخل رمز PIN للمتابعة';
-    }, 1000);
-  }
-
-  document.querySelectorAll('.key-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.key;
-      if (key === 'clear') { pinBuffer = ''; }
-      else if (key === 'del') { pinBuffer = pinBuffer.slice(0, -1); }
-      else if (pinBuffer.length < 4) { pinBuffer += key; }
-      updatePinDots();
-      if (pinBuffer.length === 4) {
-        if (pinBuffer === getPIN()) {
-          hideLockScreen();
-          pinBuffer = '';
-        } else { pinError(); }
-      }
+function startGoogleLogin() {
+    closeSideMenu();
+    showToast("جاري الاتصال بجوجل...");
+    auth.signInWithPopup(provider).catch(error => {
+        console.error(error);
+        showToast("فشل الدخول");
     });
-  });
-
-  /* ════════════════════════════════════════════════════════
-     8. SPLASH & AUTH FLOW
-  ════════════════════════════════════════════════════════ */
-  // Hide splash after delay
-  setTimeout(() => {
-    splash.classList.add('fade-out');
-    setTimeout(() => splash.classList.add('hidden'), 500);
-  }, 1800);
-
-  // Google Login
-  $('google-login-btn').addEventListener('click', async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-    } catch (err) {
-      toast('فشل تسجيل الدخول: ' + err.message, 'error');
-    }
-  });
-
-  // Auth State
-  onAuthStateChanged(auth, async user => {
-    if (user) {
-      currentUser = user;
-      encKey = getEncKey();
-      loginScreen.classList.add('hidden');
-      // Show lock screen if PIN is set
-      const pinShowing = showLockScreen();
-      if (!pinShowing) appEl.classList.remove('hidden');
-      // Update avatar & drawer
-      if (user.photoURL) {
-        userAvatar.src = user.photoURL;
-        drawerAvatar.src = user.photoURL;
-      }
-      drawerName.textContent = user.displayName || 'مستخدم';
-      drawerEmail.textContent = user.email || '';
-      // Load data from Firestore
-      loadFolders();
-      subscribeToVault();
-    } else {
-      currentUser = null;
-      appEl.classList.add('hidden');
-      loginScreen.classList.remove('hidden');
-      lockScreen.classList.add('hidden');
-      if (firestoreUnsub) { firestoreUnsub(); firestoreUnsub = null; }
-      allItems = [];
-      renderItems();
-    }
-  });
-
-  // Reveal app after PIN unlock
-  const origHideLock = hideLockScreen;
-  hideLockScreen = function() {
-    lockScreen.classList.add('hidden');
-    appEl.classList.remove('hidden');
-  };
-
-  /* ════════════════════════════════════════════════════════
-     9. FIRESTORE DATA LAYER
-  ════════════════════════════════════════════════════════ */
-
-  // --- Folders ---
-  function folderDocRef() {
-    return doc(db, 'users', currentUser.uid, 'meta', 'folders');
-  }
-
-  async function loadFolders() {
-    try {
-      const snap = await getDoc ? null : null; // dynamic import already done
-      // Use onSnapshot for real-time
-      onSnapshot(folderDocRef(), snap => {
-        if (snap.exists()) {
-          folders = snap.data().list || [];
-        } else {
-          folders = [
-            { id: 'general', name: 'عام' },
-            { id: 'social', name: 'تواصل اجتماعي' },
-            { id: 'work', name: 'عمل' },
-            { id: 'banking', name: 'بنوك' }
-          ];
-          saveFolders();
-        }
-        renderFolderTabs();
-        renderFolderSelects();
-      });
-    } catch (err) {
-      console.error('Error loading folders:', err);
-    }
-  }
-
-  async function saveFolders() {
-    if (!currentUser) return;
-    try {
-      await setDoc(folderDocRef(), { list: folders });
-    } catch (err) { console.error('Save folders error:', err); }
-  }
-
-  // --- Vault Items ---
-  function vaultCollRef() {
-    return collection(db, 'users', currentUser.uid, 'vault');
-  }
-
-  function subscribeToVault() {
-    if (firestoreUnsub) firestoreUnsub();
-    showSync(true);
-    firestoreUnsub = onSnapshot(vaultCollRef(), snap => {
-      allItems = snap.docs.map(d => {
-        const raw = d.data();
-        return {
-          id: d.id,
-          title: decrypt(raw.title || ''),
-          email: decrypt(raw.email || ''),
-          password: decrypt(raw.password || ''),
-          notes: decrypt(raw.notes || ''),
-          folder: raw.folder || 'general',
-          order: raw.order || 0,
-          createdAt: raw.createdAt || Date.now()
-        };
-      });
-      allItems.sort((a, b) => a.order - b.order);
-      renderItems();
-      showSync(false);
-    }, err => {
-      console.error('Firestore error:', err);
-      showSync(false);
-      toast('خطأ في تحميل البيانات', 'error');
-    });
-  }
-
-  async function saveItem(item) {
-    if (!currentUser) return;
-    showSync(true);
-    try {
-      const docRef = doc(db, 'users', currentUser.uid, 'vault', item.id);
-      await setDoc(docRef, {
-        title: encrypt(item.title),
-        email: encrypt(item.email),
-        password: encrypt(item.password),
-        notes: encrypt(item.notes),
-        folder: item.folder,
-        order: item.order,
-        createdAt: item.createdAt || Date.now()
-      });
-    } catch (err) {
-      toast('خطأ في الحفظ: ' + err.message, 'error');
-    }
-    showSync(false);
-  }
-
-  async function deleteItem(id) {
-    if (!currentUser) return;
-    try {
-      await deleteDoc(doc(db, 'users', currentUser.uid, 'vault', id));
-      toast('تم الحذف بنجاح', 'success');
-    } catch (err) {
-      toast('خطأ في الحذف', 'error');
-    }
-  }
-
-  async function deleteItems(ids) {
-    if (!currentUser || !ids.length) return;
-    showSync(true);
-    try {
-      const batch = writeBatch(db);
-      ids.forEach(id => batch.delete(doc(db, 'users', currentUser.uid, 'vault', id)));
-      await batch.commit();
-      toast(`تم حذف ${ids.length} عناصر`, 'success');
-    } catch (err) { toast('خطأ في الحذف الجماعي', 'error'); }
-    showSync(false);
-  }
-
-  function showSync(show) {
-    syncIndicator.classList.toggle('hidden', !show);
-  }
-
-  /* ════════════════════════════════════════════════════════
-     10. FOLDERS UI
-  ════════════════════════════════════════════════════════ */
-  function renderFolderTabs() {
-    folderTabsEl.innerHTML = '';
-    // All tab
-    const allTab = document.createElement('button');
-    allTab.className = 'folder-tab' + (currentFolder === 'all' ? ' active' : '');
-    allTab.textContent = 'الكل';
-    allTab.addEventListener('click', () => { currentFolder = 'all'; renderFolderTabs(); renderItems(); });
-    folderTabsEl.appendChild(allTab);
-
-    folders.forEach(f => {
-      const tab = document.createElement('button');
-      tab.className = 'folder-tab' + (currentFolder === f.id ? ' active' : '');
-      tab.textContent = f.name;
-      tab.dataset.folderId = f.id;
-      // Long press to rename
-      tab.addEventListener('mousedown', () => longPressStart(f));
-      tab.addEventListener('touchstart', () => longPressStart(f), { passive: true });
-      tab.addEventListener('mouseup', longPressEnd);
-      tab.addEventListener('touchend', longPressEnd);
-      tab.addEventListener('click', () => { currentFolder = f.id; renderFolderTabs(); renderItems(); });
-      folderTabsEl.appendChild(tab);
-    });
-  }
-
-  function longPressStart(folder) {
-    longPressTimer = setTimeout(() => {
-      renameFolderTarget = folder;
-      $('rename-folder-input').value = folder.name;
-      $('rename-folder-modal-overlay').classList.remove('hidden');
-    }, 700);
-  }
-  function longPressEnd() { clearTimeout(longPressTimer); }
-
-  function renderFolderSelects() {
-    // For Add/Edit modal
-    const sel = $('f-folder');
-    if (!sel) return;
-    sel.innerHTML = folders.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
-  }
-
-  $('add-folder-btn').addEventListener('click', () => {
-    const name = prompt('اسم المجلد الجديد:');
-    if (name && name.trim()) {
-      const id = 'f_' + Date.now();
-      folders.push({ id, name: name.trim() });
-      saveFolders();
-    }
-  });
-
-  // Rename Folder
-  $('rename-folder-save').addEventListener('click', () => {
-    const newName = $('rename-folder-input').value.trim();
-    if (!newName || !renameFolderTarget) return;
-    const idx = folders.findIndex(f => f.id === renameFolderTarget.id);
-    if (idx >= 0) { folders[idx].name = newName; saveFolders(); }
-    $('rename-folder-modal-overlay').classList.add('hidden');
-    renameFolderTarget = null;
-  });
-  ['rename-folder-close','rename-folder-cancel'].forEach(id => {
-    $(id).addEventListener('click', () => {
-      $('rename-folder-modal-overlay').classList.add('hidden');
-      renameFolderTarget = null;
-    });
-  });
-
-  /* ════════════════════════════════════════════════════════
-     11. VAULT RENDER
-  ════════════════════════════════════════════════════════ */
-  const AV_COLORS = ['av-purple','av-blue','av-green','av-red','av-orange','av-pink','av-teal','av-yellow'];
-  function avatarColor(str) {
-    let h = 0;
-    for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) & 0xffffffff;
-    return AV_COLORS[Math.abs(h) % AV_COLORS.length];
-  }
-
-  function getFilteredItems() {
-    let items = allItems;
-    if (currentFolder !== 'all') items = items.filter(i => i.folder === currentFolder);
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      items = items.filter(i => i.title.toLowerCase().includes(q) || i.email.toLowerCase().includes(q));
-    }
-    return items;
-  }
-
-  function renderItems() {
-    const items = getFilteredItems();
-    vaultList.innerHTML = '';
-    emptyState.classList.toggle('hidden', items.length > 0);
-
-    items.forEach((item, idx) => {
-      const el = createItemEl(item, idx);
-      vaultList.appendChild(el);
-    });
-  }
-
-  function createItemEl(item, idx) {
-    const el = document.createElement('div');
-    el.className = 'vault-item';
-    el.dataset.id = item.id;
-    if (selectedIds.has(item.id)) el.classList.add('selected');
-    el.style.animationDelay = `${idx * 40}ms`;
-    el.draggable = true;
-
-    const initials = item.title ? item.title.charAt(0).toUpperCase() : '?';
-    const color = avatarColor(item.title || '');
-
-    el.innerHTML = `
-      <div class="item-checkbox"></div>
-      <div class="item-avatar ${color}">${initials}</div>
-      <div class="item-info">
-        <div class="item-title">${escHtml(item.title)}</div>
-        ${item.email ? `<div class="item-email">${escHtml(item.email)}</div>` : ''}
-        <div class="item-password-row">
-          <span class="item-password" data-id="${item.id}">••••••••</span>
-          <button class="item-toggle-pass" data-id="${item.id}" title="عرض كلمة المرور">
-            <svg class="eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-      </div>
-      <button class="item-more-btn" data-id="${item.id}" title="خيارات">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/>
-        </svg>
-      </button>`;
-
-    // Toggle password visibility
-    el.querySelector('.item-toggle-pass').addEventListener('click', e => {
-      e.stopPropagation();
-      const passEl = el.querySelector('.item-password');
-      const showing = passEl.dataset.showing === 'true';
-      passEl.textContent = showing ? '••••••••' : item.password;
-      passEl.dataset.showing = showing ? 'false' : 'true';
-    });
-
-    // More button
-    el.querySelector('.item-more-btn').addEventListener('click', e => {
-      e.stopPropagation();
-      if (selectionMode) { toggleSelection(item.id, el); return; }
-      openActionSheet(item);
-    });
-
-    // Click (select in selection mode or toggle password)
-    el.addEventListener('click', () => {
-      if (selectionMode) { toggleSelection(item.id, el); return; }
-    });
-
-    // Long press to enter selection mode
-    let lp;
-    el.addEventListener('mousedown', () => { lp = setTimeout(() => enterSelectionMode(item.id, el), 600); });
-    el.addEventListener('touchstart', () => { lp = setTimeout(() => enterSelectionMode(item.id, el), 600); }, { passive: true });
-    el.addEventListener('mouseup', () => clearTimeout(lp));
-    el.addEventListener('touchend', () => clearTimeout(lp));
-
-    // Drag & Drop
-    el.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', item.id); el.classList.add('dragging'); });
-    el.addEventListener('dragend', () => el.classList.remove('dragging'));
-    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
-    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
-    el.addEventListener('drop', e => {
-      e.preventDefault(); el.classList.remove('drag-over');
-      const draggedId = e.dataTransfer.getData('text/plain');
-      reorderItems(draggedId, item.id);
-    });
-
-    return el;
-  }
-
-  function escHtml(str) {
-    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  async function reorderItems(fromId, toId) {
-    const filtered = getFilteredItems();
-    const fromIdx = filtered.findIndex(i => i.id === fromId);
-    const toIdx = filtered.findIndex(i => i.id === toId);
-    if (fromIdx < 0 || toIdx < 0) return;
-    // Swap in allItems
-    const fromItem = allItems.find(i => i.id === fromId);
-    const toItem = allItems.find(i => i.id === toId);
-    if (!fromItem || !toItem) return;
-    const tempOrder = fromItem.order;
-    fromItem.order = toItem.order;
-    toItem.order = tempOrder;
-    // Re-render optimistically
-    allItems.sort((a, b) => a.order - b.order);
-    renderItems();
-    // Persist
-    showSync(true);
-    try {
-      const batch = writeBatch(db);
-      [fromItem, toItem].forEach(item => {
-        batch.update(doc(db, 'users', currentUser.uid, 'vault', item.id), { order: item.order });
-      });
-      await batch.commit();
-    } catch { toast('خطأ في إعادة الترتيب', 'error'); }
-    showSync(false);
-  }
-
-  /* ════════════════════════════════════════════════════════
-     12. SELECTION MODE
-  ════════════════════════════════════════════════════════ */
-  function enterSelectionMode(id, el) {
-    selectionMode = true;
-    vaultList.classList.add('selection-mode');
-    selectedIds.clear();
-    selectedIds.add(id);
-    el.classList.add('selected');
-    updateSelectionBar();
-    selectionBar.classList.remove('hidden');
-  }
-
-  function exitSelectionMode() {
-    selectionMode = false;
-    selectedIds.clear();
-    vaultList.classList.remove('selection-mode');
-    selectionBar.classList.add('hidden');
-    renderItems();
-  }
-
-  function toggleSelection(id, el) {
-    if (selectedIds.has(id)) { selectedIds.delete(id); el.classList.remove('selected'); }
-    else { selectedIds.add(id); el.classList.add('selected'); }
-    updateSelectionBar();
-    if (selectedIds.size === 0) exitSelectionMode();
-  }
-
-  function updateSelectionBar() {
-    selectionCount.textContent = `${selectedIds.size} محدد`;
-  }
-
-  $('sel-cancel-btn').addEventListener('click', exitSelectionMode);
-
-  $('sel-delete-btn').addEventListener('click', () => {
-    if (!selectedIds.size) return;
-    if (confirm(`حذف ${selectedIds.size} عنصر؟`)) {
-      deleteItems([...selectedIds]);
-      exitSelectionMode();
-    }
-  });
-
-  $('sel-move-btn').addEventListener('click', () => {
-    if (!selectedIds.size) return;
-    moveTargetIds = [...selectedIds];
-    openMoveModal();
-  });
-
-  /* ════════════════════════════════════════════════════════
-     13. SEARCH
-  ════════════════════════════════════════════════════════ */
-  $('search-toggle-btn').addEventListener('click', () => {
-    searchBarWrap.classList.toggle('hidden');
-    if (!searchBarWrap.classList.contains('hidden')) searchInput.focus();
-  });
-
-  searchInput.addEventListener('input', () => {
-    searchQuery = searchInput.value;
-    searchClear.classList.toggle('hidden', !searchQuery);
-    renderItems();
-  });
-
-  searchClear.addEventListener('click', () => {
-    searchInput.value = ''; searchQuery = '';
-    searchClear.classList.add('hidden');
-    renderItems();
-    searchInput.focus();
-  });
-
-  /* ════════════════════════════════════════════════════════
-     14. ADD / EDIT ACCOUNT MODAL
-  ════════════════════════════════════════════════════════ */
-  let editingItemId = null;
-
-  $('fab-btn').addEventListener('click', () => openAccountModal());
-
-  function openAccountModal(item = null) {
-    editingItemId = item ? item.id : null;
-    $('modal-title').textContent = item ? 'تعديل الحساب' : 'إضافة حساب جديد';
-    $('f-title').value = item ? item.title : '';
-    $('f-email').value = item ? item.email : '';
-    $('f-password').value = item ? item.password : '';
-    $('f-notes').value = item ? item.notes : '';
-    renderFolderSelects();
-    if (item) $('f-folder').value = item.folder;
-    $('strength-fill').className = 'strength-fill';
-    $('strength-label').textContent = '';
-    $('account-modal-overlay').classList.remove('hidden');
-    setTimeout(() => $('f-title').focus(), 100);
-  }
-
-  function closeAccountModal() {
-    $('account-modal-overlay').classList.add('hidden');
-    editingItemId = null;
-  }
-
-  $('account-modal-close').addEventListener('click', closeAccountModal);
-  $('account-modal-cancel').addEventListener('click', closeAccountModal);
-  $('account-modal-overlay').addEventListener('click', e => { if (e.target === $('account-modal-overlay')) closeAccountModal(); });
-
-  // Password visibility toggle in form
-  $('f-toggle-vis').addEventListener('click', () => {
-    const inp = $('f-password');
-    const showing = inp.type === 'text';
-    inp.type = showing ? 'password' : 'text';
-    document.querySelector('#f-toggle-vis .eye-show').classList.toggle('hidden', !showing);
-    document.querySelector('#f-toggle-vis .eye-hide').classList.toggle('hidden', showing);
-  });
-
-  // Password strength
-  $('f-password').addEventListener('input', () => {
-    updateStrengthMeter($('f-password').value);
-  });
-
-  function updateStrengthMeter(pw) {
-    const fill = $('strength-fill');
-    const label = $('strength-label');
-    if (!pw) { fill.className = 'strength-fill'; label.textContent = ''; return; }
-    let score = 0;
-    if (pw.length >= 8) score++;
-    if (/[A-Z]/.test(pw)) score++;
-    if (/[0-9]/.test(pw)) score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++;
-    const levels = ['', 'ضعيفة جداً', 'ضعيفة', 'متوسطة', 'قوية'];
-    const colors = ['', '#ef4444', '#f59e0b', '#3b82f6', '#10b981'];
-    fill.className = `strength-fill s${score}`;
-    label.textContent = levels[score] || '';
-    label.style.color = colors[score] || '';
-  }
-
-  // Save account
-  $('account-modal-save').addEventListener('click', async () => {
-    const title = $('f-title').value.trim();
-    const password = $('f-password').value.trim();
-    if (!title) { toast('يرجى إدخال اسم الخدمة', 'warning'); return; }
-    if (!password) { toast('يرجى إدخال كلمة المرور', 'warning'); return; }
-
-    const item = {
-      id: editingItemId || ('item_' + Date.now() + '_' + Math.random().toString(36).substr(2,6)),
-      title,
-      email: $('f-email').value.trim(),
-      password,
-      notes: $('f-notes').value.trim(),
-      folder: $('f-folder').value || (folders[0] && folders[0].id) || 'general',
-      order: editingItemId ? (allItems.find(i => i.id === editingItemId)?.order || 0) : allItems.length,
-      createdAt: editingItemId ? (allItems.find(i => i.id === editingItemId)?.createdAt || Date.now()) : Date.now()
-    };
-
-    await saveItem(item);
-    closeAccountModal();
-    toast(editingItemId ? 'تم التعديل بنجاح' : 'تم الإضافة بنجاح', 'success');
-  });
-
-  /* ════════════════════════════════════════════════════════
-     15. ACTION SHEET (Context Menu)
-  ════════════════════════════════════════════════════════ */
-  function openActionSheet(item) {
-    actionTargetId = item.id;
-    $('action-sheet-title').textContent = item.title;
-    $('action-modal-overlay').classList.remove('hidden');
-  }
-
-  function closeActionSheet() { $('action-modal-overlay').classList.add('hidden'); actionTargetId = null; }
-  $('action-modal-close').addEventListener('click', closeActionSheet);
-  $('action-modal-overlay').addEventListener('click', e => { if (e.target === $('action-modal-overlay')) closeActionSheet(); });
-
-  $('act-copy-user').addEventListener('click', () => {
-    const item = allItems.find(i => i.id === actionTargetId);
-    if (item) { copyToClipboard(item.email || item.title); toast('تم النسخ!', 'success'); }
-    closeActionSheet();
-  });
-
-  $('act-copy-pass').addEventListener('click', () => {
-    const item = allItems.find(i => i.id === actionTargetId);
-    if (item) { copyToClipboard(item.password); toast('تم نسخ كلمة المرور!', 'success'); }
-    closeActionSheet();
-  });
-
-  $('act-edit').addEventListener('click', () => {
-    const item = allItems.find(i => i.id === actionTargetId);
-    closeActionSheet();
-    if (item) openAccountModal(item);
-  });
-
-  $('act-delete').addEventListener('click', async () => {
-    if (confirm('هل أنت متأكد من حذف هذا الحساب؟')) {
-      await deleteItem(actionTargetId);
-    }
-    closeActionSheet();
-  });
-
-  async function copyToClipboard(text) {
-    try { await navigator.clipboard.writeText(text); }
-    catch { /* fallback */ const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
-  }
-
-  /* ════════════════════════════════════════════════════════
-     16. MOVE TO FOLDER MODAL
-  ════════════════════════════════════════════════════════ */
-  function openMoveModal() {
-    const list = $('folder-select-list');
-    list.innerHTML = folders.map(f => `<button class="folder-select-item" data-fid="${f.id}">${f.name}</button>`).join('');
-    list.querySelectorAll('.folder-select-item').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const folderId = btn.dataset.fid;
-        showSync(true);
-        try {
-          const batch = writeBatch(db);
-          moveTargetIds.forEach(id => {
-            batch.update(doc(db, 'users', currentUser.uid, 'vault', id), { folder: folderId });
-          });
-          await batch.commit();
-          toast('تم النقل بنجاح', 'success');
-        } catch { toast('خطأ في النقل', 'error'); }
-        showSync(false);
-        $('move-modal-overlay').classList.add('hidden');
-        exitSelectionMode();
-      });
-    });
-    $('move-modal-overlay').classList.remove('hidden');
-  }
-
-  ['move-modal-close','move-modal-cancel'].forEach(id => {
-    $(id).addEventListener('click', () => $('move-modal-overlay').classList.add('hidden'));
-  });
-  $('move-modal-overlay').addEventListener('click', e => { if (e.target === $('move-modal-overlay')) $('move-modal-overlay').classList.add('hidden'); });
-
-  /* ════════════════════════════════════════════════════════
-     17. SIDE DRAWER
-  ════════════════════════════════════════════════════════ */
-  function openDrawer() {
-    $('side-drawer').classList.remove('hidden');
-    $('drawer-overlay').classList.remove('hidden');
-  }
-
-  function closeDrawer() {
-    $('side-drawer').classList.add('closing');
-    setTimeout(() => {
-      $('side-drawer').classList.add('hidden');
-      $('side-drawer').classList.remove('closing');
-      $('drawer-overlay').classList.add('hidden');
-    }, 250);
-  }
-
-  $('menu-btn').addEventListener('click', openDrawer);
-  $('drawer-overlay').addEventListener('click', closeDrawer);
-
-  // Logout
-  $('dm-logout').addEventListener('click', async () => {
-    closeDrawer();
-    if (confirm('هل تريد تسجيل الخروج؟')) {
-      await signOut(auth);
-      toast('تم تسجيل الخروج', 'info');
-    }
-  });
-
-  // Set PIN
-  $('dm-setpin').addEventListener('click', () => {
-    closeDrawer();
-    $('pin-modal-overlay').classList.remove('hidden');
-  });
-
-  // Change Encryption Key
-  $('dm-changekey').addEventListener('click', () => {
-    closeDrawer();
-    $('enc-key').value = getEncKey();
-    $('key-modal-overlay').classList.remove('hidden');
-  });
-
-  /* ════════════════════════════════════════════════════════
-     18. SET PIN MODAL
-  ════════════════════════════════════════════════════════ */
-  $('pin-modal-close').addEventListener('click', () => $('pin-modal-overlay').classList.add('hidden'));
-  $('pin-modal-cancel').addEventListener('click', () => $('pin-modal-overlay').classList.add('hidden'));
-  $('pin-modal-overlay').addEventListener('click', e => { if (e.target === $('pin-modal-overlay')) $('pin-modal-overlay').classList.add('hidden'); });
-
-  $('pin-modal-save').addEventListener('click', () => {
-    const newPin = $('new-pin').value;
-    const confirmPin = $('confirm-pin').value;
-    if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) { toast('يجب أن يكون الرمز 4 أرقام', 'warning'); return; }
-    if (newPin !== confirmPin) { toast('الرمزان غير متطابقان', 'warning'); return; }
-    setPIN(newPin);
-    $('pin-modal-overlay').classList.add('hidden');
-    $('new-pin').value = ''; $('confirm-pin').value = '';
-    toast('تم تعيين رمز PIN بنجاح', 'success');
-  });
-
-  /* ════════════════════════════════════════════════════════
-     19. ENCRYPTION KEY MODAL
-  ════════════════════════════════════════════════════════ */
-  $('key-modal-close').addEventListener('click', () => $('key-modal-overlay').classList.add('hidden'));
-  $('key-modal-cancel').addEventListener('click', () => $('key-modal-overlay').classList.add('hidden'));
-
-  $('key-modal-save').addEventListener('click', () => {
-    const k = $('enc-key').value.trim();
-    if (!k) { toast('المفتاح لا يمكن أن يكون فارغاً', 'warning'); return; }
-    saveEncKey(k);
-    encKey = k;
-    $('key-modal-overlay').classList.add('hidden');
-    toast('تم حفظ مفتاح التشفير. ستُعاد مزامنة البيانات.', 'success');
-    subscribeToVault();
-  });
-
-  /* ════════════════════════════════════════════════════════
-     20. EXPORT / IMPORT / BACKUP
-  ════════════════════════════════════════════════════════ */
-
-  // Export JSON
-  $('dm-export').addEventListener('click', () => {
-    closeDrawer();
-    const data = { version: 1, exported: new Date().toISOString(), items: allItems, folders };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `khazna_backup_${Date.now()}.json`;
-    a.click(); URL.revokeObjectURL(url);
-    toast('تم تصدير البيانات بنجاح', 'success');
-  });
-
-  // Import JSON
-  $('dm-import').addEventListener('click', () => {
-    closeDrawer();
-    $('import-file-input').click();
-  });
-
-  $('import-file-input').addEventListener('change', async e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      if (!data.items) { toast('ملف غير صالح', 'error'); return; }
-      if (!confirm(`استيراد ${data.items.length} حساب؟ سيتم إضافتها إلى الحسابات الحالية.`)) return;
-      showSync(true);
-      const batch = writeBatch(db);
-      data.items.forEach(item => {
-        const id = 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
-        const docRef = doc(db, 'users', currentUser.uid, 'vault', id);
-        batch.set(docRef, {
-          title: encrypt(item.title), email: encrypt(item.email),
-          password: encrypt(item.password), notes: encrypt(item.notes || ''),
-          folder: item.folder || 'general', order: item.order || 0, createdAt: Date.now()
+}
+
+function handleGoogleLogout() {
+    closeSideMenu();
+    customConfirm("هل تريد تسجيل الخروج؟", () => {
+        auth.signOut().then(() => {
+            accounts = [];
+            folders = ["عام"];
+            renderVault();
+            showToast("تم تسجيل الخروج");
         });
-      });
-      await batch.commit();
-      toast(`تم استيراد ${data.items.length} حساب بنجاح`, 'success');
-    } catch (err) { toast('خطأ في الاستيراد: ' + err.message, 'error'); }
-    showSync(false);
-    e.target.value = '';
-  });
-
-  // Backup as Text
-  $('dm-backup').addEventListener('click', () => {
-    closeDrawer();
-    const data = { v: 1, items: allItems, folders };
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-    $('backup-text').value = encoded;
-    $('backup-modal-overlay').classList.remove('hidden');
-  });
-
-  ['backup-modal-close','backup-modal-close2'].forEach(id => {
-    $(id).addEventListener('click', () => $('backup-modal-overlay').classList.add('hidden'));
-  });
-
-  $('backup-copy-btn').addEventListener('click', () => {
-    copyToClipboard($('backup-text').value);
-    toast('تم نسخ الكود!', 'success');
-  });
-
-  // Share via Text (Kodular / AppInventor)
-  $('dm-share').addEventListener('click', () => {
-    closeDrawer();
-    const data = JSON.stringify({ v: 1, items: allItems });
-    if (navigator.share) {
-      navigator.share({ title: 'خزنة أسراري - نسخة احتياطية', text: data })
-        .then(() => toast('تمت المشاركة', 'success'))
-        .catch(() => { copyToClipboard(data); toast('تم النسخ للحافظة', 'info'); });
-    } else {
-      copyToClipboard(data);
-      toast('تم نسخ البيانات للحافظة', 'info');
-    }
-  });
-
-  /* ════════════════════════════════════════════════════════
-     21. PWA SERVICE WORKER
-  ════════════════════════════════════════════════════════ */
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('SW registered'))
-        .catch(err => console.warn('SW failed:', err));
     });
-  }
+}
 
-  console.log('🔐 خزنة أسراري — Initialized');
+function setSyncLoader(isSyncing, isError = false) { 
+    const dot = document.getElementById('syncDot');
+    if (dot) {
+        if (isError) {
+            dot.className = 'sync-dot error';
+        } else {
+            dot.className = isSyncing ? 'sync-dot syncing' : 'sync-dot synced';
+        }
+    }
+}
+
+function setupRealtimeListener(uid) {
+    setSyncLoader(true);
+    unsubscribeVault = db.collection('vaults').doc(uid).onSnapshot(docSnap => {
+        if(docSnap.exists) {
+            const data = docSnap.data();
+            accounts = data.accounts || [];
+            folders = data.folders || ["عام", "فيسبوك", "جوجل"];
+        } else {
+            accounts = [];
+            folders = ["عام", "فيسبوك", "جوجل"];
+            saveToCloud(); 
+        }
+        applySort(currentSort, false); 
+        renderFoldersBar();
+        setSyncLoader(false);
+    }, error => {
+        console.error(error);
+        setSyncLoader(false, true);
+        showToast("فشل جلب البيانات");
+    });
+}
+
+function saveToCloud() {
+    const user = auth.currentUser;
+    if(user) {
+        setSyncLoader(true);
+        db.collection('vaults').doc(user.uid).set({
+            accounts: accounts,
+            folders: folders
+        }).then(() => {
+            setSyncLoader(false);
+        }).catch(error => {
+            console.error(error);
+            setSyncLoader(false, true);
+            showToast("حدث خطأ أثناء الحفظ");
+        });
+    }
+}
+
+function exportDataAuto() {
+    closeSideMenu();
+    const dataToSave = { accounts: accounts, folders: folders };
+    const blob = new Blob([JSON.stringify(dataToSave)], {type: "application/json"});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = "secrets_vault_backup.json";
+    a.click();
+}
+
+function importDataWrapper(e) {
+    closeSideMenu();
+    const reader = new FileReader();
+    reader.onload = (f) => {
+        try {
+            const imported = JSON.parse(f.target.result);
+            const rawAccounts = Array.isArray(imported) ? imported : (imported.accounts || []);
+            const newFolders = imported.folders || ["عام"];
+
+            const seenCombinations = new Set(accounts.map(a => {
+                const em = (a.email || "").trim().toLowerCase();
+                const fol = a.folder || "عام";
+                return `${em}|${fol}`;
+            }));
+            
+            const cleanAccounts = [];
+
+            rawAccounts.forEach(importedAcc => {
+                const rawEmail = importedAcc.email || importedAcc.title || "مستورد";
+                const emailLower = rawEmail.trim().toLowerCase();
+                const folder = importedAcc.folder || "عام";
+                const combo = `${emailLower}|${folder}`;
+
+                if (!seenCombinations.has(combo)) {
+                    seenCombinations.add(combo);
+                    cleanAccounts.push({
+                        id: importedAcc.id || Date.now() + Math.random(),
+                        email: rawEmail,
+                        pass: importedAcc.pass || "...",
+                        folder: folder
+                    });
+                }
+            });
+
+            accounts = [...accounts, ...cleanAccounts];
+
+            newFolders.forEach(f => {
+                if(!folders.includes(f)) folders.push(f);
+            });
+
+            cleanAccounts.forEach(acc => {
+                if (acc.folder && !folders.includes(acc.folder)) {
+                    folders.push(acc.folder);
+                }
+            });
+
+            saveToCloud();
+            renderFoldersBar();
+            applySort(currentSort);
+
+            if (cleanAccounts.length === 0 && rawAccounts.length > 0) {
+                showToast("الحسابات موجودة مسبقاً");
+            } else {
+                showToast("تم استعادة البيانات بنجاح");
+            }
+        } catch(err){
+            showToast("ملف غير صالح");
+        }
+    };
+    if(e.target.files.length > 0) {
+        reader.readAsText(e.target.files[0]);
+    }
+}
+
+function handleAppLockSettings() {
+    closeSideMenu();
+    const appPass = localStorage.getItem('appPass');
+    if(appPass) {
+        openPasswordModal("أدخل الرمز لإزالته", (v) => {
+            if(v === appPass) { 
+                localStorage.removeItem('appPass'); 
+                showToast("تم إزالة القفل");
+            }
+            else showToast("خطأ في الرمز");
+        });
+    } else {
+        openPasswordModal("تعيين رمز جديد", (v) => { 
+            if(v) { 
+                localStorage.setItem('appPass', v); 
+                showToast("تم القفل");
+            } 
+        });
+    }
+}
+
+function confirmDeleteAll() {
+    closeSideMenu();
+    customConfirm("حذف كل البيانات نهائياً؟", () => {
+        accounts = []; folders = ["عام"];
+        saveToCloud();
+        showToast("تم تفريغ الخزنة");
+    });
+}
+
+function pushHistory(type = 'modal') { 
+    window.history.pushState({modal: type}, null, ''); 
+}
+
+function goBack() { 
+    if(window.history.state) {
+        window.history.back();
+        return;
+    }
+    const overlays = document.querySelectorAll('.overlay');
+    let visible = false;
+    overlays.forEach(o => { 
+        if(o.classList.contains('show')) { 
+            o.classList.remove('show'); 
+            setTimeout(()=>o.style.display='none',200); 
+            visible=true; 
+        } 
+    });
+    
+    if(!visible && document.getElementById('vaultPage').style.display === 'flex') {
+        document.getElementById('vaultPage').style.display = 'none';
+    }
+}
+
+window.onpopstate = () => {
+    const overlays = document.querySelectorAll('.overlay');
+    let closedModal = false;
+    overlays.forEach(o => {
+        if(o.classList.contains('show')) {
+            o.classList.remove('show');
+            setTimeout(()=>o.style.display='none', 200);
+            closedModal = true;
+        }
+    });
+    if(!closedModal) {
+        const vault = document.getElementById('vaultPage');
+        if(vault && vault.style.display === 'flex') {
+            vault.style.display = 'none';
+        } else {
+            closeSideMenu();
+        }
+    }
+};
+
+function showOverlay(id) {
+    pushHistory();
+    const el = document.getElementById(id);
+    el.style.display = 'flex';
+    el.offsetHeight; 
+    el.classList.add('show');
+}
+
+function submitPassword() {
+    const val = document.getElementById('globalPassInput').value;
+    const cb = pendingCallback;
+    goBack(); 
+    if(cb) { setTimeout(() => { cb(val); }, 200); }
+    pendingCallback = null;
+}
+
+function prepareSaveAccount() {
+    if (!auth.currentUser) {
+        showToast("اتصل بحساب جوجل من القائمة أولاً");
+        return;
+    }
+
+    const email = document.getElementById('emailInput').value.trim();
+    if (!email) {
+        showToast("أدخل البيانات أولاً");
+        return;
+    }
+    isMoveAction = false;
+    openFolderSelectModal("حفظ في");
+}
+
+function saveAccount(targetFolder) {
+    const email = document.getElementById('emailInput').value.trim();
+    const pass = document.getElementById('passInput').value;
+    
+    const lowerEmail = email.toLowerCase();
+    const isDuplicate = accounts.some(acc => 
+        (acc.email || "").trim().toLowerCase() === lowerEmail && acc.folder === targetFolder
+    );
+
+    if (isDuplicate) {
+        showToast("هذا الحساب موجود مسبقاً في هذا القسم");
+        return;
+    }
+
+    accounts.unshift({ id: Date.now(), email, pass, folder: targetFolder });
+    saveToCloud();
+    document.getElementById('emailInput').value = '';
+    document.getElementById('passInput').value = '';
+    applySort(currentSort); 
+    showToast("تم الحفظ بنجاح");
+}
+
+function renderFoldersBar() {
+    const bar = document.getElementById('foldersBar');
+    bar.innerHTML = '';
+    let totalCount = accounts.length;
+    
+    const allChip = document.createElement('div');
+    allChip.className = `chip ${activeFolder === 'All' ? 'active' : ''}`;
+    allChip.innerText = `الكل (${totalCount})`;
+    allChip.onclick = () => { activeFolder = 'All'; renderVault(); renderFoldersBar(); };
+    bar.appendChild(allChip);
+    
+    folders.forEach(f => {
+        let folderCount = accounts.filter(a => a.folder === f).length;
+        const chip = document.createElement('div');
+        chip.className = `chip ${activeFolder === f ? 'active' : ''}`;
+        chip.innerText = `${f} (${folderCount})`;
+        chip.onclick = () => { activeFolder = f; renderVault(); renderFoldersBar(); };
+        chip.onmousedown = () => startFolderPress(f);
+        chip.ontouchstart = () => startFolderPress(f);
+        chip.ontouchmove = cancelPress;
+        chip.onmouseup = cancelPress;
+        chip.ontouchend = cancelPress;
+        bar.appendChild(chip);
+    });
+    
+    const addBtn = document.createElement('div');
+    addBtn.className = 'chip add-folder';
+    addBtn.innerText = '+ مجلد جديد';
+    addBtn.onclick = () => openAddFolderModal();
+    bar.appendChild(addBtn);
+}
+
+function renderVault() {
+    const list = document.getElementById('vaultList');
+    const searchVal = document.getElementById('searchInput').value ? document.getElementById('searchInput').value.toLowerCase() : '';
+    list.innerHTML = '';
+    let displayAccounts = accounts;
+    if (activeFolder !== 'All') displayAccounts = displayAccounts.filter(acc => acc.folder === activeFolder);
+    if(searchVal) displayAccounts = displayAccounts.filter(acc => (acc.email && acc.email.toLowerCase().includes(searchVal)) || (acc.pass && acc.pass.toLowerCase().includes(searchVal)));
+    
+    if(displayAccounts.length === 0) { 
+        list.innerHTML = '<div style="text-align:center; padding:60px 20px; color:var(--text-3);"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity:0.3; margin-bottom:10px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><h3>لا توجد حسابات</h3></div>'; 
+        return; 
+    }
+    
+    displayAccounts.forEach(acc => {
+        const card = document.createElement('div');
+        card.className = `account-card ${selectedIds.has(acc.id) ? 'selected-card' : ''}`;
+        card.setAttribute('data-id', acc.id);
+        const displayName = acc.email || "بدون عنوان";
+        const displayPass = acc.pass || "...";
+        
+        let leftSide = '';
+        if (isSelectionMode) {
+            leftSide = `<div class="selection-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg></div>`;
+        } else if (!searchVal && activeFolder !== 'All') {
+            leftSide = `<div class="drag-handle-visible" onmousedown="initDrag(event)" ontouchstart="initDrag(event)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg></div>`;
+        } else {
+             leftSide = `<div class="card-favicon">${displayName[0].toUpperCase()}</div>`;
+        }
+        
+        card.innerHTML = `
+            ${leftSide}
+            <div class="card-main" onclick="handleCardClick(event, ${acc.id})">
+                <div class="card-email" 
+                     onmousedown="startPress('email', ${acc.id})" ontouchstart="startPress('email', ${acc.id})" 
+                     ontouchmove="cancelPress()"
+                     onmouseup="cancelPress()" ontouchend="cancelPress()">
+                    <span>${displayName}</span>
+                </div>
+                <div id="pass-${acc.id}" class="card-pass-pill hidden-pass"
+                    onmousedown="startPress('pass', ${acc.id})" ontouchstart="startPress('pass', ${acc.id})" 
+                    ontouchmove="cancelPress()"
+                    onmouseup="cancelPress()" ontouchend="cancelPress()">••••••••</div>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
+
+function toggleSelectionMode() {
+    isSelectionMode = !isSelectionMode;
+    selectedIds.clear();
+    const btn = document.getElementById('selectToggleBtn');
+    const bottomBar = document.getElementById('bottomBar');
+    if (isSelectionMode) {
+        btn.classList.add('active');
+        bottomBar.style.display = 'flex';
+        document.getElementById('selectedCount').innerText = "محدد صفر";
+    } else {
+        btn.classList.remove('active');
+        bottomBar.style.display = 'none';
+    }
+    renderVault();
+}
+
+function deleteSelected() {
+    if(selectedIds.size === 0) return;
+    customConfirm(`هل أنت متأكد من الحذف؟`, () => {
+         accounts = accounts.filter(acc => !selectedIds.has(acc.id));
+         saveToCloud();
+         toggleSelectionMode(); 
+         showToast("تم الحذف");
+    });
+}
+
+function handleCardClick(e, id) {
+    if (isSelectionMode) {
+        if (selectedIds.has(id)) selectedIds.delete(id);
+        else selectedIds.add(id);
+        document.getElementById('selectedCount').innerText = selectedIds.size + " محدد";
+        renderVault();
+    } else {
+        if(e.target.closest('.drag-handle-visible')) return;
+        handlePassClick(id);
+    }
+}
+
+function handlePassClick(id) {
+    if(isLongPress) return;
+    const el = document.getElementById(`pass-${id}`);
+    const acc = accounts.find(a => a.id === id);
+    if(el.classList.contains('hidden-pass')) {
+         el.innerText = acc.pass || '...'; 
+         el.classList.remove('hidden-pass');
+         el.style.fontSize = "16px"; el.style.letterSpacing = "0";
+    } else { 
+        el.innerText = '••••••••'; 
+        el.classList.add('hidden-pass'); 
+        el.style.fontSize = "22px"; el.style.letterSpacing = "4px";
+    }
+}
+
+function openFolderSelectModal(title) {
+    showOverlay('folderSelectModal');
+    document.getElementById('folderModalTitle').innerText = title;
+    const listBody = document.getElementById('folderListModalBody');
+    listBody.innerHTML = '';
+    const addRow = document.createElement('div');
+    addRow.className = 'move-folder-option';
+    addRow.style.color = 'var(--primary)';
+    addRow.innerHTML = '+ مجلد جديد';
+    addRow.onclick = () => { goBack(); setTimeout(openAddFolderModal, 200); };
+    listBody.appendChild(addRow);
+    folders.forEach(f => {
+        const row = document.createElement('div');
+        row.className = 'move-folder-option';
+        row.innerText = f;
+        row.onclick = () => {
+            goBack();
+            if (isMoveAction) executeMove(f);
+            else saveAccount(f);
+        };
+        listBody.appendChild(row);
+    });
+}
+
+function openMoveModal() {
+    if(selectedIds.size === 0) return;
+    isMoveAction = true;
+    openFolderSelectModal("نقل عناصر");
+}
+
+function executeMove(targetFolder) {
+    accounts.forEach(acc => { if(selectedIds.has(acc.id)) acc.folder = targetFolder; });
+    saveToCloud();
+    toggleSelectionMode(); activeFolder = targetFolder;
+    showToast("تم النقل");
+}
+
+function openAddFolderModal(renameTarget = null) {
+    folderRenameTarget = renameTarget;
+    document.getElementById('addFolderTitle').innerText = renameTarget ? "تعديل المجلد" : "مجلد جديد";
+    const input = document.getElementById('folderNameInput');
+    input.value = renameTarget || '';
+    showOverlay('addFolderModal');
+    input.focus();
+}
+
+function submitFolder() {
+    const name = document.getElementById('folderNameInput').value.trim();
+    if(!name) return;
+    if (folderRenameTarget) {
+        const index = folders.indexOf(folderRenameTarget);
+        if(index !== -1) folders[index] = name;
+        accounts.forEach(acc => { if(acc.folder === folderRenameTarget) acc.folder = name; });
+    } else {
+        if(!folders.includes(name)) folders.push(name);
+    }
+    saveToCloud(); goBack();
+}
+
+function startFolderPress(f) {
+    isLongPress = false;
+    longPressTimer = setTimeout(() => { isLongPress = true; if(f!=='عام') openAddFolderModal(f); }, 600);
+}
+
+let draggingItem = null;
+function initDrag(e) {
+    if(isSelectionMode) return;
+    const handle = e.target.closest('.drag-handle-visible');
+    if(!handle) return;
+    draggingItem = handle.closest('.account-card');
+    const list = document.getElementById('vaultList');
+    list.addEventListener('mousemove', onDragMove);
+    list.addEventListener('touchmove', onDragMove, {passive: false});
+    document.addEventListener('mouseup', onDragEnd);
+    document.addEventListener('touchend', onDragEnd);
+    draggingItem.classList.add('dragging');
+    if(navigator.vibrate) navigator.vibrate(20);
+}
+function onDragMove(e) {
+    if(!draggingItem) return;
+    e.preventDefault();
+    const list = document.getElementById('vaultList');
+    let clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+    const siblings = [...list.querySelectorAll('.account-card:not(.dragging)')];
+    let nextSibling = siblings.find(sibling => clientY <= sibling.getBoundingClientRect().top + sibling.offsetHeight / 2);
+    list.insertBefore(draggingItem, nextSibling);
+}
+function onDragEnd() {
+    if(!draggingItem) return;
+    draggingItem.classList.remove('dragging');
+    draggingItem = null;
+    document.removeEventListener('mouseup', onDragEnd);
+    document.removeEventListener('touchend', onDragEnd);
+    saveNewOrder();
+}
+function saveNewOrder() {
+    const list = document.getElementById('vaultList');
+    const cards = list.querySelectorAll('.account-card');
+    const reorderedIds = [];
+    cards.forEach(c => reorderedIds.push(Number(c.getAttribute('data-id'))));
+    if(activeFolder !== 'All') {
+        const folderItems = accounts.filter(a => a.folder === activeFolder);
+        const sortedFolderItems = [];
+        reorderedIds.forEach(id => {
+            const item = folderItems.find(a => a.id === id);
+            if(item) sortedFolderItems.push(item);
+        });
+        const otherItems = accounts.filter(a => a.folder !== activeFolder);
+        accounts = [...sortedFolderItems, ...otherItems]; 
+    } else {
+         const newAccounts = [];
+         reorderedIds.forEach(id => {
+             const acc = accounts.find(a => a.id === id);
+             if(acc) newAccounts.push(acc);
+         });
+         accounts = newAccounts;
+    }
+    saveToCloud();
+}
+
+function startPress(type, id) {
+    isLongPress = false;
+    longPressTimer = setTimeout(() => { isLongPress = true; openContextMenu(type, id); }, 800);
+}
+function cancelPress() { clearTimeout(longPressTimer); }
+
+function openContextMenu(type, id) {
+    currentCtxId = id; currentCtxType = type;
+    showOverlay('contextModal');
+    if (navigator.vibrate) navigator.vibrate(50);
+}
+
+function ctxAction(action) {
+    goBack();
+    const acc = accounts.find(a => a.id === currentCtxId);
+    setTimeout(() => {
+        if (!acc) return;
+        if (action === 'copy') copyToClipboard(currentCtxType === 'email' ? acc.email : acc.pass);
+        else if (action === 'delete') {
+            customConfirm("حذف نهائي؟", () => {
+                accounts = accounts.filter(a => a.id !== currentCtxId);
+                saveToCloud();
+                showToast("تم الحذف");
+            });
+        } else if (action === 'edit') {
+            document.getElementById('emailInput').value = acc.email;
+            document.getElementById('passInput').value = acc.pass;
+            accounts = accounts.filter(a => a.id !== currentCtxId);
+            saveToCloud(); 
+            if(document.getElementById('vaultPage').style.display==='flex') goBack();
+        }
+    }, 200);
+}
+
+function openPasswordModal(t, cb) {
+    document.getElementById('passModalTitle').innerText = t;
+    document.getElementById('globalPassInput').value = '';
+    showOverlay('passwordModal');
+    pendingCallback = cb;
+    setTimeout(()=>document.getElementById('globalPassInput').focus(), 100);
+}
+
+function customConfirm(m, cb) {
+    document.getElementById('confirmMessage').innerText = m;
+    const btn = document.getElementById('confirmYesBtn');
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    newBtn.onclick = () => { goBack(); setTimeout(cb, 100); };
+    showOverlay('confirmModal');
+}
+
+function startVaultPress() {
+    isLongPress = false;
+    vaultPressTimer = setTimeout(() => { isLongPress = true; handleVaultLongPress(); }, 800);
+}
+function cancelVaultPress() { clearTimeout(vaultPressTimer); }
+
+function handleVaultLongPress() {
+    const vp = localStorage.getItem('vaultPass');
+    if(vp) openPasswordModal("إزالة قفل الخزنة", v => { 
+        if(v===vp){ 
+            localStorage.removeItem('vaultPass'); 
+            showToast("تم الإلغاء"); 
+        } else showToast("خطأ"); 
+    });
+    else openPasswordModal("قفل الخزنة", v => { 
+        if(v){ 
+            localStorage.setItem('vaultPass', v); 
+            showToast("تم القفل");
+        } 
+    });
+}
+
+function openVaultCheck() {
+    if(isLongPress) return;
+    
+    if (!auth.currentUser) {
+        showToast("اتصل بحساب جوجل من القائمة أولاً");
+        return;
+    }
+
+    const vp = localStorage.getItem('vaultPass');
+    if(vp) openPasswordModal("رمز الخزنة", v => { if(v===vp) openVault(); else showToast("خطأ"); });
+    else openVault();
+}
+
+function openVault() {
+    pushHistory('vault');
+    document.getElementById('vaultPage').style.display = 'flex';
+    renderFoldersBar(); renderVault();
+}
+
+function pasteFromClipboard() {
+    if (navigator.clipboard && navigator.clipboard.readText) {
+        navigator.clipboard.readText().then(t => {
+            document.getElementById('importText').value = t;
+        }).catch(err => {
+            showToast("نظام الحماية منع الزر، استخدم الضغطة المطولة للصق");
+        });
+    } else {
+        showToast("استخدم الضغطة المطولة للصق بهذا الجهاز");
+    }
+}
+
+function copyToClipboard(t) { navigator.clipboard.writeText(t).then(()=>showToast("تم النسخ")); }
+function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.style.opacity='1'; setTimeout(()=>t.style.opacity='0',2000); }
+
+function handleAndroidBack() {
+    const openOverlay = document.querySelector('.overlay.show');
+    if (openOverlay) {
+        goBack(); 
+        sendToKodular("STAY");
+        return;
+    }
+    if (document.getElementById('vaultPage').style.display === 'flex') {
+        document.getElementById('vaultPage').style.display = 'none';
+        if(window.history.state) window.history.back();
+        sendToKodular("STAY");
+        return;
+    }
+    const sideMenu = document.getElementById('sideMenu');
+    if (sideMenu && sideMenu.classList.contains('open')) {
+        closeSideMenu();
+        sendToKodular("STAY");
+        return;
+    }
+    sendToKodular("EXIT");
+}
+
+function sendToKodular(message) {
+    if (window.AppInventor && window.AppInventor.setWebViewString) {
+        window.AppInventor.setWebViewString(message);
+    }
+}
+
+function toggleTheme() {
+    const body = document.body;
+    body.classList.toggle('dark-theme');
+    const isDark = body.classList.contains('dark-theme');
+    
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) themeIcon.innerText = isDark ? "☀️" : "🌙";
+    
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        const themeIcon = document.getElementById('themeIcon');
+        if(themeIcon) themeIcon.innerText = "☀️";
+    }
+
+    const vaultList = document.getElementById('vaultList');
+    if (vaultList) {
+        vaultList.addEventListener('scroll', cancelPress);
+    }
+});
+
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('clearSearchBtn').style.display = 'none';
+    renderVault();
+}
+
+document.getElementById('searchInput')?.addEventListener('input', function() {
+    document.getElementById('clearSearchBtn').style.display = this.value ? 'block' : 'none';
+});
+
+function openSortModal() {
+    showOverlay('sortModal');
+    document.getElementById('check-newest').style.display = currentSort === 'newest' ? 'inline' : 'none';
+    document.getElementById('check-oldest').style.display = currentSort === 'oldest' ? 'inline' : 'none';
+    document.getElementById('check-az').style.display = currentSort === 'az' ? 'inline' : 'none';
+}
+
+function applySort(type, render = true) {
+    currentSort = type;
+    if(type === 'newest') accounts.sort((a,b) => b.id - a.id);
+    if(type === 'oldest') accounts.sort((a,b) => a.id - b.id);
+    if(type === 'az') accounts.sort((a,b) => (a.email||'').localeCompare(b.email||''));
+    if (render) {
+        renderVault();
+        goBack();
+    }
 }

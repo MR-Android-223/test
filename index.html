@@ -1,442 +1,326 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#8b5cf6" />
-  <meta name="description" content="خزنة أسراري - مدير كلمات المرور الشخصي الآمن" />
-  <title>خزنة أسراري</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <title>خزنة أسراري - حفظ كلمات المرور بأمان</title>
+    
+    <meta name="description" content="خزنة أسراري - تطبيق آمن وذكي لحفظ وإدارة كلمات المرور والحسابات.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#0d0f1a">
+    <meta http-equiv="content-language" content="ar">
+    <link rel="canonical" href="https://mr-android-223.github.io/my-vault/">
+    
+    <meta property="og:title" content="خزنة أسراري - حفظ كلمات المرور بأمان">
+    <meta property="og:description" content="تطبيقك الآمن لإدارة حساباتك الشخصية.">
+    <meta property="og:image" content="https://mr-android-223.github.io/my-vault/icon.png">
+    <meta property="og:url" content="https://mr-android-223.github.io/my-vault/">
+    <meta property="og:type" content="website">
+    
+    <link rel="icon" href="https://mr-android-223.github.io/my-vault/icon.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="https://mr-android-223.github.io/my-vault/icon.png">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
 
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "خزنة أسراري",
+      "url": "https://mr-android-223.github.io/my-vault/",
+      "description": "تطبيق ويب آمن لحفظ وإدارة كلمات المرور والحسابات بشكل مشفر.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Web",
+      "image": "https://mr-android-223.github.io/my-vault/icon.png"
+    }
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
-
-  <!-- Main CSS -->
-  <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-light">
+<body>
 
-  <!-- ═══════════════════════════════════════════
-       SPLASH SCREEN
-  ═══════════════════════════════════════════ -->
-  <div id="splash-screen" class="splash-screen">
-    <div class="splash-content">
-      <div class="splash-logo">
-        <div class="logo-ring"></div>
-        <div class="logo-ring ring-2"></div>
-        <svg class="logo-icon" viewBox="0 0 64 64" fill="none">
-          <path d="M32 8C23.16 8 16 15.16 16 24v4H12a4 4 0 0 0-4 4v20a4 4 0 0 0 4 4h40a4 4 0 0 0 4-4V32a4 4 0 0 0-4-4h-4v-4C48 15.16 40.84 8 32 8zm0 6c7.18 0 10 5.82 10 10v4H22v-4c0-4.18 2.82-10 10-10zm0 22a4 4 0 1 1 0 8 4 4 0 0 1 0-8z" fill="currentColor"/>
+<div style="position: absolute; left: -9999px; top: -9999px;">
+    <h2>مدير كلمات مرور آمن (مشروع شخصي)</h2>
+    <p>تطبيق ويب بسيط وشخصي لحفظ الحسابات وكلمات المرور بشكل مشفر وآمن. هذا الموقع ليس صفحة تصيد ولا يتبع لأي جهة تجارية.</p>
+</div>
+
+<header class="app-header" id="appHeader">
+    <button class="icon-btn" onclick="safeToggleMenu(event)" aria-label="Open menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="12" cy="19" r="2"/>
         </svg>
-      </div>
-      <h1 class="splash-title">خزنة أسراري</h1>
-      <p class="splash-subtitle">مدير كلمات المرور الآمن</p>
-      <div class="splash-loader">
-        <div class="loader-bar"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════
-       PIN LOCK SCREEN
-  ═══════════════════════════════════════════ -->
-  <div id="lock-screen" class="lock-screen hidden">
-    <div class="lock-content">
-      <div class="lock-icon">
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M32 8C23.16 8 16 15.16 16 24v4H12a4 4 0 0 0-4 4v20a4 4 0 0 0 4 4h40a4 4 0 0 0 4-4V32a4 4 0 0 0-4-4h-4v-4C48 15.16 40.84 8 32 8zm0 6c7.18 0 10 5.82 10 10v4H22v-4c0-4.18 2.82-10 10-10zm0 22a4 4 0 1 1 0 8 4 4 0 0 1 0-8z" fill="currentColor"/>
+    </button>
+    
+    <div class="header-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
         </svg>
-      </div>
-      <h2>قفل التطبيق</h2>
-      <p id="lock-msg">أدخل رمز PIN للمتابعة</p>
-      <div class="pin-display">
-        <span class="pin-dot" id="d1"></span>
-        <span class="pin-dot" id="d2"></span>
-        <span class="pin-dot" id="d3"></span>
-        <span class="pin-dot" id="d4"></span>
-      </div>
-      <div class="pin-keypad">
-        <button class="key-btn" data-key="1">١</button>
-        <button class="key-btn" data-key="2">٢</button>
-        <button class="key-btn" data-key="3">٣</button>
-        <button class="key-btn" data-key="4">٤</button>
-        <button class="key-btn" data-key="5">٥</button>
-        <button class="key-btn" data-key="6">٦</button>
-        <button class="key-btn" data-key="7">٧</button>
-        <button class="key-btn" data-key="8">٨</button>
-        <button class="key-btn" data-key="9">٩</button>
-        <button class="key-btn key-clear" data-key="clear">مسح</button>
-        <button class="key-btn" data-key="0">٠</button>
-        <button class="key-btn key-del" data-key="del">⌫</button>
-      </div>
+        <span>خزنة أسراري</span>
     </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════
-       LOGIN SCREEN
-  ═══════════════════════════════════════════ -->
-  <div id="login-screen" class="login-screen hidden">
-    <div class="login-bg">
-      <div class="bg-orb orb1"></div>
-      <div class="bg-orb orb2"></div>
-      <div class="bg-orb orb3"></div>
-    </div>
-    <div class="login-card">
-      <div class="login-logo">
-        <svg viewBox="0 0 64 64" fill="none">
-          <path d="M32 8C23.16 8 16 15.16 16 24v4H12a4 4 0 0 0-4 4v20a4 4 0 0 0 4 4h40a4 4 0 0 0 4-4V32a4 4 0 0 0-4-4h-4v-4C48 15.16 40.84 8 32 8zm0 6c7.18 0 10 5.82 10 10v4H22v-4c0-4.18 2.82-10 10-10zm0 22a4 4 0 1 1 0 8 4 4 0 0 1 0-8z" fill="currentColor"/>
-        </svg>
-      </div>
-      <h1 class="login-title">خزنة أسراري</h1>
-      <p class="login-desc">مدير كلمات المرور الشخصي الآمن والمشفر</p>
-      <div class="login-features">
-        <div class="feature-chip"><span>🔐</span> تشفير AES</div>
-        <div class="feature-chip"><span>☁️</span> مزامنة سحابية</div>
-        <div class="feature-chip"><span>📵</span> يعمل بدون إنترنت</div>
-      </div>
-      <button id="google-login-btn" class="google-btn">
-        <svg viewBox="0 0 24 24" width="20" height="20">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-        </svg>
-        تسجيل الدخول بـ Google
-      </button>
-      <p class="login-note">بياناتك مشفرة محلياً قبل الإرسال للسحابة</p>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════
-       MAIN APP
-  ═══════════════════════════════════════════ -->
-  <div id="app" class="app hidden">
-
-    <!-- Header -->
-    <header class="app-header">
-      <div class="header-right">
-        <button class="icon-btn" id="menu-btn" title="القائمة">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-        <div class="app-title-wrap">
-          <svg class="header-logo" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2C9.24 2 7 4.24 7 7v2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-2V7c0-2.76-2.24-5-5-5zm0 2c1.66 0 3 1.34 3 3v2H9V7c0-1.66 1.34-3 3-3zm0 9a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" fill="currentColor"/>
-          </svg>
-          <span class="app-title">خزنة أسراري</span>
+    
+    <div class="header-actions">
+        <div class="sync-indicator" id="syncLoader" title="حالة المزامنة">
+            <div class="sync-dot" id="syncDot"></div>
         </div>
-      </div>
-      <div class="header-left">
-        <div class="sync-indicator hidden" id="sync-indicator">
-          <div class="sync-spinner"></div>
-        </div>
-        <button class="icon-btn" id="search-toggle-btn" title="بحث">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span id="themeIcon" style="font-size: 18px;">🌙</span>
         </button>
-        <button class="icon-btn" id="theme-btn" title="تبديل المظهر">
-          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <svg class="moon-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-        <div class="user-avatar-wrap" id="user-avatar-wrap">
-          <img id="user-avatar" src="" alt="صورة المستخدم" class="user-avatar" />
+    </div>
+</header>
+
+<div class="side-menu-overlay" id="sideMenuOverlay" onclick="safeToggleMenu(event)"></div>
+<aside class="side-menu" id="sideMenu" onclick="event.stopPropagation()">
+    <div class="side-menu-header">
+        <div class="user-profile" id="userProfile">
+            <div class="avatar" id="userAvatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="user-info">
+                <span id="userName">مستخدم زائر</span>
+                <span id="userEmail">سجل الدخول للمزامنة</span>
+            </div>
         </div>
-      </div>
-    </header>
-
-    <!-- Search Bar -->
-    <div class="search-bar-wrap hidden" id="search-bar-wrap">
-      <div class="search-bar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="search-input" placeholder="ابحث بالاسم أو البريد الإلكتروني..." />
-        <button id="search-clear" class="search-clear hidden">✕</button>
-      </div>
     </div>
+    <nav class="side-menu-nav">
+        
+        <div id="googleLoginContainer">
+            <button class="menu-item" onclick="startGoogleLogin()">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                <span>تسجيل دخول</span>
+            </button>
+        </div>
 
-    <!-- Folder Tabs -->
-    <div class="folder-tabs-wrap" id="folder-tabs-wrap">
-      <div class="folder-tabs" id="folder-tabs">
-        <!-- Generated by JS -->
-      </div>
-      <button class="add-folder-btn" id="add-folder-btn" title="إضافة مجلد">+</button>
+        <div id="googleLogoutContainer" style="display:none;">
+            <button class="menu-item" onclick="handleGoogleLogout()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span>تسجيل خروج</span>
+            </button>
+        </div>
+
+        <div class="menu-divider"></div>
+
+        <button class="menu-item" onclick="handleAppLockSettings()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span id="lockMenuText">إعدادات القفل</span>
+        </button>
+
+        <button class="menu-item" onclick="exportDataAuto()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>تصدير نسخة</span>
+        </button>
+
+        <button class="menu-item" onclick="document.getElementById('importFile').click()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>استيراد نسخة</span>
+        </button>
+        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importDataWrapper(event)">
+
+        <div class="menu-divider"></div>
+
+        <button class="menu-item danger" onclick="confirmDeleteAll()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            <span>حذف البيانات</span>
+        </button>
+
+    </nav>
+    <div class="side-menu-footer">خزنة أسراري v1.0</div>
+</aside>
+
+<div class="main-content container">
+    <div style="margin-top: 10px;"></div>
+    
+    <input type="text" id="emailInput" class="app-input" placeholder="البريد الإلكتروني / العنوان" autocomplete="off">
+    
+    <div style="width: 100%; position: relative;">
+        <input type="text" id="passInput" class="app-input" placeholder="كلمة المرور" autocomplete="off" oninput="checkPasswordStrength()">
+        <div id="strengthContainer" style="display: none; margin-top: -5px; padding: 0 5px;">
+            <div style="height: 4px; width: 100%; background: #e5e7eb; border-radius: 2px; overflow: hidden; margin-bottom: 5px;">
+                <div id="strengthBar" style="height: 100%; width: 0%; transition: 0.3s;"></div>
+            </div>
+            <span id="strengthText" style="font-size: 12px; font-weight: bold;"></span>
+        </div>
     </div>
-
-    <!-- Selection Bar -->
-    <div class="selection-bar hidden" id="selection-bar">
-      <span id="selection-count">0 محدد</span>
-      <div class="selection-actions">
-        <button class="sel-btn sel-move" id="sel-move-btn">نقل</button>
-        <button class="sel-btn sel-delete" id="sel-delete-btn">حذف</button>
-        <button class="sel-btn sel-cancel" id="sel-cancel-btn">إلغاء</button>
-      </div>
-    </div>
-
-    <!-- Vault List -->
-    <main class="vault-main" id="vault-main">
-      <div class="vault-list" id="vault-list">
-        <!-- Items rendered by JS -->
-      </div>
-      <div class="empty-state hidden" id="empty-state">
-        <div class="empty-icon">🔐</div>
-        <h3>لا توجد حسابات بعد</h3>
-        <p>اضغط على زر + لإضافة حساب جديد</p>
-      </div>
-    </main>
-
-    <!-- FAB -->
-    <button class="fab" id="fab-btn" title="إضافة حساب">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    
+    <button class="btn btn-primary full-width" onclick="prepareSaveAccount()">
+        <span>حفظ في الخزنة</span> 
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
     </button>
 
-  </div><!-- /#app -->
+    <button id="vaultBtn" class="btn btn-secondary full-width" style="margin-top: 12px;"
+            onclick="openVaultCheck()" 
+            onmousedown="startVaultPress()" ontouchstart="startVaultPress()" 
+            onmouseup="cancelVaultPress()" ontouchend="cancelVaultPress()"
+            ontouchmove="cancelVaultPress()">
+        <span>فتح المحفوظات</span> 
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+    </button>
+</div>
 
-
-  <!-- ═══════════════════════════════════════════
-       SIDE DRAWER MENU
-  ═══════════════════════════════════════════ -->
-  <div class="drawer-overlay hidden" id="drawer-overlay"></div>
-  <nav class="side-drawer hidden" id="side-drawer">
-    <div class="drawer-header">
-      <div class="drawer-user" id="drawer-user">
-        <img id="drawer-avatar" src="" alt="" class="drawer-avatar" />
-        <div class="drawer-user-info">
-          <strong id="drawer-name"></strong>
-          <span id="drawer-email"></span>
-        </div>
-      </div>
-    </div>
-    <ul class="drawer-menu">
-      <li><button class="drawer-item" id="dm-export"><span class="di-icon">📤</span> تصدير البيانات</button></li>
-      <li><button class="drawer-item" id="dm-import"><span class="di-icon">📥</span> استيراد البيانات</button></li>
-      <li><button class="drawer-item" id="dm-backup"><span class="di-icon">💾</span> نسخ احتياطي نصي</button></li>
-      <li><button class="drawer-item" id="dm-share"><span class="di-icon">📲</span> مشاركة عبر نص</button></li>
-      <li><button class="drawer-item" id="dm-setpin"><span class="di-icon">🔑</span> تعيين رمز PIN</button></li>
-      <li><button class="drawer-item" id="dm-changekey"><span class="di-icon">🔒</span> تغيير مفتاح التشفير</button></li>
-      <li class="drawer-divider"></li>
-      <li><button class="drawer-item danger" id="dm-logout"><span class="di-icon">🚪</span> تسجيل الخروج</button></li>
-    </ul>
-    <div class="drawer-footer">
-      <p>خزنة أسراري v1.0</p>
-      <p>جميع البيانات مشفرة بـ AES-256</p>
-    </div>
-  </nav>
-
-
-  <!-- ═══════════════════════════════════════════
-       MODALS
-  ═══════════════════════════════════════════ -->
-
-  <!-- Add/Edit Account Modal -->
-  <div class="modal-overlay hidden" id="account-modal-overlay">
-    <div class="modal" id="account-modal">
-      <div class="modal-header">
-        <h2 id="modal-title">إضافة حساب جديد</h2>
-        <button class="modal-close" id="account-modal-close">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>اسم الخدمة / الموقع <span class="req">*</span></label>
-          <input type="text" id="f-title" placeholder="مثال: Gmail، Instagram..." />
-        </div>
-        <div class="form-group">
-          <label>البريد الإلكتروني / اسم المستخدم</label>
-          <input type="text" id="f-email" placeholder="user@example.com" />
-        </div>
-        <div class="form-group">
-          <label>كلمة المرور <span class="req">*</span></label>
-          <div class="input-password-wrap">
-            <input type="password" id="f-password" placeholder="أدخل كلمة المرور" />
-            <button class="toggle-vis" id="f-toggle-vis">
-              <svg class="eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <svg class="eye-hide hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-            </button>
-          </div>
-          <div class="strength-bar-wrap">
-            <div class="strength-bar" id="strength-bar">
-              <div class="strength-fill" id="strength-fill"></div>
+<div id="vaultPage">
+    <div class="vault-fixed-top">
+        <div class="vault-header" style="margin-top: 60px;">
+            <h2 class="vault-title">المحفوظات 📂</h2>
+            <div class="header-actions">
+                <button id="selectToggleBtn" class="icon-btn" onclick="toggleSelectionMode()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button class="icon-btn back-btn" onclick="goBack()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 19 12 12 5"></polyline></svg>
+                </button>
             </div>
-            <span class="strength-label" id="strength-label"></span>
-          </div>
         </div>
-        <div class="form-group">
-          <label>ملاحظات</label>
-          <textarea id="f-notes" placeholder="أي تفاصيل إضافية..." rows="3"></textarea>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 5px; padding: 0 12px;">
+            <div style="position: relative; flex: 1;">
+                <svg style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-3);" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="searchInput" class="search-input" style="padding-right: 40px;" placeholder="بحث سريع..." oninput="renderVault()">
+                <div id="clearSearchBtn" onclick="clearSearch()" style="display:none; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); cursor:pointer; color:var(--danger); font-weight:bold; font-size:18px;">✕</div>
+            </div>
+            <button class="icon-btn" onclick="openSortModal()" style="border-radius: 99px; width: 42px; background: var(--surface); border: 1px solid var(--border);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h12M3 18h6"/></svg>
+            </button>
         </div>
-        <div class="form-group">
-          <label>المجلد</label>
-          <select id="f-folder"></select>
+
+        <div class="folders-bar" id="foldersBar">
+            <div class="chip add-folder" onclick="openAddFolderModal()">+ مجلد جديد</div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="account-modal-cancel">إلغاء</button>
-        <button class="btn-primary" id="account-modal-save">حفظ</button>
-      </div>
     </div>
-  </div>
 
-  <!-- Context Menu Modal (Actions) -->
-  <div class="modal-overlay hidden" id="action-modal-overlay">
-    <div class="action-sheet" id="action-sheet">
-      <div class="action-sheet-header">
-        <h3 id="action-sheet-title">خيارات</h3>
-        <button class="modal-close" id="action-modal-close">✕</button>
-      </div>
-      <button class="action-item" id="act-copy-user">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        نسخ اسم المستخدم / البريد
-      </button>
-      <button class="action-item" id="act-copy-pass">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        نسخ كلمة المرور
-      </button>
-      <button class="action-item" id="act-edit">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        تعديل
-      </button>
-      <button class="action-item danger" id="act-delete">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-        حذف
-      </button>
-    </div>
-  </div>
-
-  <!-- Set PIN Modal -->
-  <div class="modal-overlay hidden" id="pin-modal-overlay">
-    <div class="modal" id="pin-modal">
-      <div class="modal-header">
-        <h2 id="pin-modal-title">تعيين رمز PIN</h2>
-        <button class="modal-close" id="pin-modal-close">✕</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-desc">سيتم طلب هذا الرمز عند فتح التطبيق.</p>
-        <div class="form-group">
-          <label>رمز PIN الجديد (4 أرقام)</label>
-          <input type="password" id="new-pin" maxlength="4" placeholder="• • • •" style="letter-spacing: 0.5rem; text-align: center;" />
+    <div id="vaultList" class="accounts-grid" style="padding-top: 10px;"></div>
+    
+    <div id="bottomBar" class="selection-bar" style="display: none; position: fixed; bottom: 0; width: 100%; z-index: 100;">
+        <span id="selectedCount">محدد صفر</span>
+        <div class="selection-actions">
+            <button class="btn btn-sm btn-danger" onclick="deleteSelected()">حذف</button>
+            <button class="btn btn-sm btn-secondary" onclick="openMoveModal()">نقل</button>
         </div>
-        <div class="form-group">
-          <label>تأكيد رمز PIN</label>
-          <input type="password" id="confirm-pin" maxlength="4" placeholder="• • • •" style="letter-spacing: 0.5rem; text-align: center;" />
+    </div>
+</div>
+
+<div id="contextModal" class="overlay" onclick="goBack()">
+    <div class="modal-clean" onclick="event.stopPropagation()">
+        <div style="text-align: center; padding: 20px 0 10px 0; color: var(--accent); font-weight: 700;">خيارات</div>
+        <div class="action-list">
+            <div class="context-item" onclick="ctxAction('copy')">
+                <svg width="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span>نسخ</span>
+            </div>
+            <div class="context-item" onclick="ctxAction('edit')">
+                <svg width="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>تعديل</span>
+            </div>
+            <div class="context-divider"></div>
+            <div class="context-item danger" onclick="ctxAction('delete')">
+                <svg width="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>حذف</span>
+            </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="pin-modal-cancel">إلغاء</button>
-        <button class="btn-primary" id="pin-modal-save">حفظ</button>
-      </div>
     </div>
-  </div>
+</div>
 
-  <!-- Encryption Key Modal -->
-  <div class="modal-overlay hidden" id="key-modal-overlay">
-    <div class="modal" id="key-modal">
-      <div class="modal-header">
-        <h2>مفتاح التشفير</h2>
-        <button class="modal-close" id="key-modal-close">✕</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-desc">⚠️ هذا المفتاح يُستخدم لتشفير بياناتك. لا تغيره إلا إذا كنت متأكداً، وإلا لن تتمكن من فك تشفير البيانات المحفوظة.</p>
-        <div class="form-group">
-          <label>مفتاح التشفير</label>
-          <input type="text" id="enc-key" placeholder="أدخل مفتاح التشفير..." />
+<div id="confirmModal" class="overlay">
+    <div class="modal glass compact">
+        <h3 id="confirmTitle">تنبيه</h3>
+        <p class="modal-sub" id="confirmMessage">هل أنت متأكد؟</p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="goBack()">إلغاء</button>
+            <button class="btn btn-danger" id="confirmYesBtn">نعم</button>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="key-modal-cancel">إلغاء</button>
-        <button class="btn-primary" id="key-modal-save">حفظ</button>
-      </div>
     </div>
-  </div>
+</div>
 
-  <!-- Backup Text Modal -->
-  <div class="modal-overlay hidden" id="backup-modal-overlay">
-    <div class="modal" id="backup-modal">
-      <div class="modal-header">
-        <h2>النسخ الاحتياطي النصي</h2>
-        <button class="modal-close" id="backup-modal-close">✕</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-desc">انسخ هذا النص واحتفظ به في مكان آمن لاستعادة بياناتك لاحقاً.</p>
-        <textarea id="backup-text" rows="8" readonly style="font-family: monospace; font-size: 0.75rem;"></textarea>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="backup-modal-close2">إغلاق</button>
-        <button class="btn-primary" id="backup-copy-btn">نسخ الكل</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Rename Folder Modal -->
-  <div class="modal-overlay hidden" id="rename-folder-modal-overlay">
-    <div class="modal" id="rename-folder-modal">
-      <div class="modal-header">
-        <h2>إعادة تسمية المجلد</h2>
-        <button class="modal-close" id="rename-folder-close">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>اسم المجلد الجديد</label>
-          <input type="text" id="rename-folder-input" placeholder="أدخل اسم المجلد..." />
+<div id="passwordModal" class="overlay">
+    <div class="modal glass compact">
+        <h3 id="passModalTitle">أدخل الرمز</h3>
+        <input type="password" id="globalPassInput" class="form-input" style="text-align:center; font-size:24px; letter-spacing:5px;" placeholder="••••" inputmode="numeric">
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="goBack()">إلغاء</button>
+            <button class="btn btn-primary" onclick="submitPassword()">تأكيد</button>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="rename-folder-cancel">إلغاء</button>
-        <button class="btn-primary" id="rename-folder-save">حفظ</button>
-      </div>
     </div>
-  </div>
+</div>
 
-  <!-- Move to Folder Modal -->
-  <div class="modal-overlay hidden" id="move-modal-overlay">
-    <div class="modal" id="move-modal">
-      <div class="modal-header">
-        <h2>نقل إلى مجلد</h2>
-        <button class="modal-close" id="move-modal-close">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="folder-select-list" id="folder-select-list"></div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" id="move-modal-cancel">إلغاء</button>
-      </div>
+<div id="folderSelectModal" class="overlay" onclick="goBack()">
+    <div class="modal glass compact" onclick="event.stopPropagation()">
+        <h3 id="folderModalTitle">اختر المجلد</h3>
+        <div class="move-folder-list" id="folderListModalBody"></div>
+        <div class="modal-actions"><button class="btn btn-secondary full-width" onclick="goBack()">إلغاء</button></div>
     </div>
-  </div>
+</div>
 
-  <!-- Hidden file input for import -->
-  <input type="file" id="import-file-input" accept=".json" style="display:none" />
+<div id="addFolderModal" class="overlay">
+    <div class="modal glass compact">
+        <h3 id="addFolderTitle">مجلد جديد</h3>
+        <input type="text" id="folderNameInput" class="form-input" placeholder="اسم المجلد">
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="goBack()">إلغاء</button>
+            <button class="btn btn-primary" onclick="submitFolder()">حفظ</button>
+        </div>
+    </div>
+</div>
 
-  <!-- ═══════════════════════════════════════════
-       TOAST CONTAINER
-  ═══════════════════════════════════════════ -->
-  <div class="toast-container" id="toast-container"></div>
+<div id="backupModal" class="overlay" onclick="goBack()">
+    <div class="modal glass compact" onclick="event.stopPropagation()">
+        <h3>نسخ احتياطي</h3>
+        <textarea id="backupText" class="form-input" style="height:100px; resize:none;" readonly></textarea>
+        <div class="modal-actions">
+            <button class="btn btn-primary" onclick="copyBackup()">نسخ</button>
+            <button class="btn btn-secondary" onclick="goBack()">إغلاق</button>
+        </div>
+    </div>
+</div>
 
+<div id="importModal" class="overlay" onclick="goBack()">
+    <div class="modal glass compact" onclick="event.stopPropagation()">
+        <h3>استيراد بيانات</h3>
+        <textarea id="importText" class="form-input" style="height:100px; resize:none;" placeholder="الصق الكود هنا"></textarea>
+        <div class="modal-actions" style="flex-direction: column;">
+            <button class="btn btn-secondary full-width" onclick="pasteFromClipboard()">لصق</button>
+            <div style="display:flex; gap:10px; width:100%; margin-top:10px;">
+                <button class="btn btn-primary" style="flex:1" onclick="performImport()">استعادة</button>
+                <button class="btn btn-secondary" style="flex:1" onclick="goBack()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-  <!-- ═══════════════════════════════════════════
-       SCRIPTS
-  ═══════════════════════════════════════════ -->
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot,
-             deleteDoc, query, where, writeBatch, updateDoc }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<div id="sortModal" class="overlay" onclick="goBack()">
+    <div class="modal-clean glass" onclick="event.stopPropagation()">
+        <div style="text-align: center; padding: 20px 0 10px 0; color: var(--accent); font-weight: 700;">ترتيب حسب</div>
+        <div class="action-list">
+            <div class="context-item" onclick="applySort('newest')">
+                <span>الأحدث</span>
+                <span id="check-newest" style="color:var(--accent); font-weight:bold; display:none; margin-right: auto;">✔</span>
+            </div>
+            <div class="context-item" onclick="applySort('oldest')">
+                <span>الأقدم</span>
+                <span id="check-oldest" style="color:var(--accent); font-weight:bold; display:none; margin-right: auto;">✔</span>
+            </div>
+            <div class="context-item" onclick="applySort('az')">
+                <span>أ - ي</span>
+                <span id="check-az" style="color:var(--accent); font-weight:bold; display:none; margin-right: auto;">✔</span>
+            </div>
+        </div>
+    </div>
+</div>
 
-    window.Firebase = {
-      initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut,
-      onAuthStateChanged, getFirestore, collection, doc, setDoc, getDoc,
-      onSnapshot, deleteDoc, query, where, writeBatch, updateDoc
-    };
+<div id="toast" class="toast"></div>
 
-    // Kick off app after Firebase is ready
-    window.dispatchEvent(new Event('firebase-ready'));
-  </script>
+<script src="script.js"></script>
 
-  <!-- CryptoJS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+</script>
 
-  <!-- App Script -->
-  <script src="script.js" defer></script>
 </body>
 </html>
