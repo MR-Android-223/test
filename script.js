@@ -8,7 +8,11 @@
 'use strict';
 
 // ─── Wait for Firebase to load ───────────────────────────
-window.addEventListener('firebase-ready', initApp);
+if (window.Firebase) {
+  initApp();
+} else {
+  window.addEventListener('firebase-ready', initApp);
+}
 
 function initApp() {
   /* ════════════════════════════════════════════════════════
@@ -27,7 +31,7 @@ function initApp() {
   const {
     initializeApp, getAuth, GoogleAuthProvider, signInWithPopup, signOut,
     onAuthStateChanged, getFirestore, collection, doc, setDoc,
-    onSnapshot, deleteDoc, writeBatch, updateDoc
+    onSnapshot, deleteDoc, writeBatch, updateDoc, getDoc
   } = window.Firebase;
 
   const firebaseApp = initializeApp(firebaseConfig);
