@@ -1,72 +1,52 @@
-/* ============================================================
-   Key Vault - Service Worker
-   Caches core assets for offline viewing
-   ============================================================ */
+// ═══════════════════════════════════════
+//  خزنة أسراري — Service Worker (PWA)
+// ═══════════════════════════════════════
 
-const CACHE_NAME = 'key-vault-v1';
-const CORE_ASSETS = [
+const CACHE_NAME = 'khazna-v1.0';
+const STATIC_ASSETS = [
+  '/',
   '/index.html',
   '/style.css',
   '/script.js',
-  '/manifest.json',
-  'https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap'
+  'https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&family=Tajawal:wght@300;400;500;700;800&display=swap',
+  'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js'
 ];
 
-// Install: cache core assets
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching core assets');
-      return cache.addAll(CORE_ASSETS).catch((err) => {
-        console.warn('[SW] Failed to cache some assets:', err);
-      });
-    })
+// Install — cache static assets
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
 });
 
-// Activate: clean old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => {
-            console.log('[SW] Deleting old cache:', name);
-            return caches.delete(name);
-          })
-      );
-    })
+// Activate — clean old caches
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
   );
   self.clients.claim();
 });
 
-// Fetch: network-first for API calls, cache-first for assets
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-
-  // Skip non-GET requests and Firebase requests (always need network)
-  if (
-    event.request.method !== 'GET' ||
-    url.hostname.includes('firebase') ||
-    url.hostname.includes('google') ||
-    url.hostname.includes('googleapis')
-  ) {
+// Fetch — cache-first for static, network-first for Firebase
+self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+  // Firebase requests — always network
+  if (url.hostname.includes('firebase') || url.hostname.includes('googleapis')) {
     return;
   }
-
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const fetchPromise = fetch(event.request).then((response) => {
-        if (response && response.status === 200) {
-          const cloned = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(res => {
+        if (res && res.status === 200 && res.type === 'basic') {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
         }
-        return response;
-      }).catch(() => cached); // fallback to cache on network error
-
-      return cached || fetchPromise;
+        return res;
+      }).catch(() => caches.match('/index.html'));
     })
   );
 });
